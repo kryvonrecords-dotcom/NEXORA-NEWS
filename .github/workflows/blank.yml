@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
@@ -24,6 +24,20 @@ jobs:
       - name: Baixar código
         uses: actions/checkout@v4
 
+      - name: Verificar estrutura do projeto
+        run: |
+          echo "Diretório atual:"
+          pwd
+
+          echo "Arquivos na raiz:"
+          ls -la
+
+          echo "Procurando package.json:"
+          find . -maxdepth 3 -name "package.json" -print
+
+          echo "Procurando bun.lock:"
+          find . -maxdepth 3 -name "bun.lock" -print
+
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
@@ -34,27 +48,50 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Confirmar projeto JavaScript
+        run: |
+          if [ ! -f "package.json" ]; then
+            echo "ERRO: package.json não está na raiz do repositório."
+            echo "Conteúdo encontrado:"
+            find . -maxdepth 3 -type f | sort | head -200
+            exit 1
+          fi
+
+          echo "package.json encontrado."
+
       - name: Instalar dependências
         run: bun install --frozen-lockfile
 
-      - name: Criar aplicação
+      - name: Criar aplicação web
         run: bun run build
+
+      - name: Verificar pasta dist
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "ERRO: a pasta dist não foi criada."
+            exit 1
+          fi
+
+          echo "Build concluído."
+          echo "Conteúdo da pasta dist:"
+          find dist -maxdepth 2 -type f | sort | head -100
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Preparar arquivos para publicação
+      - name: Preparar arquivos do site
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
   deploy:
     name: Publicar Nexora News
+    needs: build
+    runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
 
     steps:
       - name: Publicar no GitHub Pages
