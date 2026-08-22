@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Nexora News</title>
+    <meta name="description" content="Nexora News - Jornalismo independente com notícias de Angola, Economia, Tecnologia, Mundo e Desporto 24 horas por dia." />
+    
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="application-name" content="Nexora News" />
+    <meta name="apple-mobile-web-app-title" content="Nexora News" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0B132B" />
+    <meta name="msapplication-TileColor" content="#0B132B" />
+    <meta name="msapplication-navbutton-color" content="#0B132B" />
+    
+    <!-- App Icons -->
+    <link rel="icon" type="image/jpeg" href="/app-cover.jpg" />
+    <link rel="apple-touch-icon" href="/app-cover.jpg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/app-cover.jpg" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/app-cover.jpg" />
+
+    <meta property="og:title" content="Nexora News" />
+    <meta property="og:description" content="Notícias de Angola, África e do Mundo com apuração rigorosa, análise económica e atualizações em tempo real." />
+    <meta property="og:type" content="news" />
+    <meta property="og:image" content="/app-cover.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/app-cover.jpg" />
+    
+    <!-- Google Fonts for Modern Editorial Journalism -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;0,6..72,800;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#F5F7FA] text-slate-900 antialiased font-sans select-none sm:select-auto">
+    <div id="root"></div>
+    <script>
+      // Register PWA Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('PWA Service Worker ativo:', reg.scope))
+            .catch((err) => console.log('PWA Service Worker erro:', err));
+        });
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

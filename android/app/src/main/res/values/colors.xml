@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Brand Colors -->
+    <color name="primary_blue">#146EF5</color>
+    <color name="primary_blue_dark">#0D50B8</color>
+    <color name="primary_blue_light">#EBF3FF</color>
+    <color name="primary_dark">#0B132B</color>
+    <color name="secondary_dark">#1C2541</color>
+    <color name="tertiary_dark">#3A506B</color>
+
+    <!-- Accents -->
+    <color name="accent_red">#E53935</color>
+    <color name="accent_amber">#F59E0B</color>
+    <color name="accent_green">#10B981</color>
+    <color name="accent_purple">#8B5CF6</color>
+
+    <!-- Surfaces & Neutrals -->
+    <color name="bg_light">#F8FAFC</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="bg_dark">#090D16</color>
+    <color name="bg_card_dark">#121927</color>
+    <color name="surface_variant">#F1F5F9</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="divider_color">#E2E8F0</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#0B132B</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="text_tertiary">#94A3B8</color>
+    <color name="text_muted">#94A3B8</color>
+    <color name="text_on_dark">#FFFFFF</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Shimmer Placeholder Colors -->
+    <color name="shimmer_base">#E2E8F0</color>
+    <color name="shimmer_highlight">#F8FAFC</color>
+
+    <!-- Basic -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="overlay_black_40">#66000000</color>
+    <color name="overlay_black_70">#B3000000</color>
+
+    <!-- Category Specific Colors -->
+    <color name="cat_angola">#E53935</color>
+    <color name="cat_politica">#3B82F6</color>
+    <color name="cat_economia">#10B981</color>
+    <color name="cat_sociedade">#8B5CF6</color>
+    <color name="cat_desporto">#F59E0B</color>
+    <color name="cat_tecnologia">#06B6D4</color>
+    <color name="cat_entretenimento">#EC4899</color>
+    <color name="cat_mundo">#6366F1</color>
+
+</resources>

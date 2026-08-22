@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Material 3 Theme -->
+    <style name="Theme.NexoraNews" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorSecondary">@color/secondary_dark</item>
+        <item name="colorAccent">@color/accent_amber</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:navigationBarColor">@color/bg_light</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">@color/bg_light</item>
+    </style>
+
+    <!-- Splash Screen Theme -->
+    <style name="Theme.NexoraNews.Splash" parent="Theme.NexoraNews">
+        <item name="android:windowBackground">@color/primary_dark</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:navigationBarColor">@color/primary_dark</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <!-- Bottom Navigation View Style -->
+    <style name="Widget.NexoraNews.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="backgroundTint">@color/primary_dark</item>
+        <item name="itemIconTint">@color/nav_item_selector</item>
+        <item name="itemTextColor">@color/nav_item_selector</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.NexoraNews.BottomNavIndicator</item>
+    </style>
+
+    <style name="Widget.NexoraNews.BottomNavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#1E2A4A</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+
+    <!-- Custom Card Style -->
+    <style name="Widget.NexoraNews.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/bg_card</item>
+        <item name="cardCornerRadius">14dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/divider_color</item>
+    </style>
+</resources>

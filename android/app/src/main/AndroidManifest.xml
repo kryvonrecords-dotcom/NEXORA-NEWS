@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Strictly audited permissions for Google Play compliance -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.NexoraNews"
+        android:usesCleartextTraffic="false"
+        tools:targetApi="35">
+
+        <!-- Google AdMob Official Application ID (Nexora News Production ID) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-7453639745659255~3593190215" />
+
+        <!-- Disable Ad Services automatic advertising ID collection until consent is given -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+
+        <!-- Main Native Navigation Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:theme="@style/Theme.NexoraNews.Splash"
+            android:windowSoftInputMode="adjustResize">
+
+            <!-- Main Launcher Intent -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Deep Link: Custom Scheme (nexoranews://) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="nexoranews" />
+            </intent-filter>
+
+            <!-- Deep Link / App Links: HTTP & HTTPS domains -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="nexoranews.ao"
+                    android:pathPrefix="/noticia" />
+                <data
+                    android:scheme="https"
+                    android:host="nexoranews.ao"
+                    android:pathPrefix="/categoria" />
+            </intent-filter>
+        </activity>
+
+        <!-- Native Article Detail Screen -->
+        <activity
+            android:name=".ui.detail.ArticleDetailActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.NexoraNews"
+            android:windowSoftInputMode="adjustPan" />
+
+    </application>
+
+</manifest>
