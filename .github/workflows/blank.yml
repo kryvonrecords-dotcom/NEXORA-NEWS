@@ -4,41 +4,52 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   build:
+    name: Build Nexora News
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Baixar código
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 24
 
-      - name: Install dependencies
-        run: npm install
+      - name: Instalar Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Build
-        run: npm run build
+      - name: Instalar dependências
+        run: bun install --frozen-lockfile
 
-      - name: Setup Pages
+      - name: Criar aplicação
+        run: bun run build
+
+      - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+      - name: Preparar arquivos para publicação
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
   deploy:
+    name: Publicar Nexora News
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -46,6 +57,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy
+      - name: Publicar no GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
