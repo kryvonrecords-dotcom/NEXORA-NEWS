@@ -1,191 +1,51 @@
-name: Nexora News - Build APK
+name: Deploy Nexora News
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
-      - master
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
-    name: Compilar APK Android
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Baixar o código
-      - name: Baixar código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Mostrar o que chegou ao GitHub
-      - name: Verificar arquivos recebidos
-        shell: bash
-        run: |
-          echo "Diretório atual:"
-          pwd
-
-          echo "Arquivos na raiz:"
-          ls -lah
-
-      # 3. Extrair ZIP caso o projeto esteja dentro de um ZIP
-      - name: Extrair projeto ZIP
-        shell: bash
-        run: |
-          set -e
-
-          if [ -d "android" ]; then
-            echo "Pasta android já existe."
-            exit 0
-          fi
-
-          ZIP=$(find . -maxdepth 1 -type f -iname "*.zip" -print -quit)
-
-          if [ -z "$ZIP" ]; then
-            echo "ERRO: Não existe pasta android nem arquivo ZIP na raiz."
-            echo "Coloque o projeto ou um arquivo .zip na raiz do repositório."
-            exit 1
-          fi
-
-          echo "ZIP encontrado: $ZIP"
-
-          rm -rf extracted
-          mkdir -p extracted
-
-          unzip -q "$ZIP" -d extracted
-
-          echo "Procurando pasta android..."
-
-          ANDROID_DIR=$(find extracted -type d -name "android" -print -quit)
-
-          if [ -z "$ANDROID_DIR" ]; then
-            echo "ERRO: A pasta android não foi encontrada dentro do ZIP."
-            find extracted -maxdepth 4 -type d
-            exit 1
-          fi
-
-          PROJECT_DIR=$(dirname "$ANDROID_DIR")
-
-          echo "Projeto encontrado em:"
-          echo "$PROJECT_DIR"
-
-          cp -a "$PROJECT_DIR"/. ./
-
-          echo "Estrutura final:"
-          ls -lah
-
-          echo "Pasta Android:"
-          ls -lah android
-
-      # 4. Configurar Java
-      - name: Configurar Java 17
-        uses: actions/setup-java@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          distribution: temurin
-          java-version: "17"
+          node-version: 20
+          cache: npm
 
-      # 5. Instalar Gradle
-      - name: Configurar Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          gradle-version: "8.9"
+          path: ./dist
 
-      # 6. Criar o Gradle Wrapper
-      - name: Criar Gradle Wrapper
-        working-directory: android
-        shell: bash
-        run: |
-          set -e
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
 
-          echo "Criando Gradle Wrapper..."
-
-          gradle wrapper --gradle-version 8.9
-
-          chmod +x gradlew
-
-          echo "Verificando arquivos do Wrapper:"
-          ls -lah gradle/wrapper/
-
-          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "ERRO: gradle-wrapper.jar não foi criado."
-            exit 1
-          fi
-
-          if [ ! -f "gradle/wrapper/gradle-wrapper.properties" ]; then
-            echo "ERRO: gradle-wrapper.properties não foi criado."
-            exit 1
-          fi
-
-          echo "Gradle Wrapper OK."
-
-      # 7. Configurar Android SDK
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      # 8. Instalar componentes Android
-      - name: Instalar componentes Android
-        shell: bash
-        run: |
-          yes | sdkmanager --licenses || true
-
-          sdkmanager "platform-tools"
-          sdkmanager "platforms;android-35"
-          sdkmanager "build-tools;35.0.0"
-
-      # 9. Verificar Gradle
-      - name: Verificar projeto Gradle
-        working-directory: android
-        shell: bash
-        run: |
-          chmod +x gradlew
-
-          ./gradlew --version
-
-          ./gradlew tasks --no-daemon
-
-      # 10. Limpar projeto
-      - name: Limpar projeto
-        working-directory: android
-        shell: bash
-        run: |
-          ./gradlew clean --no-daemon
-
-      # 11. Gerar APK
-      - name: Gerar APK Debug
-        working-directory: android
-        shell: bash
-        run: |
-          ./gradlew assembleDebug --stacktrace --no-daemon
-
-      # 12. Procurar APK
-      - name: Verificar APK
-        shell: bash
-        run: |
-          echo "Procurando APK..."
-
-          find android/app/build/outputs \
-            -type f \
-            -name "*.apk" \
-            -exec ls -lh {} \;
-
-          if [ ! -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
-            echo "ERRO: APK Debug não foi gerado."
-
-            echo "Conteúdo de build/outputs:"
-            find android/app/build/outputs -maxdepth 5 -type f || true
-
-            exit 1
-          fi
-
-          echo "APK encontrado com sucesso!"
-
-      # 13. Publicar APK
-      - name: Publicar APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Nexora-News-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 30
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
