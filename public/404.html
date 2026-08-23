@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    const path = window.location.pathname;
+    const repo = "/NEXORA-NEWS";
+    const base = repo + "/";
+
+    if (path.startsWith(repo)) {
+      const route = path.slice(repo.length);
+      sessionStorage.setItem("nexora-redirect", route + window.location.search);
+      window.location.replace(base);
+    } else {
+      window.location.replace(base);
+    }
+  </script>
+</head>
+<body></body>
+</html>
