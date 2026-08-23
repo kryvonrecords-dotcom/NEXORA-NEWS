@@ -7,7 +7,7 @@
     <meta name="description" content="Nexora News - Jornalismo independente com notícias de Angola, Economia, Tecnologia, Mundo e Desporto 24 horas por dia." />
     
     <!-- PWA & Mobile Web App Meta Tags -->
-    <link rel="manifest" href="/NEXORA-NEWS/manifest.webmanifest" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <meta name="application-name" content="Nexora News" />
     <meta name="apple-mobile-web-app-title" content="Nexora News" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -18,17 +18,17 @@
     <meta name="msapplication-navbutton-color" content="#0B132B" />
     
     <!-- App Icons -->
-    <link rel="icon" type="image/jpeg" href="/NEXORA-NEWS/app-cover.jpg" />
-    <link rel="apple-touch-icon" href="/NEXORA-NEWS/app-cover.jpg" />
-    <link rel="apple-touch-icon" sizes="192x192" href="/NEXORA-NEWS/app-cover.jpg" />
-    <link rel="apple-touch-icon" sizes="512x512" href="/NEXORA-NEWS/app-cover.jpg" />
+    <link rel="icon" type="image/jpeg" href="app-cover.jpg" />
+    <link rel="apple-touch-icon" href="app-cover.jpg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="app-cover.jpg" />
+    <link rel="apple-touch-icon" sizes="512x512" href="app-cover.jpg" />
 
     <meta property="og:title" content="Nexora News" />
     <meta property="og:description" content="Notícias de Angola, África e do Mundo com apuração rigorosa, análise económica e atualizações em tempo real." />
     <meta property="og:type" content="news" />
-    <meta property="og:image" content="/NEXORA-NEWS/app-cover.jpg" />
+    <meta property="og:image" content="app-cover.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="/NEXORA-NEWS/app-cover.jpg" />
+    <meta name="twitter:image" content="app-cover.jpg" />
     
     <!-- Google Fonts for Modern Editorial Journalism -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,21 +38,11 @@
   <body class="bg-[#F5F7FA] text-slate-900 antialiased font-sans select-none sm:select-auto">
     <div id="root"></div>
     <script>
-      // Restore SPA route after GitHub Pages 404 redirect
-      (function () {
-        const route = sessionStorage.getItem("nexora-redirect");
-        if (route) {
-          sessionStorage.removeItem("nexora-redirect");
-          const target = "/NEXORA-NEWS" + (route.startsWith("/") ? route : "/" + route);
-          window.history.replaceState({}, "", target);
-        }
-      })();
-    </script>
     <script>
       // Register PWA Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/NEXORA-NEWS/sw.js')
+          navigator.serviceWorker.register('sw.js')
             .then((reg) => console.log('PWA Service Worker ativo:', reg.scope))
             .catch((err) => console.log('PWA Service Worker erro:', err));
         });
