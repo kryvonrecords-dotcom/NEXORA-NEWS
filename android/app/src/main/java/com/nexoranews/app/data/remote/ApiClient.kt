@@ -7,12 +7,7 @@ import java.net.URL
 
 object ApiClient {
 
-    private const val BASE_URL =
-        "https://hlghyzvspodrmjvmslur.supabase.co/rest/v1"
-
-    private const val SUPABASE_KEY =
-        "sb_publishable_rm2iAd195USLfN1z7VQpgA_t4zbSuwd"
-
+    private const val BASE_URL = "https://nexora-news.onrender.com/api"
     private const val TIMEOUT_MS = 15000
 
     fun get(endpoint: String): Result<String> {
@@ -26,9 +21,6 @@ object ApiClient {
                     requestMethod = "GET"
                     connectTimeout = TIMEOUT_MS
                     readTimeout = TIMEOUT_MS
-
-                    setRequestProperty("apikey", SUPABASE_KEY)
-                    setRequestProperty("Authorization", "Bearer $SUPABASE_KEY")
                     setRequestProperty("Accept", "application/json")
                 }
 
@@ -38,13 +30,18 @@ object ApiClient {
                 val reader = BufferedReader(
                     InputStreamReader(connection.inputStream)
                 )
+
                 val response = reader.use { it.readText() }
+
                 connection.disconnect()
                 Result.success(response)
             } else {
                 connection.disconnect()
-                Result.failure(Exception("Supabase HTTP Error $responseCode"))
+                Result.failure(
+                    Exception("Nexora API HTTP Error $responseCode")
+                )
             }
+
         } catch (e: Exception) {
             Result.failure(e)
         }
