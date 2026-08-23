@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initializeAdMob()
+        // initializeAdMob()
         checkNotificationPermission()
         setupFragments(savedInstanceState)
         setupBottomNavigation()
@@ -71,33 +71,6 @@ class MainActivity : AppCompatActivity() {
     private fun setupAdMobBanner() {
         try {
             val adRequest = AdRequest.Builder().build()
-            binding.adViewMain.adListener = object : AdListener() {
-                override fun onAdLoaded() {
-                    super.onAdLoaded()
-                    binding.adBannerContainer.visibility = View.VISIBLE
-                    // Adjust fragment container bottom margin so banner + bottom nav don't obscure content
-                    val density = resources.displayMetrics.density
-                    val bottomMarginPx = ((60 + 50) * density).toInt()
-                    val params = binding.fragmentContainer.layoutParams as? CoordinatorLayout.LayoutParams
-                    params?.let {
-                        it.bottomMargin = bottomMarginPx
-                        binding.fragmentContainer.layoutParams = it
-                    }
-                }
-
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    super.onAdFailedToLoad(error)
-                    binding.adBannerContainer.visibility = View.GONE
-                    val density = resources.displayMetrics.density
-                    val bottomMarginPx = (60 * density).toInt()
-                    val params = binding.fragmentContainer.layoutParams as? CoordinatorLayout.LayoutParams
-                    params?.let {
-                        it.bottomMargin = bottomMarginPx
-                        binding.fragmentContainer.layoutParams = it
-                    }
-                }
-            }
-            binding.adViewMain.loadAd(adRequest)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -214,17 +187,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        binding.adViewMain.pause()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        binding.adViewMain.resume()
     }
 
     override fun onDestroy() {
-        binding.adViewMain.destroy()
         super.onDestroy()
     }
 

@@ -55,11 +55,16 @@ export function Footer({ categories: propCategories, onNavigate }: Props) {
               onClick={() => onNavigate('/')} 
               className="flex items-center gap-3 cursor-pointer select-none"
             >
-              <img
-                src="/app-cover.jpg"
-                alt="Nexora News Logo"
-                className="w-10 h-10 rounded-full shadow-md object-cover ring-2 ring-[#146EF5]/40"
-              />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shrink-0 shadow-md ring-2 ring-[#146EF5]/40 bg-[#0B132B] flex items-center justify-center">
+                <img
+                  src="/icon-192.svg"
+                  alt="Nexora News Logo"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
+                  }}
+                />
+              </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-2xl sm:text-3xl font-black text-white font-serif uppercase tracking-tight">
                   NEXORA
@@ -231,11 +236,6 @@ export function Footer({ categories: propCategories, onNavigate }: Props) {
                 <button onClick={() => onNavigate('/termos')} className="text-slate-400 hover:text-white transition-colors cursor-pointer">
                   Termos de Uso
                 </button>
-              </li>
-              <li>
-                <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                  Sitemap XML (SEO)
-                </a>
               </li>
               <li className="pt-2">
                 <button

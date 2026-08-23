@@ -130,26 +130,7 @@
         android:layout_marginBottom="60dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <!-- Google AdMob Banner Container (Docked cleanly above Bottom Navigation) -->
-    <LinearLayout
-        android:id="@+id/adBannerContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="60dp"
-        android:background="@color/surface_light"
-        android:elevation="6dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
 
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adViewMain"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:adSize="BANNER"
-            app:adUnitId="@string/admob_banner_ad_unit_id" />
-    </LinearLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"

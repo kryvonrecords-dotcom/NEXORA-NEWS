@@ -10,6 +10,7 @@ import { SearchModal } from './components/SearchModal';
 import { MobileAppNav } from './components/MobileAppNav';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { SavedArticlesModal } from './components/SavedArticlesModal';
+import { SavedArticleToast } from './components/SavedArticleToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { NotificationToast } from './components/NotificationToast';
 import { NotificationCenterModal } from './components/NotificationCenterModal';
@@ -356,6 +357,9 @@ function AppContent() {
         onNavigate={navigate}
       />
 
+      {/* Instant Feedback Toast for Saved Articles */}
+      <SavedArticleToast />
+
       {/* 8. Global Search Modal */}
       <SearchModal
         isOpen={searchOpen}
@@ -404,15 +408,15 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <SavedArticlesProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <NotificationProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <SavedArticlesProvider>
               <AppContent />
-            </NotificationProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </SavedArticlesProvider>
+            </SavedArticlesProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Menu, 
-  X, 
-  Lock, 
-  ShieldCheck, 
-  TrendingUp, 
-  Globe, 
+import {
+  Search,
+  Menu,
+  X,
+  Lock,
+  ShieldCheck,
+  TrendingUp,
+  Globe,
   Share2,
   ChevronDown,
   Smartphone,
@@ -18,6 +18,7 @@ import { Category } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useSavedArticles } from '../context/SavedArticlesContext';
 import { SearchModal } from './SearchModal';
 import { WeatherWidget } from './WeatherWidget';
 
@@ -33,6 +34,7 @@ interface Props {
 export function Navbar({ currentPath = '/', categories: propCategories, onNavigate, onOpenSearch, onOpenSaved, onOpenNotifications }: Props) {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const { savedCount } = useSavedArticles();
   const [categories, setCategories] = useState<Category[]>(propCategories || []);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -139,11 +141,21 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
             {onOpenSaved && (
               <button
                 onClick={onOpenSaved}
-                className="text-slate-300 hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                className="text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer px-2 py-1 rounded-lg hover:bg-slate-800/80"
                 title="Ver Notícias Salvas no App"
               >
-                <Bookmark className="w-3.5 h-3.5 text-[#146EF5]" />
-                <span className="hidden sm:inline">Salvos</span>
+                <div className="relative flex items-center">
+                  <Bookmark className="w-3.5 h-3.5 text-[#146EF5]" />
+                  {savedCount > 0 && (
+                    <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-[#146EF5]" />
+                  )}
+                </div>
+                <span className="hidden sm:inline font-semibold text-xs">Salvos</span>
+                {savedCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-[#146EF5] text-white text-[9px] font-bold">
+                    {savedCount}
+                  </span>
+                )}
               </button>
             )}
 
@@ -185,15 +197,20 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
         </div>
 
         {/* Center: Brand Logo */}
-        <div 
+        <div
           onClick={() => handleNavClick('/')}
           className="flex items-center gap-3 cursor-pointer group select-none"
         >
-          <img 
-            src="/app-cover.jpg" 
-            alt="Nexora News Logo" 
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-md object-cover ring-2 ring-[#146EF5]/30 group-hover:scale-105 transition-transform" 
-          />
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shrink-0 shadow-md ring-2 ring-[#146EF5]/40 bg-[#0B132B] flex items-center justify-center">
+            <img
+              src="/icon-192.svg"
+              alt="Nexora News Logo"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
+              }}
+            />
+          </div>
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-1.5">
               <span className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#0B132B] font-serif uppercase">
@@ -251,8 +268,8 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
             <button
               onClick={() => handleNavClick('/')}
               className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-colors ${
-                currentPath === '/' 
-                  ? 'bg-[#146EF5] text-white' 
+                currentPath === '/'
+                  ? 'bg-[#146EF5] text-white'
                   : 'text-slate-200 hover:text-white hover:bg-slate-800'
               }`}
             >
@@ -266,8 +283,8 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
                   key={cat.id}
                   onClick={() => handleNavClick(`/categoria/${cat.slug}`)}
                   className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-bold tracking-wider whitespace-nowrap transition-colors ${
-                    isActive 
-                      ? 'bg-[#146EF5] text-white' 
+                    isActive
+                      ? 'bg-[#146EF5] text-white'
                       : 'text-slate-200 hover:text-white hover:bg-slate-800'
                   }`}
                 >
@@ -313,11 +330,16 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
         <div className="lg:hidden fixed inset-0 z-50 bg-[#0B132B]/90 backdrop-blur-sm flex flex-col">
           <div className="bg-[#0B132B] border-b border-slate-800 p-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <img 
-                src="/app-cover.jpg" 
-                alt="Nexora News Logo" 
-                className="w-8 h-8 rounded-full shadow object-cover ring-1 ring-[#146EF5]" 
-              />
+              <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 shadow ring-1 ring-[#146EF5] bg-[#0B132B] flex items-center justify-center">
+                <img
+                  src="/icon-192.svg"
+                  alt="Nexora News Logo"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
+                  }}
+                />
+              </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xl font-black text-white font-serif">NEXORA</span>
                 <span className="text-xl font-black text-[#146EF5] font-serif">NEWS</span>

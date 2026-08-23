@@ -147,10 +147,21 @@ export function SavedArticlesProvider({ children }: { children: React.ReactNode 
   );
 }
 
-export function useSavedArticles() {
+export function useSavedArticles(): SavedArticlesContextType {
   const context = useContext(SavedArticlesContext);
   if (!context) {
-    throw new Error('useSavedArticles must be used within a SavedArticlesProvider');
+    // Safe fallback if called outside provider
+    return {
+      savedArticles: [],
+      savedCount: 0,
+      isSaved: () => false,
+      saveArticle: () => {},
+      removeArticle: () => {},
+      toggleSaveArticle: () => false,
+      clearAllSaved: () => {},
+      lastFeedback: null,
+      dismissFeedback: () => {}
+    };
   }
   return context;
 }

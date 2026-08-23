@@ -34,7 +34,7 @@ class NewsApiService {
 
         response.mapCatching { json ->
             val type = object : TypeToken<List<NewsItem>>() {}.type
-            gson.fromJson<List<NewsItem>>(json, type) ?: emptyList()
+            gson.fromJson<List<NewsItem>>(gson.fromJson(json, Map::class.java)["news"]?.let { gson.toJson(it) } ?: "[]", type) ?: emptyList()
         }
     }
 
@@ -48,14 +48,18 @@ class NewsApiService {
 
             response.mapCatching { json ->
                 val type = object : TypeToken<List<NewsItem>>() {}.type
-                val list = gson.fromJson<List<NewsItem>>(json, type)
+                val list = gson.fromJson<List<NewsItem>>(gson.fromJson(json, Map::class.java)["news"]?.let { gson.toJson(it) } ?: "[]", type)
                 list?.firstOrNull()
             }
         }
 
     suspend fun getCategories(): Result<List<Category>> =
         withContext(Dispatchers.IO) {
-            Result.success(emptyList())
+            val response = ApiClient.get("/categories")
+            response.mapCatching { json ->
+                val type = object : TypeToken<List<Category>>() {}.type
+                gson.fromJson<List<Category>>(json, type) ?: emptyList()
+            }
         }
 
     suspend fun getSettings(): Result<SiteSettings> =

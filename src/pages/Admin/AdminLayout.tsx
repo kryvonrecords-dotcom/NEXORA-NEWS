@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  PlusCircle, 
-  Layers, 
-  Image as ImageIcon, 
-  Users, 
-  Mail, 
-  Settings, 
-  KeyRound, 
-  LogOut, 
-  ExternalLink, 
-  Menu, 
-  X, 
+import {
+  LayoutDashboard,
+  FileText,
+  PlusCircle,
+  Layers,
+  Image as ImageIcon,
+  Users,
+  Mail,
+  Settings,
+  KeyRound,
+  LogOut,
+  ExternalLink,
+  Menu,
+  X,
   ShieldCheck,
   Bell,
   Megaphone,
@@ -55,10 +55,10 @@ export function AdminLayout({ activeTab, onNavigate, children }: Props) {
     { id: 'dashboard', label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { id: 'news-list', label: 'Todas as Notícias', path: '/admin/noticias', icon: FileText },
     { id: 'news-new', label: 'Nova Notícia', path: '/admin/noticias/nova', icon: PlusCircle, highlight: true },
-    { 
-      id: 'proposals', 
-      label: 'Propostas Comerciais', 
-      path: '/admin/propostas', 
+    {
+      id: 'proposals',
+      label: 'Propostas Comerciais',
+      path: '/admin/propostas',
       icon: Briefcase,
       badge: pendingProposalsCount > 0 ? pendingProposalsCount : undefined
     },
@@ -96,12 +96,24 @@ export function AdminLayout({ activeTab, onNavigate, children }: Props) {
               {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <div 
+            <div
               onClick={() => handleNav('/admin/dashboard')}
-              className="flex items-center gap-1.5 cursor-pointer select-none"
+              className="flex items-center gap-2.5 cursor-pointer select-none"
             >
-              <span className="text-xl font-black font-serif text-white uppercase">NEXORA</span>
-              <span className="text-xl font-black font-serif text-[#146EF5] uppercase">ADMIN</span>
+              <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 shadow ring-1 ring-[#146EF5]/40 bg-[#0B132B] flex items-center justify-center">
+                <img
+                  src="/icon-192.svg"
+                  alt="Nexora Admin Logo"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-black font-serif text-white uppercase">NEXORA</span>
+                <span className="text-xl font-black font-serif text-[#146EF5] uppercase">ADMIN</span>
+              </div>
             </div>
           </div>
 

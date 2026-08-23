@@ -76,65 +76,75 @@ export function HeroSection({ leadNews, secondaryNews, trendingNews, onNavigate 
 
         {/* SECONDARY STORIES & TRENDING (Right 5 Columns) */}
         <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-          {/* Secondary Lead Story 1 */}
-          {secondaryNews[0] && (
-            <div
-              onClick={() => onNavigate(`/noticia/${secondaryNews[0].slug}`)}
-              className="group bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 flex gap-4 hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex-1"
-            >
-              <div className="flex-1 min-w-0 flex flex-col justify-between">
-                <div>
-                  <span className="text-[11px] font-bold text-[#146EF5] uppercase tracking-wider block mb-1">
-                    {secondaryNews[0].categoryName}
-                  </span>
-                  <h2 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#146EF5] transition-colors line-clamp-2 leading-snug">
-                    {secondaryNews[0].title}
-                  </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            {/* Secondary Lead Story 1 */}
+            {secondaryNews[0] && (
+              <div
+                onClick={() => onNavigate(`/noticia/${secondaryNews[0].slug}`)}
+                className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer flex flex-col"
+              >
+                <div className="relative w-full aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <img
+                    src={secondaryNews[0].featuredImage}
+                    alt={secondaryNews[0].title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-2.5 left-2.5">
+                    <span className="px-2.5 py-1 bg-[#0B132B]/85 backdrop-blur-sm text-white text-[10px] font-black uppercase tracking-wider rounded-md">
+                      {secondaryNews[0].categoryName}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-xs text-slate-400 mt-2 flex items-center gap-2">
-                  <span>{formatTimeAgo(secondaryNews[0].publishedAt)}</span>
-                  <span>•</span>
-                  <span>{secondaryNews[0].readTimeMinutes} min</span>
-                </div>
-              </div>
-              <img
-                src={secondaryNews[0].featuredImage}
-                alt={secondaryNews[0].title}
-                className="w-24 h-24 sm:w-28 sm:h-24 object-cover rounded-lg shrink-0 group-hover:scale-105 transition-transform duration-300 bg-slate-100"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          )}
 
-          {/* Secondary Lead Story 2 */}
-          {secondaryNews[1] && (
-            <div
-              onClick={() => onNavigate(`/noticia/${secondaryNews[1].slug}`)}
-              className="group bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 flex gap-4 hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex-1"
-            >
-              <div className="flex-1 min-w-0 flex flex-col justify-between">
-                <div>
-                  <span className="text-[11px] font-bold text-[#146EF5] uppercase tracking-wider block mb-1">
-                    {secondaryNews[1].categoryName}
-                  </span>
-                  <h2 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#146EF5] transition-colors line-clamp-2 leading-snug">
-                    {secondaryNews[1].title}
-                  </h2>
-                </div>
-                <div className="text-xs text-slate-400 mt-2 flex items-center gap-2">
-                  <span>{formatTimeAgo(secondaryNews[1].publishedAt)}</span>
-                  <span>•</span>
-                  <span>{secondaryNews[1].readTimeMinutes} min</span>
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#146EF5] transition-colors line-clamp-2 leading-snug">
+                      {secondaryNews[0].title}
+                    </h2>
+                  </div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span>{formatTimeAgo(secondaryNews[0].publishedAt)}</span>
+                    <span>{secondaryNews[0].readTimeMinutes} min</span>
+                  </div>
                 </div>
               </div>
-              <img
-                src={secondaryNews[1].featuredImage}
-                alt={secondaryNews[1].title}
-                className="w-24 h-24 sm:w-28 sm:h-24 object-cover rounded-lg shrink-0 group-hover:scale-105 transition-transform duration-300 bg-slate-100"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          )}
+            )}
+
+            {/* Secondary Lead Story 2 */}
+            {secondaryNews[1] && (
+              <div
+                onClick={() => onNavigate(`/noticia/${secondaryNews[1].slug}`)}
+                className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer flex flex-col"
+              >
+                <div className="relative w-full aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <img
+                    src={secondaryNews[1].featuredImage}
+                    alt={secondaryNews[1].title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-2.5 left-2.5">
+                    <span className="px-2.5 py-1 bg-[#0B132B]/85 backdrop-blur-sm text-white text-[10px] font-black uppercase tracking-wider rounded-md">
+                      {secondaryNews[1].categoryName}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#146EF5] transition-colors line-clamp-2 leading-snug">
+                      {secondaryNews[1].title}
+                    </h2>
+                  </div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span>{formatTimeAgo(secondaryNews[1].publishedAt)}</span>
+                    <span>{secondaryNews[1].readTimeMinutes} min</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* TRENDING BAR */}
           {trendingNews.length > 0 && (

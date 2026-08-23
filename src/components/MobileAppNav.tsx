@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Category, SiteSettings } from '../types';
 import { useNotifications } from '../context/NotificationContext';
+import { useSavedArticles } from '../context/SavedArticlesContext';
 
 interface Props {
   currentPath: string;
@@ -41,18 +42,8 @@ export function MobileAppNav({
   onOpenNotifications
 }: Props) {
   const { unreadCount } = useNotifications();
+  const { savedCount } = useSavedArticles();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [savedCount, setSavedCount] = useState(0);
-
-  // Check saved items count
-  React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem('nexora_saved_articles');
-      if (stored) {
-        setSavedCount(JSON.parse(stored).length || 0);
-      }
-    } catch {}
-  }, [currentPath]);
 
   // Don't render on Admin layout if deeply nested to give admin maximum screen space
   const isAdmin = currentPath.startsWith('/admin') && currentPath !== '/admin/login';
@@ -149,11 +140,16 @@ export function MobileAppNav({
             {/* Drawer Header */}
             <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
               <div className="flex items-center gap-3">
-                <img
-                  src="/app-cover.jpg"
-                  alt="Nexora News"
-                  className="w-9 h-9 rounded-full shadow border border-blue-500/30 object-cover"
-                />
+                <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 shadow border border-blue-500/30 bg-[#0B132B] flex items-center justify-center">
+                  <img
+                    src="/icon-192.svg"
+                    alt="Nexora News"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
+                    }}
+                  />
+                </div>
                 <div>
                   <h3 className="font-bold text-sm text-white">Nexora News</h3>
                   <p className="text-[11px] text-slate-400">Jornalismo independente 24h</p>

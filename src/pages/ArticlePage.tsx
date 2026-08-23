@@ -80,17 +80,6 @@ export function ArticlePage({ slug, onNavigate }: Props) {
         setData(res);
         document.title = `${res.news.title} | Nexora News`;
 
-        // Check if article is saved locally
-        try {
-          const savedStr = localStorage.getItem('nexora_saved_articles_list');
-          if (savedStr) {
-            const list: NewsItem[] = JSON.parse(savedStr);
-            setIsSaved(list.some(item => item.id === res.news.id));
-          }
-        } catch {
-          // ignore
-        }
-
         // Check AdMob interstitial policy
         if (admobService.shouldShowInterstitialOnArticleRead()) {
           const timer = setTimeout(() => {
@@ -105,22 +94,9 @@ export function ArticlePage({ slug, onNavigate }: Props) {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  const toggleSaveArticle = () => {
+  const handleToggleSave = () => {
     if (!data?.news) return;
-    try {
-      const savedStr = localStorage.getItem('nexora_saved_articles_list');
-      let list: NewsItem[] = savedStr ? JSON.parse(savedStr) : [];
-      if (isSaved) {
-        list = list.filter(item => item.id !== data.news.id);
-        setIsSaved(false);
-      } else {
-        list.unshift(data.news);
-        setIsSaved(true);
-      }
-      localStorage.setItem('nexora_saved_articles_list', JSON.stringify(list));
-    } catch (e) {
-      console.error(e);
-    }
+    contextToggleSave(data.news);
   };
 
   if (loading) {
@@ -268,7 +244,7 @@ export function ArticlePage({ slug, onNavigate }: Props) {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={toggleSaveArticle}
+              onClick={handleToggleSave}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 isSaved
                   ? 'bg-blue-50 dark:bg-blue-900/40 border-[#146EF5] text-[#146EF5]'
@@ -293,106 +269,118 @@ export function ArticlePage({ slug, onNavigate }: Props) {
         </div>
 
         {/* Article Container */}
-        <article className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-10 shadow-sm overflow-hidden">
-          {/* Header Metadata */}
-          <div className="space-y-4 mb-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#146EF5]/15 text-[#146EF5]">
-                {news.categoryName || 'Geral'}
-              </span>
-              {news.isBreaking && (
-                <span className="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse">
-                  Urgente
-                </span>
-              )}
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0B132B] dark:text-white font-serif leading-tight">
-              {news.title}
-            </h1>
-
-            <p className="text-base sm:text-lg text-slate-700 dark:text-white font-medium leading-relaxed font-sans">
-              {news.excerpt}
-            </p>
-
-            {/* Author & Timestamp Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#146EF5] to-blue-400 text-white flex items-center justify-center font-bold text-xs uppercase">
-                  {news.authorName.charAt(0)}
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 dark:text-white block">
-                    {news.authorName}
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {news.authorRole || 'Redação Nexora News'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400 text-xs">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {formatDateTime(news.publishedAt)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  {news.readTimeMinutes || 3} min de leitura
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Featured Image */}
+        <article className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-10">
+          {/* 1. Imagem Principal Ampla no Topo da Notícia */}
           {news.featuredImage && (
-            <div className="my-6 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <div className="relative w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <img
                 src={news.featuredImage}
                 alt={news.title}
-                loading="lazy"
+                loading="eager"
                 decoding="async"
-                className="w-full h-auto max-h-[500px] object-cover"
+                className="w-full aspect-[16/9] sm:aspect-[21/9] object-cover max-h-[580px] w-full"
+                referrerPolicy="no-referrer"
               />
               {news.featuredImageCaption && (
-                <p className="p-3 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 italic">
+                <p className="px-6 py-2.5 text-xs text-slate-500 dark:text-slate-400 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-100 dark:border-slate-800 italic">
                   Foto: {news.featuredImageCaption}
                 </p>
               )}
             </div>
           )}
 
-          {/* Text Size Controls */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 mb-6 text-xs">
-            <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <Type className="w-3.5 h-3.5 text-[#146EF5]" />
-              Tamanho do Texto:
-            </span>
-            <div className="flex items-center gap-1">
-              {(['normal', 'large', 'xlarge'] as const).map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => setFontSize(size)}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    fontSize === size
-                      ? 'bg-[#146EF5] text-white shadow-xs'
-                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                  }`}
-                >
-                  {size === 'normal' ? 'A' : size === 'large' ? 'A+' : 'A++'}
-                </button>
+          {/* 2. Todas as Instalações e Informações da Notícia Abaixo da Imagem */}
+          <div className="p-6 sm:p-10">
+            {/* Header Metadata */}
+            <div className="space-y-4 mb-8">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#146EF5]/15 text-[#146EF5]">
+                    {news.categoryName || 'Geral'}
+                  </span>
+                  {news.isBreaking && (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse flex items-center gap-1">
+                      <Flame className="w-3 h-3" />
+                      Urgente
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {news.readTimeMinutes || 3} min de leitura
+                  </span>
+                </div>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#0B132B] dark:text-white font-serif leading-tight">
+                {news.title}
+              </h1>
+
+              {news.excerpt && (
+                <p className="text-base sm:text-lg text-slate-700 dark:text-slate-200 font-medium leading-relaxed font-sans border-l-4 border-[#146EF5] pl-4 py-1">
+                  {news.excerpt}
+                </p>
+              )}
+
+              {/* Author & Timestamp Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-5 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#146EF5] to-blue-400 text-white flex items-center justify-center font-bold text-sm uppercase shadow-xs">
+                    {news.authorName.charAt(0)}
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-900 dark:text-white text-sm block">
+                      {news.authorName}
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {news.authorRole || 'Redação Nexora News'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400 text-xs">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Calendar className="w-3.5 h-3.5 text-[#146EF5]" />
+                    Publicado em: {formatDateTime(news.publishedAt)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Text Size Controls */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 mb-8 text-xs">
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Type className="w-4 h-4 text-[#146EF5]" />
+                Ajustar Tamanho da Leitura:
+              </span>
+              <div className="flex items-center gap-1.5">
+                {(['normal', 'large', 'xlarge'] as const).map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setFontSize(size)}
+                    className={`px-3 py-1 rounded-xl font-bold transition-all cursor-pointer ${
+                      fontSize === size
+                        ? 'bg-[#146EF5] text-white shadow-xs'
+                        : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
+                  >
+                    {size === 'normal' ? 'Padrão' : size === 'large' ? 'Grande (A+)' : 'Maior (A++)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Main Article Body */}
+            <div className={`prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 space-y-6 ${fontClass}`}>
+              {news.content.split('\n\n').map((paragraph, idx) => (
+                <p key={idx} className="leading-relaxed">
+                  {paragraph}
+                </p>
               ))}
             </div>
-          </div>
-
-          {/* Main Article Body */}
-          <div className={`prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 space-y-6 ${fontClass}`}>
-            {news.content.split('\n\n').map((paragraph, idx) => (
-              <p key={idx} className="leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
           </div>
 
           {/* Editorial Source Credits */}
