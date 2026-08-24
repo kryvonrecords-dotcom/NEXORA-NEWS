@@ -4,19 +4,28 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.Toast
+import android.app.AlertDialog
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.messaging.FirebaseMessaging
+import com.nexoranews.app.data.remote.NewsApiService
 import com.nexoranews.app.databinding.ActivityMainBinding
 import com.nexoranews.app.ui.bookmarks.BookmarksFragment
 import com.nexoranews.app.ui.categories.CategoriesFragment
@@ -28,6 +37,7 @@ import com.nexoranews.app.ui.settings.SettingsFragment
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val newsApiService = NewsApiService()
 
     private val homeFragment by lazy { HomeFragment() }
     private val newsListFragment by lazy { NewsListFragment() }
@@ -48,13 +58,27 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // initializeAdMob()
+        initializeAdMob()
         checkNotificationPermission()
         setupFragments(savedInstanceState)
         setupBottomNavigation()
         setupHeaderActions()
+        setupWhatsAppFloatingButton()
         setupBackNavigation()
         handleIntent(intent)
+    }
+
+    private fun setupWhatsAppFloatingButton() {
+        binding.fabWhatsApp.setOnClickListener {
+            try {
+                val phoneNumber = "244921281315"
+                val message = "Olá! Gostaria de falar com a redação do Nexora News."
+                val url = "https://wa.me/$phoneNumber?text=${Uri.encode(message)}"
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            } catch (e: Exception) {
+                        Toast.makeText(this, "Não foi possível abrir o WhatsApp.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun initializeAdMob() {
@@ -71,10 +95,39 @@ class MainActivity : AppCompatActivity() {
     private fun setupAdMobBanner() {
         try {
             val adRequest = AdRequest.Builder().build()
+            binding.adViewMain.adListener = object : AdListener() {
+                override fun onAdLoaded() {
+                    super.onAdLoaded()
+                    binding.adBannerContainer.visibility = View.VISIBLE
+                    // Adjust fragment container bottom margin so banner + bottom nav don't obscure content
+                    val density = resources.displayMetrics.density
+                    val bottomMarginPx = ((60 + 50) * density).toInt()
+                    val params = binding.fragmentContainer.layoutParams as? CoordinatorLayout.LayoutParams
+                    params?.let {
+                        it.bottomMargin = bottomMarginPx
+                        binding.fragmentContainer.layoutParams = it
+                    }
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    super.onAdFailedToLoad(error)
+                    binding.adBannerContainer.visibility = View.GONE
+                    val density = resources.displayMetrics.density
+                    val bottomMarginPx = (60 * density).toInt()
+                    val params = binding.fragmentContainer.layoutParams as? CoordinatorLayout.LayoutParams
+                    params?.let {
+                        it.bottomMargin = bottomMarginPx
+                        binding.fragmentContainer.layoutParams = it
+                    }
+                }
+            }
+            binding.adViewMain.loadAd(adRequest)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
+
 
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -154,6 +207,41 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnLanguage.setOnClickListener {
+            val languages = arrayOf(
+                "🇵🇹 Português",
+                "🇺🇸 English",
+                "🇪🇸 Español",
+                "🇫🇷 Français"
+            )
+
+            val languageCodes = arrayOf("pt", "en", "es", "fr")
+            val preferences = getSharedPreferences("nexora_preferences", MODE_PRIVATE)
+
+            AlertDialog.Builder(this)
+                .setTitle("Idioma")
+                .setItems(languages) { _, which ->
+                    val selectedCode = languageCodes[which]
+
+                    preferences.edit()
+                        .putString("app_language", selectedCode)
+                        .apply()
+
+                    val localeTag = when (selectedCode) {
+                        "pt" -> "pt-PT"
+                        "en" -> "en"
+                        "es" -> "es"
+                        "fr" -> "fr"
+                        else -> "pt-PT"
+                    }
+
+                    AppCompatDelegate.setApplicationLocales(
+                        LocaleListCompat.forLanguageTags(localeTag)
+                    )
+                }
+                .show()
+        }
+
         binding.btnBannerRetry.setOnClickListener {
             if (activeFragment is HomeFragment) {
                 (activeFragment as HomeFragment).loadData(forceRefresh = true)
@@ -187,14 +275,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        binding.adViewMain.pause()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        binding.adViewMain.resume()
     }
 
     override fun onDestroy() {
+        binding.adViewMain.destroy()
         super.onDestroy()
     }
 
@@ -205,11 +296,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        val appLinkData: Uri? = intent?.data
-        if (appLinkData != null) {
-            val path = appLinkData.path ?: ""
+        val clickUrl =
+            intent?.getStringExtra("notification_click_url")
+                ?: intent?.getStringExtra("clickUrl")
+                ?: intent?.getStringExtra("newsSlug")?.let {
+                    "/noticia/$it"
+                }
+
+        if (!clickUrl.isNullOrBlank()) {
+            val path = Uri.parse(clickUrl).path ?: ""
+
             if (path.contains("/noticia/") || path.contains("/news/")) {
                 val slug = path.substringAfterLast("/").trim()
+
+                if (slug.isNotEmpty()) {
+                    ArticleDetailActivity.startWithSlug(this, slug)
+                    return
+                }
+            }
+        }
+
+        val appLinkData: Uri? = intent?.data
+
+        if (appLinkData != null) {
+            val path = appLinkData.path ?: ""
+
+            if (path.contains("/noticia/") || path.contains("/news/")) {
+                val slug = path.substringAfterLast("/").trim()
+
                 if (slug.isNotEmpty()) {
                     ArticleDetailActivity.startWithSlug(this, slug)
                 }

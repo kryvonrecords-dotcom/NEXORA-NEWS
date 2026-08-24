@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nexora News</string>
+    <string name="app_tagline">Journalisme Indépendant, Rigueur &amp; Crédibilité</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_news">Actualités</string>
+    <string name="nav_categories">Catégories</string>
+    <string name="nav_bookmarks">Favoris</string>
+    <string name="nav_settings">Paramètres</string>
+
+    <!-- Home &amp; Feed -->
+    <string name="breaking_news_badge">URGENT</string>
+    <string name="featured_news_header">À la Une</string>
+    <string name="recent_news_header">Dernières Actualités</string>
+    <string name="related_news_header">Actualités Associées</string>
+    <string name="search_placeholder">Rechercher des actualités, thèmes ou auteurs…</string>
+    <string name="welcome_badge">Bienvenue sur Nexora News</string>
+    <string name="view_all">Voir tout</string>
+    <string name="read_time_format">%d min de lecture</string>
+
+    <!-- Offline &amp; Error States -->
+    <string name="offline_banner_text">Pas de connexion Internet. Certaines actualités peuvent être disponibles hors ligne.</string>
+    <string name="offline_mode_badge">Mode hors ligne</string>
+    <string name="error_loading_title">Impossible de charger les actualités</string>
+    <string name="error_loading_subtitle">Vérifiez votre connexion réseau ou réessayez.</string>
+    <string name="retry_button">Réessayer</string>
+    <string name="empty_news_title">Aucune actualité trouvée</string>
+    <string name="empty_news_subtitle">Aucune publication ne correspond à ce filtre ou à cette recherche.</string>
+    <string name="empty_bookmarks_title">Aucun article enregistré</string>
+    <string name="empty_bookmarks_subtitle">Appuyez sur l’icône de favori pour enregistrer des actualités et les lire plus tard, même hors ligne.</string>
+
+    <!-- Actions &amp; Detail -->
+    <string name="action_share">Partager</string>
+    <string name="action_bookmark">Ajouter aux favoris</string>
+    <string name="action_bookmarked">Enregistré dans les favoris</string>
+    <string name="action_unbookmarked">Supprimé des favoris</string>
+    <string name="share_article_title">Partager l’actualité</string>
+    <string name="share_article_format">%1$snn%2$snnLeia no Nexora News: %3$s</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Paramètres et À propos</string>
+    <string name="settings_notifications_title">Notifications en temps réel</string>
+    <string name="settings_notifications_subtitle">Receber alertas de notícias urgentes e grandes coberturas</string>
+    <string name="settings_cache_title">Effacer les données hors ligne</string>
+    <string name="settings_cache_subtitle">Libertar espaço de notícias salvas em cache local</string>
+    <string name="settings_cache_cleared">Cache de notícias limpo com sucesso.</string>
+    <string name="settings_font_title">Taille de la police de lecture</string>
+    <string name="settings_about_title">À propos de Nexora News</string>
+    <string name="settings_about_desc">O Nexora News é uma plataforma de jornalismo independente e rigoroso focada em Angola, África e nos principais acontecimentos mundiais.</string>
+    <string name="settings_version_format">Versão %1$s • Build Nativo Android</string>
+    <string name="settings_privacy">Politique de confidentialité</string>
+    <string name="settings_terms">Conditions d’utilisation</string>
+    <string name="settings_contact">Contacter la rédaction</string>
+
+    <!-- Notifications Channel -->
+    <string name="news_channel_name">Notícias Urgentes e Alertas</string>
+    <string name="news_channel_description">Notificações em tempo real sobre os principais acontecimentos de Angola, África e Mundo.</string>
+    <!-- Google AdMob Configuration -->
+    <string name="admob_app_id">ca-app-pub-7453639745659255~3593190215</string>
+    <string name="admob_banner_ad_unit_id">ca-app-pub-7453639745659255/2820651716</string>
+</resources>

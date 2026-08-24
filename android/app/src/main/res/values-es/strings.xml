@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nexora News</string>
+    <string name="app_tagline">Periodismo Independiente, Rigor &amp; Credibilidad</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_news">Noticias</string>
+    <string name="nav_categories">Categorías</string>
+    <string name="nav_bookmarks">Favoritos</string>
+    <string name="nav_settings">Configuración</string>
+
+    <!-- Home &amp; Feed -->
+    <string name="breaking_news_badge">URGENTE</string>
+    <string name="featured_news_header">Noticias Destacadas</string>
+    <string name="recent_news_header">Últimas Noticias</string>
+    <string name="related_news_header">Noticias Relacionadas</string>
+    <string name="search_placeholder">Buscar noticias, temas o autores…</string>
+    <string name="welcome_badge">Bienvenido a Nexora News</string>
+    <string name="view_all">Ver todo</string>
+    <string name="read_time_format">%d min de lectura</string>
+
+    <!-- Offline &amp; Error States -->
+    <string name="offline_banner_text">Sin conexión a Internet. Algunas noticias pueden estar disponibles sin conexión.</string>
+    <string name="offline_mode_badge">Modo sin conexión</string>
+    <string name="error_loading_title">No se pudieron cargar las noticias</string>
+    <string name="error_loading_subtitle">Comprueba tu conexión de red o inténtalo de nuevo.</string>
+    <string name="retry_button">Intentar de nuevo</string>
+    <string name="empty_news_title">No se encontraron noticias</string>
+    <string name="empty_news_subtitle">No encontramos publicaciones para este filtro o búsqueda.</string>
+    <string name="empty_bookmarks_title">No hay artículos guardados</string>
+    <string name="empty_bookmarks_subtitle">Toca el icono de marcador para guardar noticias y leerlas más tarde, incluso sin conexión.</string>
+
+    <!-- Actions &amp; Detail -->
+    <string name="action_share">Compartir</string>
+    <string name="action_bookmark">Guardar</string>
+    <string name="action_bookmarked">Guardado en favoritos</string>
+    <string name="action_unbookmarked">Eliminado de favoritos</string>
+    <string name="share_article_title">Compartir noticia</string>
+    <string name="share_article_format">%1$snn%2$snnLeia no Nexora News: %3$s</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Configuración y acerca de</string>
+    <string name="settings_notifications_title">Notificaciones en tiempo real</string>
+    <string name="settings_notifications_subtitle">Receber alertas de notícias urgentes e grandes coberturas</string>
+    <string name="settings_cache_title">Borrar datos sin conexión</string>
+    <string name="settings_cache_subtitle">Libertar espaço de notícias salvas em cache local</string>
+    <string name="settings_cache_cleared">Cache de notícias limpo com sucesso.</string>
+    <string name="settings_font_title">Tamaño de fuente de lectura</string>
+    <string name="settings_about_title">Acerca de Nexora News</string>
+    <string name="settings_about_desc">O Nexora News é uma plataforma de jornalismo independente e rigoroso focada em Angola, África e nos principais acontecimentos mundiais.</string>
+    <string name="settings_version_format">Versão %1$s • Build Nativo Android</string>
+    <string name="settings_privacy">Política de privacidad</string>
+    <string name="settings_terms">Términos de uso</string>
+    <string name="settings_contact">Contactar con la redacción</string>
+
+    <!-- Notifications Channel -->
+    <string name="news_channel_name">Notícias Urgentes e Alertas</string>
+    <string name="news_channel_description">Notificações em tempo real sobre os principais acontecimentos de Angola, África e Mundo.</string>
+    <!-- Google AdMob Configuration -->
+    <string name="admob_app_id">ca-app-pub-7453639745659255~3593190215</string>
+    <string name="admob_banner_ad_unit_id">ca-app-pub-7453639745659255/2820651716</string>
+</resources>
