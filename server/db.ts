@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import { supabase } from './supabase';
 import { 
   Advertisement, 
   AppNotification, 
@@ -10,7 +11,8 @@ import {
   NewsItem, 
   NewsletterCampaign, 
   NewsletterSubscriber, 
-  PushSubscriptionItem, 
+  PushSubscriptionItem,
+  FcmTokenItem, 
   SiteSettings, 
   User 
 } from '../src/types';
@@ -27,6 +29,7 @@ interface DatabaseSchema {
   contactMessages?: EditorialContactMessage[];
   notifications: AppNotification[];
   pushSubscriptions: PushSubscriptionItem[];
+  fcmTokens: FcmTokenItem[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -132,6 +135,41 @@ const DEMO_NEWS: NewsItem[] = [
 <p>Durante a cerimónia de inauguração, representantes ministeriais sublinharam que a entrada em funcionamento do parque permitirá poupar milhares de toneladas de combustível fóssil anualmente, desonerando o erário público e garantindo eletricidade fiável a polos fabris e agrícolas vizinhos.</p>
 <h2>Impacto social e formação técnica local</h2>
 <p>Mais de 80% da mão-de-obra contratada na fase de construção e subsequente operação é constituída por técnicos e engenheiros formados em institutos politécnicos nacionais, reafirmando o compromisso com a capacitação do capital humano angolano.</p>`,
+    translations: {
+      en: {
+        title: 'Angola Accelerates Energy Transition with New Large-Scale Solar Photovoltaic Park',
+        excerpt: 'With enough capacity to supply more than 450,000 families, the new project in Benguela marks a decisive step toward diversifying the national energy mix and reducing emissions.',
+        content: `<p class="lead">Angola's energy sector has reached a historic milestone with the official inauguration of one of the largest solar photovoltaic complexes in Southern Africa, located in Benguela province. The project aims to strengthen energy self-sufficiency and boost regional agro-industrial development.</p>
+<h2>A sustainable step toward industrial development</h2>
+<p>With a strategic investment structured between the Angolan government and international cooperation partners, the complex has more than 350,000 next-generation bifacial solar panels, maximizing the use of the region's high solar radiation levels.</p>
+<blockquote>"This project is not only an electricity infrastructure; it is a catalyst for industrial opportunities, qualified jobs for young Angolans and the fulfillment of international climate targets."</blockquote>
+<p>The facility is expected to save thousands of tonnes of fossil fuel every year while providing reliable electricity to nearby industrial and agricultural areas.</p>
+<h2>Social impact and local technical training</h2>
+<p>More than 80% of the workforce hired during construction and subsequent operations consists of technicians and engineers trained at national polytechnic institutes.</p>`
+      },
+      es: {
+        title: 'Angola acelera la transición energética con un nuevo parque solar fotovoltaico de gran capacidad',
+        excerpt: 'Con capacidad para abastecer a más de 450.000 familias, el nuevo proyecto en Benguela marca un paso decisivo hacia la diversificación de la matriz energética nacional y la reducción de emisiones.',
+        content: `<p class="lead">El sector energético de Angola ha alcanzado un hito histórico con la inauguración oficial de uno de los mayores complejos solares fotovoltaicos de África Austral, situado en la provincia de Benguela. El proyecto busca fortalecer la autosuficiencia energética e impulsar el desarrollo agroindustrial regional.</p>
+<h2>Un avance sostenible para el desarrollo industrial</h2>
+<p>El complejo cuenta con más de 350.000 paneles solares bifaciales de última generación, maximizando el aprovechamiento de los elevados niveles de radiación solar de la región.</p>
+<blockquote>"Este proyecto no es solo una infraestructura eléctrica; es un catalizador de oportunidades industriales, empleos cualificados para jóvenes angoleños y cumplimiento de los objetivos climáticos internacionales."</blockquote>
+<p>La instalación permitirá ahorrar miles de toneladas de combustible fósil cada año y garantizar electricidad fiable a las zonas industriales y agrícolas cercanas.</p>
+<h2>Impacto social y formación técnica local</h2>
+<p>Más del 80% de la mano de obra contratada está formada por técnicos e ingenieros preparados en institutos politécnicos nacionales.</p>`
+      },
+      fr: {
+        title: 'L’Angola accélère sa transition énergétique avec un nouveau parc solaire photovoltaïque de grande capacité',
+        excerpt: 'Avec une capacité suffisante pour approvisionner plus de 450 000 familles, le nouveau projet de Benguela marque une étape décisive dans la diversification du mix énergétique national et la réduction des émissions.',
+        content: `<p class="lead">Le secteur énergétique angolais a franchi une étape historique avec l’inauguration officielle de l’un des plus grands complexes solaires photovoltaïques d’Afrique australe, situé dans la province de Benguela. Le projet vise à renforcer l’autosuffisance énergétique et à stimuler le développement agro-industriel régional.</p>
+<h2>Une avancée durable pour le développement industriel</h2>
+<p>Le complexe compte plus de 350 000 panneaux solaires bifaciaux de dernière génération, permettant de maximiser l’utilisation des niveaux élevés de rayonnement solaire de la région.</p>
+<blockquote>« Ce projet n’est pas seulement une infrastructure électrique ; c’est un catalyseur d’opportunités industrielles, d’emplois qualifiés pour les jeunes Angolais et de réalisation des objectifs climatiques internationaux. »</blockquote>
+<p>L’installation permettra d’économiser des milliers de tonnes de combustibles fossiles chaque année et de garantir une électricité fiable aux zones industrielles et agricoles voisines.</p>
+<h2>Impact social et formation technique locale</h2>
+<p>Plus de 80 % de la main-d’œuvre recrutée est composée de techniciens et d’ingénieurs formés dans des instituts polytechniques nationaux.</p>`
+      }
+    },
     featuredImage: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1400&q=80',
     featuredImageCaption: 'Complexo solar fotovoltaico em operação plena no centro-oeste angolano. (Foto: Divulgação/Nexora)',
     galleryImages: [
@@ -462,7 +500,8 @@ class DatabaseManager {
           adProposals: parsed.adProposals && parsed.adProposals.length > 0 ? parsed.adProposals : DEFAULT_PROPOSALS,
           contactMessages: parsed.contactMessages && parsed.contactMessages.length > 0 ? parsed.contactMessages : DEFAULT_CONTACT_MESSAGES,
           notifications: parsed.notifications || DEFAULT_NOTIFICATIONS,
-          pushSubscriptions: parsed.pushSubscriptions || []
+          pushSubscriptions: parsed.pushSubscriptions || [],
+              fcmTokens: parsed.fcmTokens || []
         };
       } catch (err) {
         console.error('Error reading database file, initializing default:', err);
@@ -497,7 +536,8 @@ class DatabaseManager {
       adProposals: DEFAULT_PROPOSALS,
       contactMessages: DEFAULT_CONTACT_MESSAGES,
       notifications: DEFAULT_NOTIFICATIONS,
-      pushSubscriptions: []
+      pushSubscriptions: [],
+      fcmTokens: []
     };
 
     this.saveDataDirect(initialData);
@@ -515,6 +555,22 @@ class DatabaseManager {
 
   public save() {
     this.saveDataDirect(this.data);
+
+    if (supabase) {
+      void supabase
+        .from('nexora_backup')
+        .upsert({
+          id: 1,
+          data: JSON.stringify(this.data)
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.error('Supabase backup failed:', error.message);
+          } else {
+            console.log('Supabase backup updated successfully.');
+          }
+        });
+    }
   }
 
   // Users
@@ -1118,6 +1174,57 @@ class DatabaseManager {
     this.data.notifications = [];
     this.save();
     return count;
+  }
+
+  // Firebase Cloud Messaging tokens
+  public getFcmTokens(): FcmTokenItem[] {
+    return this.data.fcmTokens || [];
+  }
+
+  public addFcmToken(token: string, userAgent?: string): FcmTokenItem {
+    if (!this.data.fcmTokens) {
+      this.data.fcmTokens = [];
+    }
+
+    const existingIdx = this.data.fcmTokens.findIndex(item => item.token === token);
+
+    if (existingIdx !== -1) {
+      this.data.fcmTokens[existingIdx] = {
+        ...this.data.fcmTokens[existingIdx],
+        userAgent,
+        updatedAt: new Date().toISOString()
+      };
+      this.save();
+      return this.data.fcmTokens[existingIdx];
+    }
+
+    const newToken: FcmTokenItem = {
+      id: `fcm-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+      token,
+      userAgent,
+      createdAt: new Date().toISOString()
+    };
+
+    this.data.fcmTokens.push(newToken);
+    this.save();
+    return newToken;
+  }
+
+  public deleteFcmToken(tokenOrId: string): boolean {
+    if (!this.data.fcmTokens) return false;
+
+    const initialLen = this.data.fcmTokens.length;
+
+    this.data.fcmTokens = this.data.fcmTokens.filter(
+      item => item.id !== tokenOrId && item.token !== tokenOrId
+    );
+
+    if (this.data.fcmTokens.length !== initialLen) {
+      this.save();
+      return true;
+    }
+
+    return false;
   }
 
   // Push Subscriptions
