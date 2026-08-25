@@ -1,4 +1,4 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { initializeApp, cert } from 'firebase-admin/app';
 import { getMessaging as getFirebaseMessaging } from 'firebase-admin/messaging';
 import { db } from './db';
 import { AppNotification } from '../src/types';
@@ -9,10 +9,6 @@ function initializeFirebaseAdmin(): boolean {
   if (initialized) return true;
 
   try {
-    if (getApps().length > 0) {
-      initialized = true;
-      return true;
-    }
 
     const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
