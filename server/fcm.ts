@@ -61,7 +61,6 @@ export async function sendFcmToAll(
     notification: {
       title: notification.title,
       body: notification.body,
-      imageUrl: notification.imageUrl || undefined
     },
 
     data: {
@@ -82,8 +81,7 @@ export async function sendFcmToAll(
       notification: {
         channelId: 'nexora_news_notifications',
         sound: 'default',
-        imageUrl: notification.imageUrl || undefined
-      }
+        }
     }
   };
 
