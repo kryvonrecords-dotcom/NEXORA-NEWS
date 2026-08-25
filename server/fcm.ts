@@ -1,4 +1,5 @@
-import admin from 'firebase-admin';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getMessaging as getFirebaseMessaging } from 'firebase-admin/messaging';
 import { db } from './db';
 import { AppNotification } from '../src/types';
 
@@ -8,7 +9,7 @@ function initializeFirebaseAdmin(): boolean {
   if (initialized) return true;
 
   try {
-    if (admin.apps.length > 0) {
+    if (getApps().length > 0) {
       initialized = true;
       return true;
     }
@@ -22,8 +23,8 @@ function initializeFirebaseAdmin(): boolean {
 
     const serviceAccount = JSON.parse(serviceAccountJson);
 
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+    initializeApp({
+      credential: cert(serviceAccount)
     });
 
     initialized = true;
@@ -71,7 +72,8 @@ export async function sendFcmToAll(
       id: notification.id || '',
       newsId: notification.newsId || '',
       newsSlug: notification.newsSlug || '',
-      clickUrl: notification.clickUrl ||
+      clickUrl:
+        notification.clickUrl ||
         (notification.newsSlug
           ? `/noticia/${notification.newsSlug}`
           : '/'),
@@ -90,7 +92,15 @@ export async function sendFcmToAll(
   };
 
   try {
-    const response = await admin.messaging().sendEachForMulticast(message);
+    console.log("FCM PAYLOAD AUTOMÁTICO:", JSON.stringify({
+      tokens: message.tokens?.length,
+      title: message.notification?.title,
+      body: message.notification?.body,
+      data: message.data,
+      android: message.android
+    }, null, 2));
+
+    const response = await getFirebaseMessaging().sendEachForMulticast(message);
 
     let failed = 0;
 
@@ -103,8 +113,8 @@ export async function sendFcmToAll(
         const errorCode = result.error?.code || '';
 
         if (
-          errorCode.includes('registration-token-not-registered') ||
-          errorCode.includes('invalid-registration-token')
+          errorCode === 'messaging/registration-token-not-registered' ||
+          errorCode === 'messaging/invalid-registration-token'
         ) {
           db.deleteFcmToken(tokens[i].token);
         }
