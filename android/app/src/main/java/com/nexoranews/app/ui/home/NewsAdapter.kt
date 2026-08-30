@@ -23,7 +23,7 @@ class NewsAdapter(
     private var newsList: List<NewsItem>,
     private val repository: NewsRepository,
     private val onItemClick: ((NewsItem) -> Unit)? = null
-) : RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
 
     fun updateNews(newItems: List<NewsItem>) {
         this.newsList = newItems

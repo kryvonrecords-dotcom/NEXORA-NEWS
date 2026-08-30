@@ -9,7 +9,6 @@ import { MostReadSidebar } from '../components/MostReadSidebar';
 import { NewsletterBox } from '../components/NewsletterBox';
 import { PromoHeroBanner } from '../components/PromoHeroBanner';
 import { RefreshButton } from '../components/RefreshButton';
-import { AdMobBanner } from '../components/AdMobBanner';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -128,9 +127,6 @@ export function HomePage({ onNavigate }: Props) {
           </div>
         </aside>
       </div>
-
-      {/* Google AdMob Discrete Middle Banner */}
-      <AdMobBanner position="middle" />
 
       {/* 3. CATEGORY BLOCKS */}
       {angolaCategory && angolaNews.length > 0 && (

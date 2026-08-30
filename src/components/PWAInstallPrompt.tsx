@@ -92,6 +92,9 @@ export function PWAInstallPrompt({ onInstallSuccess }: Props) {
               <img
                 src="/icon-192.svg"
                 alt="Nexora News App"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
+                }}
                 className="w-11 h-11 rounded-xl shadow-md border border-slate-700 shrink-0"
               />
               <div>
@@ -145,6 +148,9 @@ export function PWAInstallPrompt({ onInstallSuccess }: Props) {
                 <img
                   src="/icon-192.svg"
                   alt="Nexora News"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
+                  }}
                   className="w-9 h-9 rounded-xl shadow border border-slate-200"
                 />
                 <div>

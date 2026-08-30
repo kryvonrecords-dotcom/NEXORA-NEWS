@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
-import { supabase } from './supabase';
 import { 
   Advertisement, 
   AppNotification, 
@@ -11,8 +10,7 @@ import {
   NewsItem, 
   NewsletterCampaign, 
   NewsletterSubscriber, 
-  PushSubscriptionItem,
-  FcmTokenItem, 
+  PushSubscriptionItem, 
   SiteSettings, 
   User 
 } from '../src/types';
@@ -29,7 +27,6 @@ interface DatabaseSchema {
   contactMessages?: EditorialContactMessage[];
   notifications: AppNotification[];
   pushSubscriptions: PushSubscriptionItem[];
-  fcmTokens: FcmTokenItem[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -90,7 +87,7 @@ const DEFAULT_ADS: Advertisement[] = [
     tagline: 'A Verdade Importa. A Gente Traz Até Você!',
     badgeText: 'BAIXE O APLICATIVO',
     mediaType: 'custom_banner',
-    mediaUrl: '/src/assets/images/nexora_promo_banner_1786868992912.jpg',
+    mediaUrl: '/promo-banner.jpg',
     linkUrl: 'https://play.google.com/store',
     targetNewTab: true,
     callToAction: 'Acesse Agora',
@@ -99,25 +96,6 @@ const DEFAULT_ADS: Advertisement[] = [
     order: 1,
     viewsCount: 1420,
     clicksCount: 238,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 'ad-video-spot',
-    title: 'Nexora News Digital: Tecnologia & Jornalismo em Tempo Real',
-    subtitle: 'Assista ao spot promocional oficial e descubra como o Nexora News lidera a cobertura jornalística em Angola e África.',
-    tagline: 'Informação Sem Fronteiras',
-    badgeText: 'VÍDEO SPOT PROMOCIONAL',
-    mediaType: 'video',
-    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    videoThumbnail: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80',
-    linkUrl: '/sobre',
-    targetNewTab: false,
-    callToAction: 'Assistir Vídeo',
-    position: 'top_hero',
-    status: 'active',
-    order: 2,
-    viewsCount: 890,
-    clicksCount: 115,
     createdAt: new Date().toISOString()
   }
 ];
@@ -135,41 +113,6 @@ const DEMO_NEWS: NewsItem[] = [
 <p>Durante a cerimónia de inauguração, representantes ministeriais sublinharam que a entrada em funcionamento do parque permitirá poupar milhares de toneladas de combustível fóssil anualmente, desonerando o erário público e garantindo eletricidade fiável a polos fabris e agrícolas vizinhos.</p>
 <h2>Impacto social e formação técnica local</h2>
 <p>Mais de 80% da mão-de-obra contratada na fase de construção e subsequente operação é constituída por técnicos e engenheiros formados em institutos politécnicos nacionais, reafirmando o compromisso com a capacitação do capital humano angolano.</p>`,
-    translations: {
-      en: {
-        title: 'Angola Accelerates Energy Transition with New Large-Scale Solar Photovoltaic Park',
-        excerpt: 'With enough capacity to supply more than 450,000 families, the new project in Benguela marks a decisive step toward diversifying the national energy mix and reducing emissions.',
-        content: `<p class="lead">Angola's energy sector has reached a historic milestone with the official inauguration of one of the largest solar photovoltaic complexes in Southern Africa, located in Benguela province. The project aims to strengthen energy self-sufficiency and boost regional agro-industrial development.</p>
-<h2>A sustainable step toward industrial development</h2>
-<p>With a strategic investment structured between the Angolan government and international cooperation partners, the complex has more than 350,000 next-generation bifacial solar panels, maximizing the use of the region's high solar radiation levels.</p>
-<blockquote>"This project is not only an electricity infrastructure; it is a catalyst for industrial opportunities, qualified jobs for young Angolans and the fulfillment of international climate targets."</blockquote>
-<p>The facility is expected to save thousands of tonnes of fossil fuel every year while providing reliable electricity to nearby industrial and agricultural areas.</p>
-<h2>Social impact and local technical training</h2>
-<p>More than 80% of the workforce hired during construction and subsequent operations consists of technicians and engineers trained at national polytechnic institutes.</p>`
-      },
-      es: {
-        title: 'Angola acelera la transición energética con un nuevo parque solar fotovoltaico de gran capacidad',
-        excerpt: 'Con capacidad para abastecer a más de 450.000 familias, el nuevo proyecto en Benguela marca un paso decisivo hacia la diversificación de la matriz energética nacional y la reducción de emisiones.',
-        content: `<p class="lead">El sector energético de Angola ha alcanzado un hito histórico con la inauguración oficial de uno de los mayores complejos solares fotovoltaicos de África Austral, situado en la provincia de Benguela. El proyecto busca fortalecer la autosuficiencia energética e impulsar el desarrollo agroindustrial regional.</p>
-<h2>Un avance sostenible para el desarrollo industrial</h2>
-<p>El complejo cuenta con más de 350.000 paneles solares bifaciales de última generación, maximizando el aprovechamiento de los elevados niveles de radiación solar de la región.</p>
-<blockquote>"Este proyecto no es solo una infraestructura eléctrica; es un catalizador de oportunidades industriales, empleos cualificados para jóvenes angoleños y cumplimiento de los objetivos climáticos internacionales."</blockquote>
-<p>La instalación permitirá ahorrar miles de toneladas de combustible fósil cada año y garantizar electricidad fiable a las zonas industriales y agrícolas cercanas.</p>
-<h2>Impacto social y formación técnica local</h2>
-<p>Más del 80% de la mano de obra contratada está formada por técnicos e ingenieros preparados en institutos politécnicos nacionales.</p>`
-      },
-      fr: {
-        title: 'L’Angola accélère sa transition énergétique avec un nouveau parc solaire photovoltaïque de grande capacité',
-        excerpt: 'Avec une capacité suffisante pour approvisionner plus de 450 000 familles, le nouveau projet de Benguela marque une étape décisive dans la diversification du mix énergétique national et la réduction des émissions.',
-        content: `<p class="lead">Le secteur énergétique angolais a franchi une étape historique avec l’inauguration officielle de l’un des plus grands complexes solaires photovoltaïques d’Afrique australe, situé dans la province de Benguela. Le projet vise à renforcer l’autosuffisance énergétique et à stimuler le développement agro-industriel régional.</p>
-<h2>Une avancée durable pour le développement industriel</h2>
-<p>Le complexe compte plus de 350 000 panneaux solaires bifaciaux de dernière génération, permettant de maximiser l’utilisation des niveaux élevés de rayonnement solaire de la région.</p>
-<blockquote>« Ce projet n’est pas seulement une infrastructure électrique ; c’est un catalyseur d’opportunités industrielles, d’emplois qualifiés pour les jeunes Angolais et de réalisation des objectifs climatiques internationaux. »</blockquote>
-<p>L’installation permettra d’économiser des milliers de tonnes de combustibles fossiles chaque année et de garantir une électricité fiable aux zones industrielles et agricoles voisines.</p>
-<h2>Impact social et formation technique locale</h2>
-<p>Plus de 80 % de la main-d’œuvre recrutée est composée de techniciens et d’ingénieurs formés dans des instituts polytechniques nationaux.</p>`
-      }
-    },
     featuredImage: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1400&q=80',
     featuredImageCaption: 'Complexo solar fotovoltaico em operação plena no centro-oeste angolano. (Foto: Divulgação/Nexora)',
     galleryImages: [
@@ -496,12 +439,11 @@ class DatabaseManager {
             }
           ],
           settings: parsed.settings || DEFAULT_SETTINGS,
-          advertisements: parsed.advertisements || DEFAULT_ADS,
-          adProposals: parsed.adProposals && parsed.adProposals.length > 0 ? parsed.adProposals : DEFAULT_PROPOSALS,
+          advertisements: (parsed.advertisements || DEFAULT_ADS).filter((a: Advertisement) => a.id !== 'ad-video-spot' && !a.mediaUrl?.includes('BigBuckBunny')),
+          adProposals: (parsed.adProposals && parsed.adProposals.length > 0 ? parsed.adProposals : DEFAULT_PROPOSALS).filter((p: CommercialProposal) => !p.company?.toLowerCase().includes('empresa teste')),
           contactMessages: parsed.contactMessages && parsed.contactMessages.length > 0 ? parsed.contactMessages : DEFAULT_CONTACT_MESSAGES,
           notifications: parsed.notifications || DEFAULT_NOTIFICATIONS,
-          pushSubscriptions: parsed.pushSubscriptions || [],
-              fcmTokens: parsed.fcmTokens || []
+          pushSubscriptions: parsed.pushSubscriptions || []
         };
       } catch (err) {
         console.error('Error reading database file, initializing default:', err);
@@ -536,8 +478,7 @@ class DatabaseManager {
       adProposals: DEFAULT_PROPOSALS,
       contactMessages: DEFAULT_CONTACT_MESSAGES,
       notifications: DEFAULT_NOTIFICATIONS,
-      pushSubscriptions: [],
-      fcmTokens: []
+      pushSubscriptions: []
     };
 
     this.saveDataDirect(initialData);
@@ -553,67 +494,8 @@ class DatabaseManager {
     }
   }
 
-  public async restoreFromSupabase(): Promise<boolean> {
-    if (!supabase) {
-      console.log('Supabase não configurado para recuperação.');
-      return false;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('nexora_backup')
-        .select('data')
-        .eq('id', 1)
-        .single();
-
-      if (error || !data?.data) {
-        console.error('Supabase restore failed:', error?.message || 'backup não encontrado');
-        return false;
-      }
-
-      const restored = JSON.parse(data.data);
-
-      if (!restored || !Array.isArray(restored.news) || !Array.isArray(restored.categories)) {
-        console.error('Backup do Supabase inválido.');
-        return false;
-      }
-
-      this.data = {
-        ...this.data,
-        ...restored
-      };
-
-      this.saveDataDirect(this.data);
-
-      console.log(
-        `Supabase restore successful: ${this.data.news.length} notícias, ${this.data.categories.length} categorias.`
-      );
-
-      return true;
-    } catch (err) {
-      console.error('Supabase restore failed:', err);
-      return false;
-    }
-  }
-
   public save() {
     this.saveDataDirect(this.data);
-
-    if (supabase) {
-      void supabase
-        .from('nexora_backup')
-        .upsert({
-          id: 1,
-          data: JSON.stringify(this.data)
-        })
-        .then(({ error }) => {
-          if (error) {
-            console.error('Supabase backup failed:', error.message);
-          } else {
-            console.log('Supabase backup updated successfully.');
-          }
-        });
-    }
   }
 
   // Users
@@ -686,15 +568,42 @@ class DatabaseManager {
     return false;
   }
 
+  // News Image Safe Sanitizer
+  private sanitizeNewsImage(imgUrl: string | undefined | null, categorySlug?: string): string {
+    if (imgUrl && typeof imgUrl === 'string' && imgUrl.trim() !== '' && imgUrl !== 'null' && imgUrl !== 'undefined') {
+      return imgUrl.trim();
+    }
+    const slug = (categorySlug || 'geral').toLowerCase();
+    const defaults: Record<string, string> = {
+      angola: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1400&q=80',
+      africa: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=1200&q=80',
+      mundo: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=80',
+      politica: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80',
+      economia: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=80',
+      tecnologia: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+      desporto: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
+      entretenimento: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+      cultura: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=1200&q=80',
+      saude: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80',
+      educacao: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80',
+      sociedade: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+      geral: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80',
+    };
+    return defaults[slug] || defaults.geral;
+  }
+
   // News
   public getAllNews(): NewsItem[] {
-    // Populate categoryName & categorySlug if missing
+    // Populate categoryName & categorySlug if missing and ensure valid image
     return this.data.news.map(n => {
       const cat = this.getCategoryById(n.categoryId);
+      const categoryName = cat ? cat.name : n.categoryName || 'Geral';
+      const categorySlug = cat ? cat.slug : n.categorySlug || 'geral';
       return {
         ...n,
-        categoryName: cat ? cat.name : n.categoryName || 'Geral',
-        categorySlug: cat ? cat.slug : n.categorySlug || 'geral'
+        categoryName,
+        categorySlug,
+        featuredImage: this.sanitizeNewsImage(n.featuredImage, categorySlug)
       };
     });
   }
@@ -918,9 +827,35 @@ class DatabaseManager {
     return this.data.settings;
   }
 
+  private sanitizeAdvertisement(ad: Advertisement): Advertisement {
+    let mediaUrl = ad.mediaUrl || '';
+    if (mediaUrl.includes('nexora_welcome_cover') || mediaUrl.includes('welcome-cover')) {
+      mediaUrl = '/welcome-cover.jpg';
+    } else if (mediaUrl.includes('nexora_promo_banner') || mediaUrl.includes('promo-banner')) {
+      mediaUrl = '/promo-banner.jpg';
+    } else if (mediaUrl.includes('nexora_app_cover') || mediaUrl.includes('app-cover')) {
+      mediaUrl = '/app-cover.jpg';
+    } else if (!mediaUrl || mediaUrl.trim() === '') {
+      mediaUrl = ad.mediaType === 'custom_banner' ? '/welcome-cover.jpg' : '/promo-banner.jpg';
+    }
+
+    let videoThumbnail = ad.videoThumbnail || '';
+    if (videoThumbnail.includes('nexora_welcome_cover') || videoThumbnail.includes('welcome-cover')) {
+      videoThumbnail = '/welcome-cover.jpg';
+    } else if (!videoThumbnail && ad.mediaType === 'video') {
+      videoThumbnail = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80';
+    }
+
+    return {
+      ...ad,
+      mediaUrl,
+      videoThumbnail
+    };
+  }
+
   // Advertisements
   public getAdvertisements(filters?: { position?: string; status?: string }): Advertisement[] {
-    let ads = this.data.advertisements || [];
+    let ads = (this.data.advertisements || []).map(a => this.sanitizeAdvertisement(a));
     if (filters?.position) {
       ads = ads.filter(a => a.position === filters.position);
     }
@@ -1217,57 +1152,6 @@ class DatabaseManager {
     this.data.notifications = [];
     this.save();
     return count;
-  }
-
-  // Firebase Cloud Messaging tokens
-  public getFcmTokens(): FcmTokenItem[] {
-    return this.data.fcmTokens || [];
-  }
-
-  public addFcmToken(token: string, userAgent?: string): FcmTokenItem {
-    if (!this.data.fcmTokens) {
-      this.data.fcmTokens = [];
-    }
-
-    const existingIdx = this.data.fcmTokens.findIndex(item => item.token === token);
-
-    if (existingIdx !== -1) {
-      this.data.fcmTokens[existingIdx] = {
-        ...this.data.fcmTokens[existingIdx],
-        userAgent,
-        updatedAt: new Date().toISOString()
-      };
-      this.save();
-      return this.data.fcmTokens[existingIdx];
-    }
-
-    const newToken: FcmTokenItem = {
-      id: `fcm-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
-      token,
-      userAgent,
-      createdAt: new Date().toISOString()
-    };
-
-    this.data.fcmTokens.push(newToken);
-    this.save();
-    return newToken;
-  }
-
-  public deleteFcmToken(tokenOrId: string): boolean {
-    if (!this.data.fcmTokens) return false;
-
-    const initialLen = this.data.fcmTokens.length;
-
-    this.data.fcmTokens = this.data.fcmTokens.filter(
-      item => item.id !== tokenOrId && item.token !== tokenOrId
-    );
-
-    if (this.data.fcmTokens.length !== initialLen) {
-      this.save();
-      return true;
-    }
-
-    return false;
   }
 
   // Push Subscriptions

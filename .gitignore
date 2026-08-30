@@ -17,4 +17,41 @@ android/.idea/
 *.iml
 .idea/
 .cxx/
+
+# Local backups, ZIPs and temporary files
+_backup-web-antes-do-zip/
+_zip-atualizado/
+backup-sem-anuncios-web/
+backups/
+*.zip
+*.backup
+*.backup-*
+*.bak
+
+# Local/private Firebase configuration
+android/app/google-services.json
+
+# Temporary diagnostic/test files
+kotlin-error.txt
+test-supabase.ts
+test-upload.png
+teste-notificacao.png
+verificar-backup.ts
+backup-to-supabase.ts
+android/Task
+
+# Accidental files created from terminal commands
+-H
+-d
+cd
+grep
+tsx
+react-example@0.0.0
+{
+"database\""
+
+# Additional local files
+android/app/src/main/res/fragment_home.xml.backup2
 data/vapid_keys.json
+"database\"
+database"

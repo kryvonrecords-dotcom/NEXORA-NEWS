@@ -13,53 +13,48 @@ class NewsApiService {
 
     private val gson = Gson()
 
-    suspend fun getNews(
-        category: String? = null,
-        search: String? = null
-    ): Result<List<NewsItem>> = withContext(Dispatchers.IO) {
-
-        val params = mutableListOf<String>()
-
-        params.add("select=*")
-
+    suspend fun getNews(category: String? = null, search: String? = null): Result<List<NewsItem>> = withContext(Dispatchers.IO) {
+        val queryParams = mutableListOf<String>()
         if (!category.isNullOrBlank() && category != "Todos") {
-            params.add("category=eq.${URLEncoder.encode(category, "UTF-8")}")
+            queryParams.add("category=" + URLEncoder.encode(category, "UTF-8"))
+        }
+        if (!search.isNullOrBlank()) {
+            queryParams.add("search=" + URLEncoder.encode(search, "UTF-8"))
         }
 
-        params.add("order=published_at.desc")
-
-        val endpoint = "/news?" + params.joinToString("&")
+        val endpoint = if (queryParams.isNotEmpty()) {
+            "/news?" + queryParams.joinToString("&")
+        } else {
+            "/news"
+        }
 
         val response = ApiClient.get(endpoint)
-
         response.mapCatching { json ->
             val type = object : TypeToken<List<NewsItem>>() {}.type
             gson.fromJson<List<NewsItem>>(json, type) ?: emptyList()
         }
     }
 
-    suspend fun getNewsBySlug(slug: String): Result<NewsItem?> =
-        withContext(Dispatchers.IO) {
-
-            val encodedSlug = URLEncoder.encode(slug, "UTF-8")
-            val endpoint = "/news?select=*&slug=eq.$encodedSlug&limit=1"
-
-            val response = ApiClient.get(endpoint)
-
-            response.mapCatching { json ->
-                val type = object : TypeToken<List<NewsItem>>() {}.type
-                val list = gson.fromJson<List<NewsItem>>(json, type)
-                list?.firstOrNull()
-            }
+    suspend fun getNewsBySlug(slug: String): Result<NewsItem?> = withContext(Dispatchers.IO) {
+        val endpoint = "/news/slug/" + URLEncoder.encode(slug, "UTF-8")
+        val response = ApiClient.get(endpoint)
+        response.mapCatching { json ->
+            gson.fromJson(json, NewsItem::class.java)
         }
+    }
 
-    suspend fun getCategories(): Result<List<Category>> =
-        withContext(Dispatchers.IO) {
-            Result.success(emptyList())
+    suspend fun getCategories(): Result<List<Category>> = withContext(Dispatchers.IO) {
+        val response = ApiClient.get("/categories")
+        response.mapCatching { json ->
+            val type = object : TypeToken<List<Category>>() {}.type
+            gson.fromJson<List<Category>>(json, type) ?: emptyList()
         }
+    }
 
-    suspend fun getSettings(): Result<SiteSettings> =
-        withContext(Dispatchers.IO) {
-            Result.failure(Exception("Settings not configured"))
+    suspend fun getSettings(): Result<SiteSettings> = withContext(Dispatchers.IO) {
+        val response = ApiClient.get("/settings")
+        response.mapCatching { json ->
+            gson.fromJson(json, SiteSettings::class.java)
         }
+    }
 }

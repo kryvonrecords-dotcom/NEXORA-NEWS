@@ -32,15 +32,13 @@ import {
   getYouTubeEmbedUrl, 
   getYouTubeThumbnailUrl 
 } from '../../utils/mediaUtils';
+import { getBannerImageUrl, handleBannerImageError } from '../../utils/imageUtils';
 
 interface Props {
   onNavigate: (path: string) => void;
 }
 
-const DEFAULT_BANNER_IMAGE = '/src/assets/images/nexora_promo_banner_1786868992912.jpg';
-const SAMPLE_IMAGE = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80';
-const SAMPLE_VIDEO = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-const SAMPLE_YOUTUBE = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+const DEFAULT_BANNER_IMAGE = '/promo-banner.jpg';
 
 export function AdminAds({ onNavigate }: Props) {
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -475,15 +473,16 @@ export function AdminAds({ onNavigate }: Props) {
                       ) : (
                         <video
                           src={ad.mediaUrl}
-                          poster={ad.videoThumbnail || DEFAULT_BANNER_IMAGE}
+                          poster={getBannerImageUrl(ad.videoThumbnail || DEFAULT_BANNER_IMAGE, ad.title, ad.subtitle)}
                           className="w-full h-full object-cover"
                           controls
                         />
                       )
                     ) : (
                       <img
-                        src={ad.mediaUrl || DEFAULT_BANNER_IMAGE}
+                        src={getBannerImageUrl(ad.mediaUrl || DEFAULT_BANNER_IMAGE, ad.title, ad.subtitle)}
                         alt={ad.title}
+                        onError={e => handleBannerImageError(e, ad.title, ad.subtitle)}
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
                       />
@@ -655,40 +654,6 @@ export function AdminAds({ onNavigate }: Props) {
                     <ImageIcon className="w-3.5 h-3.5 text-[#146EF5]" />
                     <span>Banner Oficial Nexora</span>
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        mediaUrl: SAMPLE_IMAGE,
-                        mediaType: 'image',
-                        title: prev.title || 'Destaque Promocional',
-                        badgeText: 'PUBLICIDADE'
-                      }));
-                    }}
-                    className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-[#146EF5] rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
-                  >
-                    <Globe className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Foto Web de Exemplo</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        mediaUrl: SAMPLE_VIDEO,
-                        mediaType: 'video',
-                        title: prev.title || 'Nexora News Spot Digital',
-                        badgeText: 'VÍDEO SPOT'
-                      }));
-                    }}
-                    className="px-2.5 py-1.5 bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-700 hover:text-purple-600 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
-                  >
-                    <Film className="w-3.5 h-3.5 text-purple-600" />
-                    <span>Vídeo Spot Demo</span>
-                  </button>
                 </div>
               </div>
 
@@ -812,20 +777,18 @@ export function AdminAds({ onNavigate }: Props) {
                       ) : (
                         <video
                           src={formData.mediaUrl}
-                          poster={formData.videoThumbnail || DEFAULT_BANNER_IMAGE}
+                          poster={getBannerImageUrl(formData.videoThumbnail || DEFAULT_BANNER_IMAGE, formData.title, formData.subtitle)}
                           className="w-full h-full object-cover"
                           controls
                         />
                       )
                     ) : (
                       <img
-                        src={formData.mediaUrl}
+                        src={getBannerImageUrl(formData.mediaUrl || DEFAULT_BANNER_IMAGE, formData.title, formData.subtitle)}
                         alt="Preview"
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = DEFAULT_BANNER_IMAGE;
-                        }}
+                        onError={(e) => handleBannerImageError(e, formData.title, formData.subtitle)}
                       />
                     )}
                   </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Image as ImageIcon, Upload, Trash2, Copy, Check, Loader2, ExternalLink, AlertCircle } from 'lucide-react';
 import { api } from '../../services/api';
 import { formatDateTime } from '../../lib/utils';
+import { handleImageError } from '../../utils/imageUtils';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -132,6 +133,7 @@ export function AdminMediaGallery({ onNavigate }: Props) {
                   <img
                     src={file.url}
                     alt={file.filename}
+                    onError={e => handleImageError(e, 'Mídia', file.filename)}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     referrerPolicy="no-referrer"
                   />

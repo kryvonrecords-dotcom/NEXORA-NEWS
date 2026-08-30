@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Search,
-  Menu,
-  X,
-  Lock,
-  ShieldCheck,
-  TrendingUp,
-  Globe,
+import { 
+  Search, 
+  Menu, 
+  X, 
+  Lock, 
+  ShieldCheck, 
+  TrendingUp, 
+  Globe, 
   Share2,
   ChevronDown,
   Smartphone,
@@ -197,15 +197,15 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
         </div>
 
         {/* Center: Brand Logo */}
-        <div
+        <div 
           onClick={() => handleNavClick('/')}
           className="flex items-center gap-3 cursor-pointer group select-none"
         >
           <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shrink-0 shadow-md ring-2 ring-[#146EF5]/40 bg-[#0B132B] flex items-center justify-center">
-            <img
-              src="/icon-192.svg"
-              alt="Nexora News Logo"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            <img 
+              src="/icon-192.svg" 
+              alt="Nexora News Logo" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
               }}
@@ -268,8 +268,8 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
             <button
               onClick={() => handleNavClick('/')}
               className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-colors ${
-                currentPath === '/'
-                  ? 'bg-[#146EF5] text-white'
+                currentPath === '/' 
+                  ? 'bg-[#146EF5] text-white' 
                   : 'text-slate-200 hover:text-white hover:bg-slate-800'
               }`}
             >
@@ -283,8 +283,8 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
                   key={cat.id}
                   onClick={() => handleNavClick(`/categoria/${cat.slug}`)}
                   className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-bold tracking-wider whitespace-nowrap transition-colors ${
-                    isActive
-                      ? 'bg-[#146EF5] text-white'
+                    isActive 
+                      ? 'bg-[#146EF5] text-white' 
                       : 'text-slate-200 hover:text-white hover:bg-slate-800'
                   }`}
                 >
@@ -331,10 +331,10 @@ export function Navbar({ currentPath = '/', categories: propCategories, onNaviga
           <div className="bg-[#0B132B] border-b border-slate-800 p-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 shadow ring-1 ring-[#146EF5] bg-[#0B132B] flex items-center justify-center">
-                <img
-                  src="/icon-192.svg"
-                  alt="Nexora News Logo"
-                  className="w-full h-full object-cover"
+                <img 
+                  src="/icon-192.svg" 
+                  alt="Nexora News Logo" 
+                  className="w-full h-full object-cover" 
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = '/app-cover.jpg';
                   }}

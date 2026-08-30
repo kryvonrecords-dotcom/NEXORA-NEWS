@@ -1,36 +1,37 @@
-// Nexora News PWA Service Worker
-const CACHE_NAME = 'nexora-news-v1';
+// Nexora News PWA Service Worker (Resilient & Vite-Safe)
+const CACHE_NAME = 'nexora-news-v3-prod';
 const OFFLINE_URL = '/';
 
-const ASSETS_TO_CACHE = [
+const STATIC_ASSETS = [
   '/',
-  '/index.html',
   '/manifest.webmanifest',
-  '/manifest.json',
+  '/app-cover.jpg',
+  '/welcome-cover.jpg',
+  '/promo-banner.jpg',
   '/icon-192.svg',
-  '/icon-512.svg',
-  '/src/main.tsx',
-  '/src/index.css'
+  '/icon-512.svg'
 ];
 
 // Install Event
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
-        console.warn('PWA: Cache pre-fetch warning:', err);
+      return cache.addAll(STATIC_ASSETS).catch((err) => {
+        console.warn('PWA pre-cache notice:', err);
       });
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
-// Activate Event - clean old caches
+// Activate Event - purge all older caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('PWA: Removing obsolete cache:', key);
             return caches.delete(key);
           }
         })
@@ -39,23 +40,35 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event - Network first with Stale-while-revalidate for assets
+// Fetch Event - Safe routing
 self.addEventListener('fetch', (event) => {
-  // Ignore non-GET or cross-origin POST requests
   if (event.request.method !== 'GET') return;
-  
+
   const url = new URL(event.request.url);
 
-  // API calls: Network first, cache fallback
+  // 1. NEVER intercept Vite, development modules, TypeScript sources, or query-busted dev bundles
+  if (
+    url.pathname.includes('/@vite/') ||
+    url.pathname.includes('/@fs/') ||
+    url.pathname.includes('/@id/') ||
+    url.pathname.includes('/node_modules/') ||
+    url.pathname.startsWith('/src/') ||
+    url.searchParams.has('v') ||
+    url.searchParams.has('t') ||
+    url.searchParams.has('import')
+  ) {
+    return; // Pass through directly to network
+  }
+
+  // 2. API calls: Network-first with cache fallback for offline reading
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Clone and cache successful GET responses for offline read
           if (response && response.status === 200) {
-            const responseToCache = response.clone();
+            const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
+              cache.put(event.request, clone);
             });
           }
           return response;
@@ -67,38 +80,55 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static Assets & Navigation: Stale-While-Revalidate
+  // 3. HTML Navigation requests: Network-First (always fresh page)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, clone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          return caches.match(OFFLINE_URL);
+        })
+    );
+    return;
+  }
+
+  // 4. Static media / assets: Stale-While-Revalidate
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            const responseToCache = networkResponse.clone();
+            const clone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
+              cache.put(event.request, clone);
             });
           }
           return networkResponse;
         })
-        .catch(() => {
-          // If offline and requesting navigation, return index.html
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
-        });
+        .catch(() => cachedResponse);
 
       return cachedResponse || fetchPromise;
     })
   );
 });
 
-// Push Event - Receive real-time push notifications in the background (dispatched by server only when admin publishes a news)
+// Push Event
 self.addEventListener('push', (event) => {
   let data = {
     title: 'Nexora News',
     body: 'Nova notícia publicada!',
-    icon: '/icon-192.svg',
-    badge: '/icon-192.svg',
+    icon: '/app-cover.jpg',
+    badge: '/app-cover.jpg',
     clickUrl: '/'
   };
 
@@ -115,8 +145,8 @@ self.addEventListener('push', (event) => {
 
   const notificationOptions = {
     body: data.body,
-    icon: data.icon || '/icon-192.svg',
-    badge: data.badge || '/icon-192.svg',
+    icon: data.icon || '/app-cover.jpg',
+    badge: data.badge || '/app-cover.jpg',
     image: data.imageUrl || data.image,
     vibrate: [200, 100, 200, 100, 200],
     tag: data.tag || data.id || `nexora-${Date.now()}`,
@@ -138,7 +168,7 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Notification Click Event - Open or focus news article
+// Notification Click Event
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 

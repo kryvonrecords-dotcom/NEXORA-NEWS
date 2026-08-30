@@ -18,13 +18,15 @@ import { Advertisement } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { isYouTubeUrl, getYouTubeEmbedUrl } from '../utils/mediaUtils';
+import { getBannerImageUrl, handleBannerImageError } from '../utils/imageUtils';
 
 interface Props {
   onNavigate: (path: string) => void;
 }
 
-const DEFAULT_BANNER_IMG = '/src/assets/images/nexora_welcome_cover_1787203359113.jpg';
-const APP_COVER_IMG = '/src/assets/images/nexora_app_cover_1787203335092.jpg';
+const DEFAULT_BANNER_IMG = '/welcome-cover.jpg';
+const APP_COVER_IMG = '/app-cover.jpg';
+const PROMO_BANNER_IMG = '/promo-banner.jpg';
 
 export function PromoHeroBanner({ onNavigate }: Props) {
   const { user } = useAuth();
@@ -142,7 +144,7 @@ export function PromoHeroBanner({ onNavigate }: Props) {
                 <video
                   ref={videoRef}
                   src={currentAd.mediaUrl}
-                  poster={currentAd.videoThumbnail || DEFAULT_BANNER_IMG}
+                  poster={getBannerImageUrl(currentAd.videoThumbnail || DEFAULT_BANNER_IMG, currentAd.title, currentAd.subtitle)}
                   className="w-full h-full object-cover"
                   playsInline
                   loop
@@ -216,11 +218,12 @@ export function PromoHeroBanner({ onNavigate }: Props) {
           /* CASE 2: Uploaded Image Banner */
           <div 
             onClick={() => handleAdClick(currentAd)}
-            className="relative w-full h-full cursor-pointer group/ad"
+            className="relative w-full h-full cursor-pointer group/ad bg-[#0B132B]"
           >
             <img
-              src={currentAd.mediaUrl}
+              src={getBannerImageUrl(currentAd.mediaUrl, currentAd.title, currentAd.subtitle)}
               alt={currentAd.title}
+              onError={e => handleBannerImageError(e, currentAd.title, currentAd.subtitle)}
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover group-hover/ad:scale-[1.01] transition-transform duration-500"
             />
@@ -250,8 +253,9 @@ export function PromoHeroBanner({ onNavigate }: Props) {
           >
             {/* The exact graphical poster image in full 16:9 fidelity */}
             <img
-              src={DEFAULT_BANNER_IMG}
+              src={getBannerImageUrl(DEFAULT_BANNER_IMG, 'Nexora News', 'A Notícia Que Move o Mundo')}
               alt="Nexora News - A Notícia Que Move o Mundo"
+              onError={e => handleBannerImageError(e, 'Nexora News', 'A Notícia Que Move o Mundo')}
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover group-hover/ad:scale-[1.015] transition-transform duration-700"
             />

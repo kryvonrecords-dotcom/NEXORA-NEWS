@@ -46,7 +46,7 @@ export function AdMobInterstitial({ isOpen, onClose }: Props) {
             <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
               ANÚNCIO INTERSTICIAL
             </span>
-            <span className="text-[11px]">{config.isTestMode ? 'Google AdMob (Teste)' : 'Patrocinado'}</span>
+            <span className="text-[11px]">Patrocinado</span>
           </div>
 
           <div>
@@ -100,9 +100,8 @@ export function AdMobInterstitial({ isOpen, onClose }: Props) {
         <div className="px-4 py-2 bg-slate-50 dark:bg-slate-950/70 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <ShieldCheck className="w-3 h-3 text-emerald-500" />
-            <span>Em conformidade com as políticas do Google Play & AdMob</span>
+            <span>Em conformidade com as políticas do Google AdMob</span>
           </div>
-          <span>ID: {config.interstitialAdUnitId.slice(0, 15)}...</span>
         </div>
       </div>
     </div>

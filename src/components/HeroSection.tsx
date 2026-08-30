@@ -2,6 +2,7 @@ import React from 'react';
 import { Flame, Clock, Eye, ChevronRight, TrendingUp } from 'lucide-react';
 import { NewsItem } from '../types';
 import { formatTimeAgo } from '../lib/utils';
+import { getNewsImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Props {
   leadNews?: NewsItem;
@@ -23,8 +24,9 @@ export function HeroSection({ leadNews, secondaryNews, trendingNews, onNavigate 
         >
           {/* Background Image with Dark Vignette */}
           <img
-            src={leadNews.featuredImage}
+            src={getNewsImageUrl(leadNews.featuredImage, leadNews.categoryName, leadNews.title)}
             alt={leadNews.title}
+            onError={e => handleImageError(e, leadNews.categoryName, leadNews.title)}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
             referrerPolicy="no-referrer"
           />
@@ -85,8 +87,9 @@ export function HeroSection({ leadNews, secondaryNews, trendingNews, onNavigate 
               >
                 <div className="relative w-full aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
-                    src={secondaryNews[0].featuredImage}
+                    src={getNewsImageUrl(secondaryNews[0].featuredImage, secondaryNews[0].categoryName, secondaryNews[0].title)}
                     alt={secondaryNews[0].title}
+                    onError={e => handleImageError(e, secondaryNews[0].categoryName, secondaryNews[0].title)}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"
                   />
@@ -119,8 +122,9 @@ export function HeroSection({ leadNews, secondaryNews, trendingNews, onNavigate 
               >
                 <div className="relative w-full aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
-                    src={secondaryNews[1].featuredImage}
+                    src={getNewsImageUrl(secondaryNews[1].featuredImage, secondaryNews[1].categoryName, secondaryNews[1].title)}
                     alt={secondaryNews[1].title}
+                    onError={e => handleImageError(e, secondaryNews[1].categoryName, secondaryNews[1].title)}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"
                   />

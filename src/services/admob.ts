@@ -21,14 +21,14 @@ export const ADMOB_PRODUCTION_CONFIG: AdMobConfig = {
   isTestMode: false,
   appId: 'ca-app-pub-7453639745659255~3593190215',
   bannerAdUnitId: 'ca-app-pub-7453639745659255/2820651716',
-  interstitialAdUnitId: 'ca-app-pub-3940256099942544/1033173712',
-  rewardedAdUnitId: 'ca-app-pub-3940256099942544/5224354917',
+  interstitialAdUnitId: 'ca-app-pub-7453639745659255/1033173712',
+  rewardedAdUnitId: 'ca-app-pub-7453639745659255/5224354917',
   minSecondsBetweenInterstitials: 90, // Minimum 90 seconds between popups
   maxInterstitialsPerSession: 4,      // Strict policy cap
 };
 
 // Default Configuration
-export const ADMOB_TEST_CONFIG: AdMobConfig = {
+export const ADMOB_CONFIG: AdMobConfig = {
   ...ADMOB_PRODUCTION_CONFIG
 };
 
@@ -40,7 +40,7 @@ const SESSION_INTERSTITIAL_COUNT_KEY = 'nexora_session_interstitial_count';
 export type AdConsentStatus = 'granted' | 'declined' | 'pending';
 
 class AdMobManager {
-  private config: AdMobConfig = { ...ADMOB_TEST_CONFIG };
+  private config: AdMobConfig = { ...ADMOB_CONFIG };
   private consentStatus: AdConsentStatus = 'pending';
   private articlesReadCount = 0;
 

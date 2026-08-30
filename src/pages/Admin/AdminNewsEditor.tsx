@@ -30,6 +30,7 @@ import {
 import { Category, NewsItem } from '../../types';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { getNewsImageUrl, getCategoryFallbackUrl, handleImageError } from '../../utils/imageUtils';
 
 interface Props {
   editId?: string;
@@ -231,12 +232,15 @@ export function AdminNewsEditor({ editId, onNavigate }: Props) {
     setError(null);
     setSuccess(null);
 
+    const selectedCat = categories.find(c => c.id === categoryId);
+    const resolvedFeaturedImage = featuredImage.trim() || getCategoryFallbackUrl(selectedCat?.name || 'Geral', title.trim());
+
     const payload = {
       title: title.trim(),
       excerpt: excerpt.trim() || title.trim(),
       content,
       categoryId,
-      featuredImage: featuredImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80',
+      featuredImage: resolvedFeaturedImage,
       featuredImageCaption: featuredImageCaption.trim(),
       galleryImages,
       authorName: authorName.trim() || 'Redação Nexora',
@@ -415,8 +419,9 @@ export function AdminNewsEditor({ editId, onNavigate }: Props) {
                 <div className="space-y-4">
                   <div className="relative rounded-xl overflow-hidden aspect-video max-h-64 mx-auto bg-slate-900 shadow">
                     <img
-                      src={featuredImage}
+                      src={getNewsImageUrl(featuredImage, categories.find(c => c.id === categoryId)?.name, title)}
                       alt="Pré-visualização"
+                      onError={e => handleImageError(e, categories.find(c => c.id === categoryId)?.name, title)}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />

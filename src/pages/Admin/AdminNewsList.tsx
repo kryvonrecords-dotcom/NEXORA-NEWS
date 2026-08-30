@@ -17,6 +17,7 @@ import {
 import { Category, NewsItem } from '../../types';
 import { api } from '../../services/api';
 import { formatDate, formatTimeAgo } from '../../lib/utils';
+import { getNewsImageUrl, handleImageError } from '../../utils/imageUtils';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -199,8 +200,9 @@ export function AdminNewsList({ onNavigate }: Props) {
                     <td className="py-3 px-4 min-w-[240px]">
                       <div className="flex items-center gap-3">
                         <img
-                          src={item.featuredImage}
+                          src={getNewsImageUrl(item.featuredImage, item.categoryName, item.title)}
                           alt={item.title}
+                          onError={e => handleImageError(e, item.categoryName, item.title)}
                           className="w-12 h-12 object-cover rounded-lg shrink-0 bg-slate-100"
                           referrerPolicy="no-referrer"
                         />

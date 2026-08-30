@@ -21,15 +21,14 @@ export function AdMobBanner({ position = 'bottom', className = '' }: Props) {
       <div className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800/90 p-4 shadow-xs">
         {/* Ad Tag Header */}
         <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mb-2 border-b border-slate-200/60 dark:border-slate-700/60 pb-1.5">
-          <div className="flex items-center gap-1 font-semibold uppercase tracking-wider">
+          <div className="flex items-center gap-1.5 font-semibold uppercase tracking-wider">
             <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold">
               Anúncio
             </span>
-            <span className="hidden sm:inline">Google Mobile Ads {config.isTestMode && '(Modo Teste)'}</span>
+            <span className="hidden sm:inline">Google Mobile Ads</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[9px] text-slate-400">Ad ID: {config.bannerAdUnitId.slice(0, 15)}...</span>
             <button
               onClick={() => setClosed(true)}
               className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"

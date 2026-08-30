@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import { AppNotification } from '../types';
+import { handleImageError } from '../utils/imageUtils';
 
 interface Props {
   isOpen: boolean;
@@ -294,6 +295,7 @@ export function NotificationCenterModal({ isOpen, onClose, onNavigate }: Props) 
                         <img 
                           src={notif.imageUrl} 
                           alt="Thumbnail" 
+                          onError={e => handleImageError(e, 'Notícias', notif.title)}
                           className="w-12 h-12 rounded-xl object-cover ring-1 ring-slate-200"
                           referrerPolicy="no-referrer"
                         />

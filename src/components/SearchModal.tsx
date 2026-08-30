@@ -3,6 +3,7 @@ import { Search, X, Calendar, ArrowRight, Loader2 } from 'lucide-react';
 import { NewsItem } from '../types';
 import { api } from '../services/api';
 import { formatDate } from '../lib/utils';
+import { getNewsImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Props {
   isOpen: boolean;
@@ -146,8 +147,9 @@ export function SearchModal({ isOpen, onClose, onNavigate }: Props) {
                   className="group flex gap-4 p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
                 >
                   <img
-                    src={item.featuredImage}
+                    src={getNewsImageUrl(item.featuredImage, item.categoryName, item.title)}
                     alt={item.title}
+                    onError={e => handleImageError(e, item.categoryName, item.title)}
                     className="w-20 h-16 sm:w-24 sm:h-20 object-cover rounded-lg shrink-0 group-hover:opacity-90 transition-opacity"
                     referrerPolicy="no-referrer"
                   />

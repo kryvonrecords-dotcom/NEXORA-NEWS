@@ -14,6 +14,18 @@ import {
 import { offlineCache } from './offlineCache';
 
 const TOKEN_KEY = 'nexora_admin_token';
+const API_BASE_URL = 'https://nexora-news.onrender.com/api';
+
+function apiUrl(path: string): string {
+  const normalized = path.startsWith('/api/') ? path.slice(4) : path;
+  return `${API_BASE_URL}${normalized.startsWith('/') ? normalized : `/${normalized}`}`;
+}
+
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const url = typeof input === 'string' ? input : input.toString();
+  const target = url.startsWith('/api/') ? apiUrl(url) : url;
+  return fetch(target, init);
+}
 
 export function getAuthToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -41,7 +53,8 @@ async function fetchWithAuth<T>(url: string, options: RequestInit = {}): Promise
     headers['Content-Type'] = 'application/json';
   }
 
-  const response = await fetch(url, {
+  const targetUrl = url.startsWith('/api/') ? apiUrl(url) : url;
+  const response = await fetch(targetUrl, {
     ...options,
     headers,
   });
@@ -91,7 +104,7 @@ export const api = {
     if (params?.search) searchParams.set('search', params.search);
 
     try {
-      const res = await fetch(`/api/news?${searchParams.toString()}`);
+      const res = await apiFetch(`/api/news?${searchParams.toString()}`);
       if (res.ok) {
         const data = await res.json();
         if (data && Array.isArray(data.news) && data.news.length > 0 && !params?.category && !params?.search) {
@@ -123,7 +136,7 @@ export const api = {
 
   async getNewsBySlug(slug: string): Promise<{ news: NewsItem; related: NewsItem[]; prevNews: any; nextNews: any }> {
     try {
-      const res = await fetch(`/api/news/slug/${encodeURIComponent(slug)}`);
+      const res = await apiFetch(`/api/news/slug/${encodeURIComponent(slug)}`);
       if (res.ok) {
         return await res.json();
       }
@@ -157,7 +170,7 @@ export const api = {
 
   async getBreakingNews(): Promise<{ enabled: boolean; customText?: string; customUrl?: string; breakingItems: NewsItem[] }> {
     try {
-      const res = await fetch('/api/news/breaking');
+      const res = await apiFetch('/api/news/breaking');
       if (res.ok) {
         return await res.json();
       }
@@ -174,7 +187,7 @@ export const api = {
 
   async getCategories(): Promise<Category[]> {
     try {
-      const res = await fetch('/api/categories');
+      const res = await apiFetch('/api/categories');
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
@@ -203,7 +216,7 @@ export const api = {
 
   async getSettings(): Promise<SiteSettings> {
     try {
-      const res = await fetch('/api/settings');
+      const res = await apiFetch('/api/settings');
       if (res.ok) {
         const data = await res.json();
         if (data) {
@@ -234,7 +247,7 @@ export const api = {
 
   async recordAdClick(adId: string): Promise<void> {
     try {
-      await fetch(`/api/ads/${adId}/click`, { method: 'POST' });
+      await apiFetch(`/api/ads/${adId}/click`, { method: 'POST' });
     } catch {
       // ignore
     }
@@ -242,14 +255,14 @@ export const api = {
 
   async recordAdImpression(adId: string): Promise<void> {
     try {
-      await fetch(`/api/ads/${adId}/impression`, { method: 'POST' });
+      await apiFetch(`/api/ads/${adId}/impression`, { method: 'POST' });
     } catch {
       // ignore
     }
   },
 
   async subscribeNewsletter(email: string): Promise<{ success: boolean; message: string }> {
-    const res = await fetch('/api/newsletter/subscribe', {
+    const res = await apiFetch('/api/newsletter/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -286,7 +299,7 @@ export const api = {
   // Push Notifications Client Integration
   async getVapidPublicKey(): Promise<{ publicKey: string }> {
     try {
-      const res = await fetch('/api/notifications/vapid-key');
+      const res = await apiFetch('/api/notifications/vapid-key');
       if (res.ok) return await res.json();
     } catch {
       // fallback key
@@ -460,7 +473,7 @@ export const api = {
     budget?: string;
     message?: string;
   }): Promise<{ success: boolean; message: string; proposal: CommercialProposal }> {
-    const res = await fetch('/api/ads/proposals', {
+    const res = await apiFetch('/api/ads/proposals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -506,7 +519,7 @@ export const api = {
     subject?: string;
     message: string;
   }): Promise<{ success: boolean; message: string; item: EditorialContactMessage }> {
-    const res = await fetch('/api/contact/messages', {
+    const res = await apiFetch('/api/contact/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -551,7 +564,7 @@ export const api = {
   async getLatestNotifications(sinceOrLimit?: string | number): Promise<AppNotification[]> {
     try {
       if (typeof sinceOrLimit === 'string' && sinceOrLimit.trim()) {
-        const res = await fetch(`/api/notifications/latest?after=${encodeURIComponent(sinceOrLimit.trim())}`);
+        const res = await apiFetch(`/api/notifications/latest?after=${encodeURIComponent(sinceOrLimit.trim())}`);
         if (res.ok) return await res.json();
         return [];
       }

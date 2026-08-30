@@ -79,22 +79,6 @@
                     android:padding="7dp"
                     android:src="@drawable/ic_refresh"
                     app:tint="@color/white" />
-                <TextView
-                    android:id="@+id/btnLanguage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginStart="4dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:text="🇵🇹 PT ▾"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
             </LinearLayout>
         </com.google.android.material.appbar.MaterialToolbar>
 
@@ -139,7 +123,6 @@
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
@@ -168,25 +151,12 @@
             app:adUnitId="@string/admob_banner_ad_unit_id" />
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabWhatsApp"
-        android:layout_width="58dp"
-        android:layout_height="58dp"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="18dp"
-        android:layout_marginBottom="78dp"
-        android:contentDescription="Falar com a Nexora News no WhatsApp"
-        android:src="@drawable/ic_whatsapp"
-        android:visibility="visible"
-        app:backgroundTint="#25D366"
-        app:tint="@color/white" />
-
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_gravity="bottom"
-        android:background="@color/surface_light"
+        android:background="@color/primary_dark"
         app:elevation="8dp"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_selector"

@@ -29,9 +29,7 @@ import { formatDate, formatDateTime, shareArticle } from '../lib/utils';
 import { NewsCard } from '../components/NewsCard';
 import { useAuth } from '../context/AuthContext';
 import { useSavedArticles } from '../context/SavedArticlesContext';
-import { AdMobBanner } from '../components/AdMobBanner';
-import { AdMobInterstitial } from '../components/AdMobInterstitial';
-import { admobService } from '../services/admob';
+import { getNewsImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Props {
   slug: string;
@@ -53,7 +51,6 @@ export function ArticlePage({ slug, onNavigate }: Props) {
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showInterstitial, setShowInterstitial] = useState(false);
 
   const isSaved = data?.news ? (checkIsSaved(data.news.id) || checkIsSaved(data.news.slug)) : false;
 
@@ -79,14 +76,6 @@ export function ArticlePage({ slug, onNavigate }: Props) {
       .then(res => {
         setData(res);
         document.title = `${res.news.title} | Nexora News`;
-
-        // Check AdMob interstitial policy
-        if (admobService.shouldShowInterstitialOnArticleRead()) {
-          const timer = setTimeout(() => {
-            setShowInterstitial(true);
-          }, 800);
-          return () => clearTimeout(timer);
-        }
       })
       .catch(err => {
         setError(err.message || 'Notícia não encontrada');
@@ -160,12 +149,6 @@ export function ArticlePage({ slug, onNavigate }: Props) {
 
   return (
     <div className="bg-[#F5F7FA] dark:bg-slate-950 min-h-screen py-6 sm:py-10">
-      {/* AdMob Interstitial Controller */}
-      <AdMobInterstitial
-        isOpen={showInterstitial}
-        onClose={() => setShowInterstitial(false)}
-      />
-
       {/* Schema.org Structured Data for SEO */}
       <script
         type="application/ld+json"
@@ -271,23 +254,22 @@ export function ArticlePage({ slug, onNavigate }: Props) {
         {/* Article Container */}
         <article className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-10">
           {/* 1. Imagem Principal Ampla no Topo da Notícia */}
-          {news.featuredImage && (
-            <div className="relative w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-              <img
-                src={news.featuredImage}
-                alt={news.title}
-                loading="eager"
-                decoding="async"
-                className="w-full aspect-[16/9] sm:aspect-[21/9] object-cover max-h-[580px] w-full"
-                referrerPolicy="no-referrer"
-              />
-              {news.featuredImageCaption && (
-                <p className="px-6 py-2.5 text-xs text-slate-500 dark:text-slate-400 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-100 dark:border-slate-800 italic">
-                  Foto: {news.featuredImageCaption}
-                </p>
-              )}
-            </div>
-          )}
+          <div className="relative w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <img
+              src={getNewsImageUrl(news.featuredImage, news.categoryName, news.title)}
+              alt={news.title}
+              loading="eager"
+              decoding="async"
+              onError={e => handleImageError(e, news.categoryName, news.title)}
+              className="w-full aspect-[16/9] sm:aspect-[21/9] object-cover max-h-[580px] w-full"
+              referrerPolicy="no-referrer"
+            />
+            {news.featuredImageCaption && (
+              <p className="px-6 py-2.5 text-xs text-slate-500 dark:text-slate-400 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-100 dark:border-slate-800 italic">
+                Foto: {news.featuredImageCaption}
+              </p>
+            )}
+          </div>
 
           {/* 2. Todas as Instalações e Informações da Notícia Abaixo da Imagem */}
           <div className="p-6 sm:p-10">
@@ -391,9 +373,6 @@ export function ArticlePage({ slug, onNavigate }: Props) {
             </div>
             <span>Jornalismo Verificado &amp; Independente</span>
           </div>
-
-          {/* Google AdMob Banner Inside Article */}
-          <AdMobBanner position="bottom" className="mt-8" />
         </article>
 
         {/* Previous & Next Navigation */}

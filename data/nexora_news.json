@@ -4,10 +4,10 @@
       "id": "admin-1",
       "name": "Redator Chefe / Admin",
       "email": "admin@nexoranews.ao",
-      "passwordHash": "$2b$10$d4q2R4sukjdM0AMOpEZIn.qNL.ETos9DzcaoX4.5M92erGn.Cxwqm",
+      "passwordHash": "$2b$10$3Zv3PEgYGhUTfcC1QbNEPuxEZ.XBO6koaKXLzL/iLUBnATKxAfRDa",
       "role": "admin",
-      "createdAt": "2026-08-23T08:03:14.643Z",
-      "updatedAt": "2026-08-23T08:03:14.643Z"
+      "createdAt": "2026-08-30T06:32:23.465Z",
+      "updatedAt": "2026-08-30T06:32:23.465Z"
     }
   ],
   "categories": [
@@ -18,7 +18,7 @@
       "description": "Notícias nacionais de Angola, atualidade e sociedade.",
       "color": "#146EF5",
       "order": 1,
-      "createdAt": "2026-08-23T08:03:14.378Z"
+      "createdAt": "2026-08-30T06:32:23.208Z"
     },
     {
       "id": "cat-africa",
@@ -27,7 +27,7 @@
       "description": "Acontecimentos no continente africano e cooperação regional.",
       "color": "#0B132B",
       "order": 2,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.209Z"
     },
     {
       "id": "cat-mundo",
@@ -36,7 +36,7 @@
       "description": "Geopolítica e notícias internacionais de relevo.",
       "color": "#2563EB",
       "order": 3,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.209Z"
     },
     {
       "id": "cat-politica",
@@ -45,7 +45,7 @@
       "description": "Decisões governamentais, assembleia e diplomacia.",
       "color": "#4F46E5",
       "order": 4,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.209Z"
     },
     {
       "id": "cat-economia",
@@ -54,7 +54,7 @@
       "description": "Mercados, finanças, investimentos, petróleo e banca.",
       "color": "#0D9488",
       "order": 5,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.209Z"
     },
     {
       "id": "cat-tecnologia",
@@ -63,7 +63,7 @@
       "description": "Inovação digital, telecomunicações, startups e ciência.",
       "color": "#7C3AED",
       "order": 6,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.209Z"
     },
     {
       "id": "cat-desporto",
@@ -72,7 +72,7 @@
       "description": "Girabola, futebol internacional, basquetebol e atletas.",
       "color": "#EA580C",
       "order": 7,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.209Z"
     },
     {
       "id": "cat-entretenimento",
@@ -81,7 +81,7 @@
       "description": "Música, cinema, moda, celebridades e espetáculos.",
       "color": "#DB2777",
       "order": 8,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.210Z"
     },
     {
       "id": "cat-cultura",
@@ -90,7 +90,7 @@
       "description": "Artes, literatura, património histórico e tradições.",
       "color": "#9333EA",
       "order": 9,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.210Z"
     },
     {
       "id": "cat-saude",
@@ -99,7 +99,7 @@
       "description": "Medicina, bem-estar, hospitais e saúde pública.",
       "color": "#059669",
       "order": 10,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.210Z"
     },
     {
       "id": "cat-educacao",
@@ -108,7 +108,7 @@
       "description": "Universidades, bolsas de estudo, formação e ensino.",
       "color": "#0284C7",
       "order": 11,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.210Z"
     },
     {
       "id": "cat-sociedade",
@@ -117,7 +117,7 @@
       "description": "Comunidade, iniciativas sociais e cidadania.",
       "color": "#D97706",
       "order": 12,
-      "createdAt": "2026-08-23T08:03:14.379Z"
+      "createdAt": "2026-08-30T06:32:23.210Z"
     }
   ],
   "news": [
@@ -150,9 +150,9 @@
       "isBreaking": false,
       "isHero": true,
       "isSecondaryHero": false,
-      "publishedAt": "2026-08-23T06:03:14.380Z",
-      "createdAt": "2026-08-23T05:03:14.380Z",
-      "updatedAt": "2026-08-23T06:03:14.380Z",
+      "publishedAt": "2026-08-30T04:32:23.210Z",
+      "createdAt": "2026-08-30T03:32:23.211Z",
+      "updatedAt": "2026-08-30T04:32:23.211Z",
       "views": 3420,
       "readTimeMinutes": 4,
       "isDemo": true
@@ -182,9 +182,9 @@
       "isBreaking": true,
       "isHero": false,
       "isSecondaryHero": true,
-      "publishedAt": "2026-08-23T04:03:14.380Z",
-      "createdAt": "2026-08-23T03:03:14.381Z",
-      "updatedAt": "2026-08-23T04:03:14.381Z",
+      "publishedAt": "2026-08-30T02:32:23.211Z",
+      "createdAt": "2026-08-30T01:32:23.211Z",
+      "updatedAt": "2026-08-30T02:32:23.211Z",
       "views": 4890,
       "readTimeMinutes": 3,
       "isDemo": true
@@ -213,9 +213,9 @@
       "isBreaking": false,
       "isHero": false,
       "isSecondaryHero": true,
-      "publishedAt": "2026-08-23T00:03:14.381Z",
-      "createdAt": "2026-08-22T23:03:14.381Z",
-      "updatedAt": "2026-08-23T00:03:14.381Z",
+      "publishedAt": "2026-08-29T22:32:23.211Z",
+      "createdAt": "2026-08-29T21:32:23.211Z",
+      "updatedAt": "2026-08-29T22:32:23.211Z",
       "views": 2150,
       "readTimeMinutes": 3,
       "isDemo": true
@@ -243,9 +243,9 @@
       "isBreaking": false,
       "isHero": false,
       "isSecondaryHero": false,
-      "publishedAt": "2026-08-22T20:03:14.381Z",
-      "createdAt": "2026-08-22T19:03:14.381Z",
-      "updatedAt": "2026-08-22T20:03:14.381Z",
+      "publishedAt": "2026-08-29T18:32:23.211Z",
+      "createdAt": "2026-08-29T17:32:23.211Z",
+      "updatedAt": "2026-08-29T18:32:23.211Z",
       "views": 3100,
       "readTimeMinutes": 4,
       "isDemo": true
@@ -274,9 +274,9 @@
       "isBreaking": false,
       "isHero": false,
       "isSecondaryHero": false,
-      "publishedAt": "2026-08-22T16:03:14.381Z",
-      "createdAt": "2026-08-22T14:03:14.381Z",
-      "updatedAt": "2026-08-22T16:03:14.381Z",
+      "publishedAt": "2026-08-29T14:32:23.212Z",
+      "createdAt": "2026-08-29T12:32:23.212Z",
+      "updatedAt": "2026-08-29T14:32:23.212Z",
       "views": 5240,
       "readTimeMinutes": 3,
       "isDemo": true
@@ -305,9 +305,9 @@
       "isBreaking": false,
       "isHero": false,
       "isSecondaryHero": false,
-      "publishedAt": "2026-08-22T12:03:14.381Z",
-      "createdAt": "2026-08-22T10:03:14.381Z",
-      "updatedAt": "2026-08-22T12:03:14.381Z",
+      "publishedAt": "2026-08-29T10:32:23.212Z",
+      "createdAt": "2026-08-29T08:32:23.212Z",
+      "updatedAt": "2026-08-29T10:32:23.212Z",
       "views": 1820,
       "readTimeMinutes": 3,
       "isDemo": true
@@ -335,9 +335,9 @@
       "isBreaking": false,
       "isHero": false,
       "isSecondaryHero": false,
-      "publishedAt": "2026-08-22T06:03:14.381Z",
-      "createdAt": "2026-08-22T04:03:14.381Z",
-      "updatedAt": "2026-08-22T06:03:14.381Z",
+      "publishedAt": "2026-08-29T04:32:23.212Z",
+      "createdAt": "2026-08-29T02:32:23.212Z",
+      "updatedAt": "2026-08-29T04:32:23.212Z",
       "views": 2980,
       "readTimeMinutes": 3,
       "isDemo": true
@@ -365,9 +365,9 @@
       "isBreaking": false,
       "isHero": false,
       "isSecondaryHero": false,
-      "publishedAt": "2026-08-22T02:03:14.382Z",
-      "createdAt": "2026-08-22T00:03:14.382Z",
-      "updatedAt": "2026-08-22T02:03:14.382Z",
+      "publishedAt": "2026-08-29T00:32:23.212Z",
+      "createdAt": "2026-08-28T22:32:23.212Z",
+      "updatedAt": "2026-08-29T00:32:23.212Z",
       "views": 4120,
       "readTimeMinutes": 4,
       "isDemo": true
@@ -377,7 +377,7 @@
     {
       "id": "sub-1",
       "email": "leitor.exemplo@nexoranews.ao",
-      "createdAt": "2026-08-23T08:03:14.643Z",
+      "createdAt": "2026-08-30T06:32:23.465Z",
       "status": "active"
     }
   ],
@@ -420,7 +420,7 @@
       "tagline": "A Verdade Importa. A Gente Traz Até Você!",
       "badgeText": "BAIXE O APLICATIVO",
       "mediaType": "custom_banner",
-      "mediaUrl": "/src/assets/images/nexora_promo_banner_1786868992912.jpg",
+      "mediaUrl": "/promo-banner.jpg",
       "linkUrl": "https://play.google.com/store",
       "targetNewTab": true,
       "callToAction": "Acesse Agora",
@@ -429,26 +429,7 @@
       "order": 1,
       "viewsCount": 1420,
       "clicksCount": 238,
-      "createdAt": "2026-08-23T08:03:14.380Z"
-    },
-    {
-      "id": "ad-video-spot",
-      "title": "Nexora News Digital: Tecnologia & Jornalismo em Tempo Real",
-      "subtitle": "Assista ao spot promocional oficial e descubra como o Nexora News lidera a cobertura jornalística em Angola e África.",
-      "tagline": "Informação Sem Fronteiras",
-      "badgeText": "VÍDEO SPOT PROMOCIONAL",
-      "mediaType": "video",
-      "mediaUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      "videoThumbnail": "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80",
-      "linkUrl": "/sobre",
-      "targetNewTab": false,
-      "callToAction": "Assistir Vídeo",
-      "position": "top_hero",
-      "status": "active",
-      "order": 2,
-      "viewsCount": 890,
-      "clicksCount": 115,
-      "createdAt": "2026-08-23T08:03:14.380Z"
+      "createdAt": "2026-08-30T06:32:23.210Z"
     }
   ],
   "adProposals": [
@@ -463,7 +444,7 @@
       "message": "Gostaríamos de agendar a veiculação de um Hero Banner de topo durante 30 dias para o lançamento da nova campanha de internet 5G e fibra residencial.",
       "status": "pending",
       "notes": "Prioridade alta. Anunciante premium nacional.",
-      "createdAt": "2026-08-23T05:03:14.382Z"
+      "createdAt": "2026-08-30T03:32:23.212Z"
     },
     {
       "id": "prop-sample-2",
@@ -476,7 +457,7 @@
       "message": "Solicitamos o Mídia Kit completo e proposta para um pacote trimestral com foco em publirreportagens sobre finanças corporativas e crédito imobiliário.",
       "status": "contacted",
       "notes": "Mídia Kit enviado por email em 21/08. Aguardando retorno com artes finais.",
-      "createdAt": "2026-08-22T06:03:14.382Z"
+      "createdAt": "2026-08-29T04:32:23.212Z"
     }
   ],
   "contactMessages": [
@@ -490,7 +471,7 @@
       "message": "Prezada equipa editorial, submeto o meu artigo de opinião académica e técnica sobre os impactos das fintechs e da inteligência artificial no sistema financeiro nacional.",
       "status": "reviewed",
       "notes": "Encaminhado para a editoria de Economia.",
-      "createdAt": "2026-08-22T20:03:14.382Z"
+      "createdAt": "2026-08-29T18:32:23.212Z"
     }
   ],
   "notifications": [
@@ -503,7 +484,7 @@
       "imageUrl": "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80",
       "isBreaking": true,
       "type": "breaking_news",
-      "sentAt": "2026-08-23T07:48:14.382Z",
+      "sentAt": "2026-08-30T06:17:23.212Z",
       "deliveredCount": 420,
       "clickUrl": "/noticia/banco-central-anuncia-incentivos-credito-startups"
     },
@@ -516,7 +497,7 @@
       "imageUrl": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80",
       "isBreaking": false,
       "type": "new_article",
-      "sentAt": "2026-08-23T06:03:14.382Z",
+      "sentAt": "2026-08-30T04:32:23.212Z",
       "deliveredCount": 395,
       "clickUrl": "/noticia/nova-rede-fibra-otica-submarina-luanda"
     }

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -20,6 +19,42 @@ async function startServer() {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
   app.use('/uploads', express.static(uploadsDir));
+
+  // Fallback for /uploads/* if image file was deleted, lost after restart, or not found on disk
+  app.get('/uploads/*', (req, res) => {
+    const filename = path.basename(req.path || '');
+    const svgFallback = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B132B"/>
+      <stop offset="100%" stop-color="#1C2541"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#146EF5"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="1000" cy="150" r="220" fill="#146EF5" opacity="0.08"/>
+  <g transform="translate(600, 280) scale(1.6)" opacity="0.95">
+    <circle cx="0" cy="0" r="48" fill="rgba(255,255,255,0.06)" stroke="#146EF5" stroke-width="2"/>
+    <path d="M-18 -18 L18 -18 C20 -18 22 -16 22 -14 L22 18 C22 20 20 22 18 22 L-18 22 C-20 22 -22 20 -22 18 L-22 -14 C-22 -16 -20 -18 -18 -18 Z" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="-14" y1="-10" x2="4" y2="-10" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="-14" y1="-3" x2="4" y2="-3" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="-14" y1="4" x2="14" y2="4" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="-14" y1="11" x2="14" y2="11" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    <rect x="8" y="-12" width="6" height="10" fill="#146EF5" rx="1"/>
+  </g>
+  <g transform="translate(600, 520)" text-anchor="middle">
+    <text x="0" y="0" fill="#ffffff" font-family="'Georgia', serif" font-size="34" font-weight="bold">NEXORA NEWS</text>
+    <text x="0" y="40" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="500" letter-spacing="2">JORNALISMO DE EXCELÊNCIA EM TEMPO REAL</text>
+  </g>
+</svg>`;
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(svgFallback);
+  });
 
   // Dynamic SEO Sitemap
   app.get('/sitemap.xml', (req, res) => {
@@ -86,8 +121,6 @@ async function startServer() {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
-
-  await db.restoreFromSupabase();
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Nexora News Server running on http://0.0.0.0:${PORT}`);

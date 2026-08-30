@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bell, Flame, X, ArrowRight, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
+import { handleImageError } from '../utils/imageUtils';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -46,6 +47,7 @@ export function NotificationToast({ onNavigate }: Props) {
               <img 
                 src={activeToast.imageUrl} 
                 alt="Notícia" 
+                onError={e => handleImageError(e, 'Notícias', activeToast.title)}
                 className="w-13 h-13 rounded-xl object-cover ring-2 ring-white/10"
                 referrerPolicy="no-referrer"
               />

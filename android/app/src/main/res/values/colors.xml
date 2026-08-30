@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- Brand Colors -->
     <color name="primary_blue">#146EF5</color>
     <color name="primary_blue_dark">#0D50B8</color>
@@ -21,14 +20,12 @@
     <color name="bg_dark">#090D16</color>
     <color name="bg_card_dark">#121927</color>
     <color name="surface_variant">#F1F5F9</color>
-    <color name="surface_light">#FFFFFF</color>
     <color name="divider_color">#E2E8F0</color>
 
     <!-- Text Colors -->
     <color name="text_primary">#0B132B</color>
     <color name="text_secondary">#64748B</color>
     <color name="text_tertiary">#94A3B8</color>
-    <color name="text_muted">#94A3B8</color>
     <color name="text_on_dark">#FFFFFF</color>
     <color name="text_on_primary">#FFFFFF</color>
 
@@ -52,5 +49,4 @@
     <color name="cat_tecnologia">#06B6D4</color>
     <color name="cat_entretenimento">#EC4899</color>
     <color name="cat_mundo">#6366F1</color>
-
 </resources>

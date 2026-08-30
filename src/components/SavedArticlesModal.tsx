@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bookmark, X, Trash2, BookOpen, Clock, Sparkles } from 'lucide-react';
 import { useSavedArticles } from '../context/SavedArticlesContext';
+import { getNewsImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Props {
   isOpen: boolean;
@@ -94,14 +95,14 @@ export function SavedArticlesModal({ isOpen, onClose, onNavigate }: Props) {
                 onClick={() => handleOpenArticle(article.slug)}
                 className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3 cursor-pointer group hover:bg-slate-50/80 -mx-2 px-2 rounded-xl transition-all"
               >
-                {(article.featuredImage || (article as any).imageUrl) && (
-                  <img
-                    src={article.featuredImage || (article as any).imageUrl}
-                    alt={article.title}
-                    className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 border border-slate-100"
-                    loading="lazy"
-                  />
-                )}
+                <img
+                  src={getNewsImageUrl(article.featuredImage || (article as any).imageUrl, article.categoryName, article.title)}
+                  alt={article.title}
+                  onError={e => handleImageError(e, article.categoryName, article.title)}
+                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 border border-slate-100 dark:border-slate-800"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-bold text-[#146EF5] uppercase tracking-wider">

@@ -3,6 +3,7 @@ import { Calendar, Clock, Eye, Flame, Share2, Bookmark } from 'lucide-react';
 import { NewsItem } from '../types';
 import { formatDate, formatTimeAgo, shareArticle } from '../lib/utils';
 import { useSavedArticles } from '../context/SavedArticlesContext';
+import { getNewsImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Props {
   key?: React.Key;
@@ -32,16 +33,17 @@ export function NewsCard({ news, variant = 'standard', onNavigate }: Props) {
 
   if (variant === 'compact') {
     return (
-      <article
+      <article 
         onClick={handleClick}
         className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer mb-4 last:mb-0"
       >
         {/* 1. Imagem Ampla no Topo */}
         <div className="relative w-full aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
           <img
-            src={news.featuredImage}
+            src={getNewsImageUrl(news.featuredImage, news.categoryName, news.title)}
             alt={news.title}
             loading="lazy"
+            onError={e => handleImageError(e, news.categoryName, news.title)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             referrerPolicy="no-referrer"
           />
@@ -104,16 +106,17 @@ export function NewsCard({ news, variant = 'standard', onNavigate }: Props) {
 
   if (variant === 'horizontal') {
     return (
-      <article
+      <article 
         onClick={handleClick}
         className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer"
       >
         {/* 1. Imagem Ampla no Topo */}
         <div className="relative w-full aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
           <img
-            src={news.featuredImage}
+            src={getNewsImageUrl(news.featuredImage, news.categoryName, news.title)}
             alt={news.title}
             loading="lazy"
+            onError={e => handleImageError(e, news.categoryName, news.title)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             referrerPolicy="no-referrer"
           />
@@ -195,20 +198,21 @@ export function NewsCard({ news, variant = 'standard', onNavigate }: Props) {
 
   // Standard Card - Imagem Ampla no Topo, Todas as informações abaixo
   return (
-    <article
+    <article 
       onClick={handleClick}
       className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer"
     >
       {/* 1. Imagem Ampla e Panorâmica no Topo */}
       <div className="relative w-full aspect-[16/9] sm:aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
         <img
-          src={news.featuredImage}
+          src={getNewsImageUrl(news.featuredImage, news.categoryName, news.title)}
           alt={news.title}
           loading="lazy"
+          onError={e => handleImageError(e, news.categoryName, news.title)}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           referrerPolicy="no-referrer"
         />
-
+        
         {/* Categorias e Tags sobre a imagem */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5">
           <span className="px-2.5 py-1 bg-[#0B132B]/85 backdrop-blur-sm text-white text-[10px] font-black uppercase tracking-wider rounded-md">
@@ -253,7 +257,7 @@ export function NewsCard({ news, variant = 'standard', onNavigate }: Props) {
           <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#146EF5] transition-colors line-clamp-2 leading-snug">
             {news.title}
           </h3>
-
+          
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mt-2 leading-relaxed">
             {news.excerpt}
           </p>

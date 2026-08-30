@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-APP_HOME=`cd "${0%/*}" >/dev/null 2>&1 && pwd -P`
 
 APP_NAME="Gradle"
 APP_BASE_NAME=`basename "$0"`
@@ -57,7 +56,7 @@ case "`uname`" in
     ;;
 esac
 
-CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
@@ -105,7 +104,7 @@ fi
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin ; then
     APP_HOME=`cygpath --path --mixed "$APP_HOME"`
-    CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+    CLASSPATH=`cygpath --path --mixed "$CLASSPATH"`
     JAVACMD=`cygpath --system --mixed "$JAVACMD"`
 
     # We build the pattern for arguments to be converted via cygpath

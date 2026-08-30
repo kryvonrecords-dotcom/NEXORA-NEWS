@@ -23,6 +23,7 @@ import {
 import { api } from '../../services/api';
 import { AppNotification, NewsItem } from '../../types';
 import { useNotifications } from '../../context/NotificationContext';
+import { handleImageError } from '../../utils/imageUtils';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -471,6 +472,7 @@ export function AdminNotifications({ onNavigate }: Props) {
                   <img 
                     src={imageUrl} 
                     alt="Preview" 
+                    onError={e => handleImageError(e, 'Notícias', title)}
                     className="w-12 h-12 rounded-xl object-cover ring-1 ring-white/10" 
                     referrerPolicy="no-referrer"
                   />
@@ -552,6 +554,7 @@ export function AdminNotifications({ onNavigate }: Props) {
                     <img 
                       src={notif.imageUrl} 
                       alt="Thumbnail" 
+                      onError={e => handleImageError(e, 'Notícias', notif.title)}
                       className="w-10 h-10 rounded-lg object-cover ring-1 ring-slate-200 shrink-0" 
                       referrerPolicy="no-referrer"
                     />

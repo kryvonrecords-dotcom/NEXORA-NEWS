@@ -7,117 +7,8 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from './db';
 import { generateToken, requireAdmin, AuthenticatedRequest } from './auth';
 import { getVapidPublicKey, sendWebPushToAll } from './webPush';
-import { sendFcmToAll } from './fcm';
-
-
-type TranslationResult = {
-  title: string;
-  excerpt: string;
-  content: string;
-};
-
-async function translateWithDeepL(
-  text: string,
-  targetLang: 'EN' | 'ES' | 'FR'
-): Promise<string> {
-  const apiKey = process.env.DEEPL_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('DEEPL_API_KEY não configurada.');
-  }
-
-  const response = await fetch('https://api-free.deepl.com/v2/translate', {
-    method: 'POST',
-    headers: {
-      'Authorization': `DeepL-Auth-Key ${apiKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: new URLSearchParams({
-      text,
-      target_lang: targetLang,
-      preserve_formatting: '1',
-      tag_handling: 'html'
-    })
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`DeepL ${response.status}: ${errorText}`);
-  }
-
-  const data = await response.json() as {
-    translations?: Array<{ text?: string }>
-  };
-
-  return data.translations?.[0]?.text || text;
-}
-
-async function generateNewsTranslations(
-  title: string,
-  excerpt: string,
-  content: string
-): Promise<{
-  en: TranslationResult;
-  es: TranslationResult;
-  fr: TranslationResult;
-} | null> {
-  try {
-    const languages = [
-      ['en', 'EN'],
-      ['es', 'ES'],
-      ['fr', 'FR']
-    ] as const;
-
-    const result = {} as {
-      en: TranslationResult;
-      es: TranslationResult;
-      fr: TranslationResult;
-    };
-
-    for (const [code, lang] of languages) {
-      const translated = await Promise.all([
-        translateWithDeepL(title, lang),
-        translateWithDeepL(excerpt, lang),
-        translateWithDeepL(content, lang)
-      ]);
-
-      result[code] = {
-        title: translated[0],
-        excerpt: translated[1],
-        content: translated[2]
-      };
-    }
-
-    console.log('OK: notícia traduzida para EN, ES e FR.');
-    return result;
-  } catch (error) {
-    console.error('Erro ao traduzir notícia com DeepL:', error);
-    return null;
-  }
-}
 
 const router = express.Router();
-
-router.post('/fcm/token', (req: Request, res: Response): void => {
-  const { token, userAgent } = req.body;
-
-  if (!token || typeof token !== 'string' || token.length < 20) {
-    res.status(400).json({ error: 'Token FCM inválido.' });
-    return;
-  }
-
-  const saved = db.addFcmToken(
-    token.trim(),
-    typeof userAgent === 'string' ? userAgent : 'Android'
-  );
-
-  res.json({
-    message: 'Token FCM registrado com sucesso.',
-    id: saved.id
-  });
-});
-
-
 
 // Lazy Gemini AI initialization
 let aiClient: GoogleGenAI | null = null;
@@ -371,35 +262,19 @@ router.get('/weather', async (req: Request, res: Response): Promise<void> => {
 // PUBLIC NEWS & CONTENT
 // ----------------------------------------------------
 router.get('/news', (req: Request, res: Response): void => {
-  const {
-    category,
-    tag,
-    limit,
-    offset,
-    isHero,
-    isBreaking,
-    search
-  } = req.query;
-
-  // Idioma solicitado pelo aplicativo.
-  // Português é o idioma padrão.
-  const lang = String(req.query.lang || 'pt').toLowerCase();
-
+  const { category, tag, limit, offset, isHero, isBreaking, search } = req.query;
   let list = db.getPublishedNews();
 
   if (category) {
-    list = list.filter(item =>
-      item.categoryId === category ||
+    list = list.filter(item => 
+      item.categoryId === category || 
       item.categorySlug?.toLowerCase() === String(category).toLowerCase()
     );
   }
 
   if (tag) {
-    list = list.filter(item =>
-      item.tags &&
-      item.tags.some(t =>
-        t.toLowerCase() === String(tag).toLowerCase()
-      )
+    list = list.filter(item => 
+      item.tags && item.tags.some(t => t.toLowerCase() === String(tag).toLowerCase())
     );
   }
 
@@ -413,68 +288,27 @@ router.get('/news', (req: Request, res: Response): void => {
 
   if (search) {
     const q = String(search).toLowerCase().trim();
-
-    list = list.filter(item => {
-      const originalMatches =
-        item.title.toLowerCase().includes(q) ||
-        item.excerpt.toLowerCase().includes(q) ||
-        item.content.toLowerCase().includes(q);
-
-      const translation =
-        lang === 'en' || lang === 'es' || lang === 'fr'
-          ? item.translations?.[lang]
-          : undefined;
-
-      const translatedMatches = translation
-        ? translation.title.toLowerCase().includes(q) ||
-          translation.excerpt.toLowerCase().includes(q) ||
-          translation.content.toLowerCase().includes(q)
-        : false;
-
-      const tagMatches =
-        item.tags &&
-        item.tags.some(t => t.toLowerCase().includes(q));
-
-      return originalMatches || translatedMatches || tagMatches;
-    });
+    list = list.filter(item => 
+      item.title.toLowerCase().includes(q) ||
+      item.excerpt.toLowerCase().includes(q) ||
+      item.content.toLowerCase().includes(q) ||
+      (item.tags && item.tags.some(t => t.toLowerCase().includes(q)))
+    );
   }
 
   const total = list.length;
   const numLimit = limit ? parseInt(String(limit), 10) : 20;
   const numOffset = offset ? parseInt(String(offset), 10) : 0;
-
-  const paginated = list
-    .slice(numOffset, numOffset + numLimit)
-    .map(item => {
-      if (lang === 'pt') {
-        return item;
-      }
-
-      const translation =
-        lang === 'en' || lang === 'es' || lang === 'fr'
-          ? item.translations?.[lang]
-          : undefined;
-
-      if (!translation) {
-        return item;
-      }
-
-      return {
-        ...item,
-        title: translation.title,
-        excerpt: translation.excerpt,
-        content: translation.content
-      };
-    });
+  const paginated = list.slice(numOffset, numOffset + numLimit);
 
   res.json({
     news: paginated,
     total,
     limit: numLimit,
-    offset: numOffset,
-    language: lang
+    offset: numOffset
   });
 });
+
 router.get('/news/breaking', (req: Request, res: Response): void => {
   const settings = db.getSettings();
   const breakingNews = db.getPublishedNews().filter(n => n.isBreaking);
@@ -773,7 +607,7 @@ router.get('/admin/news/:id', requireAdmin, (req: AuthenticatedRequest, res: Res
   res.json(item);
 });
 
-router.post('/admin/news', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+router.post('/admin/news', requireAdmin, (req: AuthenticatedRequest, res: Response): void => {
   const {
     title,
     excerpt,
@@ -812,22 +646,11 @@ router.post('/admin/news', requireAdmin, async (req: AuthenticatedRequest, res: 
     parsedTags = tags.split(',').map(t => t.trim()).filter(Boolean);
   }
 
-  let translations;
-
-  if ((status || 'published') === 'published' && process.env.DEEPL_API_KEY) {
-    translations = await generateNewsTranslations(
-      title,
-      excerpt || title,
-      content
-    );
-  }
-
   const created = db.createNews({
     title,
     slug,
     excerpt: excerpt || title,
     content,
-    ...(translations ? { translations } : {}),
     featuredImage: featuredImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80',
     featuredImageCaption,
     galleryImages: Array.isArray(galleryImages) ? galleryImages : [],
@@ -860,7 +683,6 @@ router.post('/admin/news', requireAdmin, async (req: AuthenticatedRequest, res: 
     });
     // Send real background Web Push to all devices
     sendWebPushToAll(notif).catch(e => console.error('WebPush dispatch error:', e));
-    sendFcmToAll(notif).catch(e => console.error('FCM dispatch error:', e));
   }
 
   res.status(201).json({
@@ -947,7 +769,6 @@ router.put('/admin/news/:id', requireAdmin, (req: AuthenticatedRequest, res: Res
       clickUrl: `/noticia/${updated.slug}`
     });
     sendWebPushToAll(notif).catch(e => console.error('WebPush dispatch error:', e));
-    sendFcmToAll(notif).catch(e => console.error('FCM dispatch error:', e));
   }
 
   res.json({

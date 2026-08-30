@@ -22,10 +22,10 @@ data class NewsItem(
     @SerializedName("category")
     val category: String,
 
-    @SerializedName("image_url")
+    @SerializedName("imageUrl")
     val imageUrl: String? = null,
 
-    @SerializedName("image_caption")
+    @SerializedName("imageCaption")
     val imageCaption: String? = null,
 
     @SerializedName("gallery")
@@ -37,19 +37,19 @@ data class NewsItem(
     @SerializedName("source")
     val source: String? = "Nexora News",
 
-    @SerializedName("published_at")
+    @SerializedName("publishedAt")
     val publishedAt: String,
 
-    @SerializedName("updated_at")
+    @SerializedName("updatedAt")
     val updatedAt: String? = null,
 
-    @SerializedName("read_time")
+    @SerializedName("readTime")
     val readTime: Int = 3,
 
-    @SerializedName("is_breaking")
+    @SerializedName("isBreaking")
     val isBreaking: Boolean = false,
 
-    @SerializedName("is_featured")
+    @SerializedName("isFeatured")
     val isFeatured: Boolean = false,
 
     @SerializedName("views")
