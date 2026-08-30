@@ -55,3 +55,17 @@ android/app/src/main/res/fragment_home.xml.backup2
 data/vapid_keys.json
 "database\"
 database"
+
+# Temporários criados durante recuperação do Supabase
+db-antigo.ts
+server-antigo.ts
+testar-secret.ts
+server.ts.before-supabase-restore
+server/db.ts.before-supabase-restore
+data/nexora_news.backup.json
+data/nexora_news.backup.safe.json
+data/nexora_news.before-restore.json
+android/app/build.gradle.admob-backup
+android/app/src/main/AndroidManifest.xml.admob-backup
+android/app/src/main/java/com/nexoranews/app/MainActivity.kt.admob-backup
+android/app/src/main/java/com/nexoranews/app/ui/detail/ArticleDetailActivity.kt.admob-backup

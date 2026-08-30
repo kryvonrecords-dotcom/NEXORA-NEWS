@@ -58,6 +58,4 @@
     <string name="news_channel_name">Notícias Urgentes e Alertas</string>
     <string name="news_channel_description">Notificações em tempo real sobre os principais acontecimentos de Angola, África e Mundo.</string>
     <!-- Google AdMob Configuration -->
-    <string name="admob_app_id">ca-app-pub-7453639745659255~3593190215</string>
-    <string name="admob_banner_ad_unit_id">ca-app-pub-7453639745659255/6050906557</string>
 </resources>

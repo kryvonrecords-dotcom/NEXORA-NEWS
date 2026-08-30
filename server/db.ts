@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import { supabase } from './supabase';
 import { 
   Advertisement, 
   AppNotification, 
@@ -491,6 +492,56 @@ class DatabaseManager {
       fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
     } catch (err) {
       console.error('Failed to write database file:', err);
+    }
+  }
+
+  public async restoreFromSupabase(): Promise<boolean> {
+    if (!supabase) {
+      console.log('Supabase não configurado para recuperação.');
+      return false;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('nexora_backup')
+        .select('data')
+        .eq('id', 1)
+        .single();
+
+      if (error || !data?.data) {
+        console.error(
+          'Supabase restore failed:',
+          error?.message || 'backup não encontrado'
+        );
+        return false;
+      }
+
+      const restored = JSON.parse(data.data);
+
+      if (
+        !restored ||
+        !Array.isArray(restored.news) ||
+        !Array.isArray(restored.categories)
+      ) {
+        console.error('Backup do Supabase inválido.');
+        return false;
+      }
+
+      this.data = {
+        ...this.data,
+        ...restored
+      };
+
+      this.saveDataDirect(this.data);
+
+      console.log(
+        `Supabase restore successful: ${this.data.news.length} notícias, ${this.data.categories.length} categorias.`
+      );
+
+      return true;
+    } catch (err) {
+      console.error('Supabase restore failed:', err);
+      return false;
     }
   }
 

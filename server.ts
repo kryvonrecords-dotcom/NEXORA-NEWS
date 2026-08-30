@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -121,6 +122,9 @@ async function startServer() {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  // Recuperar banco do Supabase antes de iniciar o servidor
+  await db.restoreFromSupabase();
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Nexora News Server running on http://0.0.0.0:${PORT}`);

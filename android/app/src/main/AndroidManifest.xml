@@ -19,10 +19,8 @@
         android:usesCleartextTraffic="false"
         tools:targetApi="35">
 
-        <!-- Google AdMob Official Application ID (Nexora News Production ID) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-7453639745659255~3593190215" />
 
         <!-- Disable Ad Services automatic advertising ID collection until consent is given -->
         <meta-data

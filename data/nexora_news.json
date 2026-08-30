@@ -381,6 +381,18 @@
       "status": "active"
     }
   ],
+  "newsletterCampaigns": [
+    {
+      "id": "camp-1",
+      "subject": "Resumo Diário Nexora News: Economia e Política em Destaque",
+      "previewText": "Acompanhe as principais manchetes desta manhã em Angola e no Mundo.",
+      "introText": "Caros leitores, partilhamos convosco o resumo das notícias mais importantes selecionadas pela nossa equipa editorial.",
+      "sentAt": "2026-08-29T13:39:35.247Z",
+      "sentCount": 148,
+      "openRateEstimated": 64,
+      "status": "sent"
+    }
+  ],
   "settings": {
     "siteName": "Nexora News",
     "siteTagline": "Jornalismo de Excelência, Rigor e Credibilidade em Tempo Real",

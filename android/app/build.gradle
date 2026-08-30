@@ -21,7 +21,6 @@ android {
 
         // Custom Manifest Placeholders
         manifestPlaceholders = [
-            adMobAppId: "ca-app-pub-7453639745659255~3593190215"
         ]
     }
 
@@ -112,7 +111,6 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.16.0'
 
     // Google Play Mobile Ads SDK (AdMob)
-    implementation 'com.google.android.gms:play-services-ads:23.3.0'
 
     // User Messaging Platform (UMP) SDK for European/Global Consent (GDPR/LGPD)
     implementation 'com.google.android.ump:user-messaging-platform:3.0.0'
