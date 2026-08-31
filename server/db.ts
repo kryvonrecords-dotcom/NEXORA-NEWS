@@ -527,9 +527,45 @@ class DatabaseManager {
         return false;
       }
 
+      // Merge seguro das notícias: não apagar notícias locais ausentes no backup.
+      const localNews = Array.isArray(this.data.news) ? this.data.news : [];
+      const remoteNews = Array.isArray(restored.news) ? restored.news : [];
+
+      const newsMap = new Map<string, NewsItem>();
+
+      for (const news of localNews) {
+        if (news?.id) {
+          newsMap.set(news.id, news);
+        }
+      }
+
+      for (const news of remoteNews) {
+        if (!news?.id) continue;
+
+        const local = newsMap.get(news.id);
+
+        if (!local) {
+          newsMap.set(news.id, news);
+          continue;
+        }
+
+        const localTime = new Date(
+          local.updatedAt || local.createdAt || 0
+        ).getTime();
+
+        const remoteTime = new Date(
+          news.updatedAt || news.createdAt || 0
+        ).getTime();
+
+        if (remoteTime >= localTime) {
+          newsMap.set(news.id, news);
+        }
+      }
+
       this.data = {
         ...this.data,
-        ...restored
+        ...restored,
+        news: Array.from(newsMap.values())
       };
 
       this.saveDataDirect(this.data);
@@ -545,8 +581,49 @@ class DatabaseManager {
     }
   }
 
+  private backupInProgress = false;
+  private backupPending = false;
+
   public save() {
     this.saveDataDirect(this.data);
+
+    if (!supabase) return;
+
+    this.backupPending = true;
+    void this.flushSupabaseBackup();
+  }
+
+  private async flushSupabaseBackup(): Promise<void> {
+    if (!supabase || this.backupInProgress) return;
+
+    this.backupInProgress = true;
+
+    try {
+      while (this.backupPending) {
+        this.backupPending = false;
+
+        const snapshot = JSON.stringify(this.data);
+
+        const { error } = await supabase
+          .from('nexora_backup')
+          .upsert({
+            id: 1,
+            data: snapshot
+          });
+
+        if (error) {
+          console.error('Supabase backup failed:', error.message);
+        } else {
+          console.log('Supabase backup updated successfully.');
+        }
+      }
+    } finally {
+      this.backupInProgress = false;
+
+      if (this.backupPending) {
+        void this.flushSupabaseBackup();
+      }
+    }
   }
 
   // Users

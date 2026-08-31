@@ -22,5 +22,12 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "exclude": [
+    "_backup-web-antes-do-zip",
+    "backup-sem-anuncios-web",
+    "node_modules",
+    "dist",
+    "db-antigo.ts"
+  ]
 }
