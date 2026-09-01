@@ -5,6 +5,7 @@ import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import { GoogleGenAI } from '@google/genai';
 import { db } from './db';
+import { supabase } from './supabase';
 import { generateToken, requireAdmin, AuthenticatedRequest } from './auth';
 import { getVapidPublicKey, sendWebPushToAll } from './webPush';
 
@@ -67,9 +68,12 @@ const upload = multer({
 });
 
 // Helper for single file upload handler
-const handleSingleUpload = (req: AuthenticatedRequest, res: Response): void => {
-  // If upload.any() was used, check req.files or req.file
+const handleSingleUpload = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   let file: Express.Multer.File | undefined = req.file;
+
   if (!file && req.files && Array.isArray(req.files) && req.files.length > 0) {
     file = req.files[0];
   }
@@ -79,16 +83,60 @@ const handleSingleUpload = (req: AuthenticatedRequest, res: Response): void => {
     return;
   }
 
-  const publicUrl = `/uploads/${file.filename}`;
-  res.json({
-    message: 'Upload concluído com sucesso!',
-    url: publicUrl,
-    filename: file.filename,
-    originalName: file.originalname,
-    size: file.size,
-    mimetype: file.mimetype,
-    mimeType: file.mimetype
-  });
+  if (!supabase) {
+    res.status(500).json({ error: 'Supabase não está configurado.' });
+    return;
+  }
+
+  try {
+    const storagePath = `news/${file.filename}`;
+    const fileBuffer = fs.readFileSync(file.path);
+
+    const { error: uploadError } = await supabase
+      .storage
+      .from('uploads')
+      .upload(storagePath, fileBuffer, {
+        contentType: file.mimetype,
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Erro ao enviar imagem para Supabase:', uploadError.message);
+      res.status(500).json({
+        error: 'Erro ao enviar arquivo para o armazenamento.',
+        details: uploadError.message
+      });
+      return;
+    }
+
+    const { data: publicUrlData } = supabase
+      .storage
+      .from('uploads')
+      .getPublicUrl(storagePath);
+
+    // Remove a cópia temporária local
+    if (fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
+
+    res.json({
+      message: 'Upload concluído com sucesso!',
+      url: publicUrlData.publicUrl,
+      filename: file.filename,
+      storagePath,
+      originalName: file.originalname,
+      size: file.size,
+      mimetype: file.mimetype,
+      mimeType: file.mimetype
+    });
+
+  } catch (err) {
+    console.error('Erro no upload:', err);
+
+    res.status(500).json({
+      error: 'Erro interno ao enviar arquivo.'
+    });
+  }
 };
 
 // Helper for slug generation
@@ -443,26 +491,85 @@ router.post('/admin/uploads', requireAdmin, upload.any(), handleSingleUpload);
 router.post('/admin/media', requireAdmin, upload.any(), handleSingleUpload);
 
 // Multiple Image Upload Endpoints
-const handleMultipleUploads = (req: AuthenticatedRequest, res: Response): void => {
-  const rawFiles = (req.files || (req.file ? [req.file] : [])) as Express.Multer.File[];
+const handleMultipleUploads = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const rawFiles = (
+    req.files || (req.file ? [req.file] : [])
+  ) as Express.Multer.File[];
+
   if (!rawFiles || rawFiles.length === 0) {
-    res.status(400).json({ error: 'Nenhum arquivo enviado.' });
+    res.status(400).json({
+      error: 'Nenhum arquivo enviado.'
+    });
     return;
   }
 
-  const uploaded = rawFiles.map(f => ({
-    url: `/uploads/${f.filename}`,
-    filename: f.filename,
-    originalName: f.originalname,
-    size: f.size,
-    mimetype: f.mimetype,
-    mimeType: f.mimetype
-  }));
+  if (!supabase) {
+    res.status(500).json({
+      error: 'Supabase não está configurado.'
+    });
+    return;
+  }
 
-  res.json({
-    message: 'Uploads concluídos com sucesso!',
-    files: uploaded
-  });
+  try {
+    const uploaded = [];
+
+    for (const file of rawFiles) {
+      const storagePath = `news/${file.filename}`;
+      const fileBuffer = fs.readFileSync(file.path);
+
+      const { error: uploadError } = await supabase
+        .storage
+        .from('uploads')
+        .upload(storagePath, fileBuffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error(
+          'Erro ao enviar arquivo para Supabase:',
+          uploadError.message
+        );
+
+        throw new Error(uploadError.message);
+      }
+
+      const { data: publicUrlData } = supabase
+        .storage
+        .from('uploads')
+        .getPublicUrl(storagePath);
+
+      uploaded.push({
+        url: publicUrlData.publicUrl,
+        filename: file.filename,
+        storagePath,
+        originalName: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+        mimeType: file.mimetype
+      });
+
+      // Remove cópia temporária local
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+    }
+
+    res.json({
+      message: 'Uploads concluídos com sucesso!',
+      files: uploaded
+    });
+
+  } catch (err) {
+    console.error('Erro no upload múltiplo:', err);
+
+    res.status(500).json({
+      error: 'Erro interno ao enviar arquivos.'
+    });
+  }
 };
 
 router.post('/upload-multiple', requireAdmin, upload.any(), handleMultipleUploads);
