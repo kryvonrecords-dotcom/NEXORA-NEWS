@@ -185,3 +185,88 @@ html.dark .article-content a:hover {
   margin: 2rem 0;
   width: 100%;
 }
+
+/* =========================================================
+   NEXORA NEWS — SOBRE NÓS
+   Correção definitiva de contraste no modo escuro
+   ========================================================= */
+
+/* Cabeçalho da página no modo escuro */
+html.dark .about-page > .flex {
+  color: #CBD5E1 !important;
+}
+
+html.dark .about-page > .flex .text-slate-500 {
+  color: #CBD5E1 !important;
+}
+
+html.dark .about-page > .flex .text-slate-800 {
+  color: #F8FAFC !important;
+}
+
+/* Título e descrição do cabeçalho */
+html.dark .about-page > .text-center h1 {
+  color: #F8FAFC !important;
+}
+
+html.dark .about-page > .text-center p {
+  color: #E2E8F0 !important;
+}
+
+/* Caixa principal permanece clara e legível */
+html.dark .about-page > .bg-white {
+  background-color: #FFFFFF !important;
+  color: #334155 !important;
+}
+
+/* Textos dentro da caixa branca */
+html.dark .about-page > .bg-white .text-slate-900 {
+  color: #0B132B !important;
+}
+
+html.dark .about-page > .bg-white .text-slate-800 {
+  color: #0B132B !important;
+}
+
+html.dark .about-page > .bg-white .text-slate-700 {
+  color: #334155 !important;
+}
+
+html.dark .about-page > .bg-white .text-slate-600 {
+  color: #475569 !important;
+}
+
+html.dark .about-page > .bg-white .text-slate-500 {
+  color: #64748B !important;
+}
+
+html.dark .about-page > .bg-white .text-slate-400 {
+  color: #64748B !important;
+}
+
+/* Fundos claros e bordas da caixa */
+html.dark .about-page > .bg-white .bg-slate-50 {
+  background-color: #F8FAFC !important;
+}
+
+html.dark .about-page > .bg-white .bg-slate-100 {
+  background-color: #F1F5F9 !important;
+}
+
+html.dark .about-page > .bg-white .border-slate-100,
+html.dark .about-page > .bg-white .border-slate-200,
+html.dark .about-page > .bg-white .border-slate-300 {
+  border-color: #E2E8F0 !important;
+}
+
+/* Impede transparência/fade nos textos da Sobre Nós */
+html.dark .about-page p,
+html.dark .about-page h1,
+html.dark .about-page h2,
+html.dark .about-page h3,
+html.dark .about-page h4,
+html.dark .about-page li,
+html.dark .about-page button,
+html.dark .about-page a {
+  opacity: 1 !important;
+}

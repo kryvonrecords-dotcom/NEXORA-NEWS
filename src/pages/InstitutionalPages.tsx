@@ -52,7 +52,7 @@ export function AboutPage({ onNavigate }: Props) {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <div className="about-page max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-slate-500 mb-6">
         <button onClick={() => onNavigate('/')} className="hover:text-[#146EF5] transition-colors">Início</button>
@@ -75,13 +75,13 @@ export function AboutPage({ onNavigate }: Props) {
       </div>
 
       {/* Main Content Box */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-12 shadow-sm space-y-12 text-slate-700 leading-relaxed">
+      <div className="bg-white text-slate-700 rounded-3xl border border-slate-200 p-6 sm:p-12 shadow-sm space-y-12 leading-relaxed dark:bg-white dark:text-slate-700">
         
         {/* Section 1: Quem Somos & Missão */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-4">
             <span className="text-xs font-bold text-[#146EF5] uppercase tracking-widest block">Nossa Identidade</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#0B132B] font-serif">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0B132B] font-serif dark:!text-white">
               A Notícia Que Move o Mundo, Contada com Rigor
             </h2>
             <p className="text-sm sm:text-base text-slate-900 font-medium">
@@ -110,7 +110,7 @@ export function AboutPage({ onNavigate }: Props) {
         {/* Section 2: Três Pilares Fundamentais */}
         <div className="pt-8 border-t border-slate-100">
           <div className="text-center max-w-xl mx-auto mb-8">
-            <h3 className="text-xl font-bold text-[#0B132B] font-serif">Os Nossos Pilares Editoriais</h3>
+            <h3 className="text-xl font-bold text-[#0B132B] font-serif dark:text-[#0B132B]">Os Nossos Pilares Editoriais</h3>
             <p className="text-xs text-slate-900 font-medium mt-1">Princípios inegociáveis que orientam cada linha publicada</p>
           </div>
 
@@ -119,7 +119,7 @@ export function AboutPage({ onNavigate }: Props) {
               <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#146EF5] flex items-center justify-center mb-4">
                 <Shield className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif">Independência Editorial</h4>
+              <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif dark:text-[#0B132B]">Independência Editorial</h4>
               <p className="text-xs text-slate-900 font-medium leading-relaxed">
                 Total autonomia em relação a interesses partidários, governamentais, confissionais ou grupos de pressão económica.
               </p>
@@ -129,7 +129,7 @@ export function AboutPage({ onNavigate }: Props) {
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
                 <Award className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif">Rigor & Fact-Checking</h4>
+              <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif dark:text-[#0B132B]">Rigor & Fact-Checking</h4>
               <p className="text-xs text-slate-900 font-medium leading-relaxed">
                 Verificação minuciosa de factos com cruzamento de múltiplas fontes fidedignas antes de qualquer divulgação ao público.
               </p>
@@ -139,7 +139,7 @@ export function AboutPage({ onNavigate }: Props) {
               <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
                 <Globe className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif">Pluralismo & Isenção</h4>
+              <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif dark:text-[#0B132B]">Pluralismo & Isenção</h4>
               <p className="text-xs text-slate-900 font-medium leading-relaxed">
                 Respeito absoluto pelo contraditório, dando voz às diferentes perspetivas com respeito pela dignidade da pessoa humana.
               </p>
@@ -151,7 +151,7 @@ export function AboutPage({ onNavigate }: Props) {
         <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest block">Tecnologia & Inovação</span>
-            <h3 className="text-xl sm:text-2xl font-bold text-[#0B132B] font-serif">
+            <h3 className="text-xl sm:text-2xl font-bold text-[#0B132B] font-serif dark:text-[#0B132B]">
               Jornalismo na Era Digital
             </h3>
             <p className="text-xs sm:text-sm text-slate-900 font-medium leading-relaxed">
