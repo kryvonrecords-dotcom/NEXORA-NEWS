@@ -1138,7 +1138,7 @@ export function PrivacyPage({ onNavigate }: Props) {
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold !text-[#0B132B] font-serif">1. Introdução e Compromisso</h2>
+          <h2 className="text-lg font-bold font-serif" style={{ color: "#0B132B" }}>1. Introdução e Compromisso</h2>
           <p>
             O <strong>Nexora News</strong> valoriza e protege a privacidade dos seus utilizadores. Esta Política de Privacidade descreve as práticas de tratamento de dados da aplicação móvel e portal web Nexora News, de acordo com as diretrizes da Google Play Store, RGPD, LGPD e demais legislações aplicáveis.
           </p>
