@@ -1138,14 +1138,14 @@ export function PrivacyPage({ onNavigate }: Props) {
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold font-serif" style={{ color: "#0B132B" }}>1. Introdução e Compromisso</h2>
+          <h2 className="text-lg font-bold font-serif" style={{ color: "#FFFFFF" }}>1. Introdução e Compromisso</h2>
           <p>
             O <strong>Nexora News</strong> valoriza e protege a privacidade dos seus utilizadores. Esta Política de Privacidade descreve as práticas de tratamento de dados da aplicação móvel e portal web Nexora News, de acordo com as diretrizes da Google Play Store, RGPD, LGPD e demais legislações aplicáveis.
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold !text-[#0B132B] font-serif">2. Dados Recolhidos e Finalidade</h2>
+          <h2 className="text-lg font-bold !text-white font-serif">2. Dados Recolhidos e Finalidade</h2>
           <ul className="list-disc pl-5 space-y-2 text-slate-600">
             <li><strong>Identificadores Técnicos e de Dispositivo:</strong> Endereço IP anónimo, modelo do dispositivo e versão do sistema operativo, utilizados exclusivamente para garantir a entrega correta do conteúdo, cache de leitura e estabilidade técnica da aplicação.</li>
             <li><strong>Subscrição da Newsletter e Contactos:</strong> Endereço de email e nome voluntariamente fornecidos pelo leitor ao subscrever boletins informativos ou ao submeter formulários de contacto.</li>
@@ -1155,7 +1155,7 @@ export function PrivacyPage({ onNavigate }: Props) {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold !text-[#0B132B] font-serif">3. Publicidade e Google AdMob</h2>
+          <h2 className="text-lg font-bold !text-white font-serif">3. Publicidade e Google AdMob</h2>
           <p>
             O Nexora News utiliza o serviço de publicidade <strong>Google Mobile Ads (AdMob)</strong> para financiar as operações jornalísticas e manter o acesso livre aos artigos. O Google AdMob pode utilizar identificadores de publicidade (Google Advertising ID / GAID) para exibir anúncios relevantes.
           </p>
@@ -1165,14 +1165,14 @@ export function PrivacyPage({ onNavigate }: Props) {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold !text-[#0B132B] font-serif">4. Armazenamento e Segurança</h2>
+          <h2 className="text-lg font-bold !text-white font-serif">4. Armazenamento e Segurança</h2>
           <p>
             Adotamos protocolos avançados de encriptação SSL/TLS para transmissão segura de dados e medidas rígidas de segurança contra acessos não autorizados. Nenhum dado pessoal é comercializado ou partilhado com entidades terceiras para fins de marketing abusivo.
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold !text-[#0B132B] font-serif">5. Contacto do Responsável de Privacidade</h2>
+          <h2 className="text-lg font-bold !text-white font-serif">5. Contacto do Responsável de Privacidade</h2>
           <p>
             Para exercer os seus direitos de acesso, retificação, eliminação de dados ou esclarecer dúvidas sobre esta política, entre em contacto direto com o nosso Responsável de Proteção de Dados:
           </p>
@@ -1220,17 +1220,17 @@ export function TermsPage({ onNavigate }: Props) {
           Bem-vindo ao <strong>Nexora News</strong>. Ao aceder e utilizar a aplicação móvel ou portal web do Nexora News, o utilizador concorda expressamente com os presentes Termos de Uso.
         </p>
 
-        <h2 className="text-lg font-bold !text-[#0B132B] font-serif">1. Propriedade Intelectual</h2>
+        <h2 className="text-lg font-bold !text-white font-serif">1. Propriedade Intelectual</h2>
         <p>
           Todos os artigos, fotografias, infográficos e conteúdos multimédia publicados são propriedade do Nexora News ou de fontes creditadas, protegidos pela legislação de direitos de autor. É estritamente proibida a reprodução comercial sem autorização prévia por escrito.
         </p>
 
-        <h2 className="text-lg font-bold !text-[#0B132B] font-serif">2. Responsabilidade Editorial</h2>
+        <h2 className="text-lg font-bold !text-white font-serif">2. Responsabilidade Editorial</h2>
         <p>
           A redação do Nexora News compromete-se com a precisão dos factos noticiados. Caso seja detetada qualquer incorreção, a retificação será publicada de forma clara e visível no artigo correspondente.
         </p>
 
-        <h2 className="text-lg font-bold !text-[#0B132B] font-serif">3. Atualizações dos Termos</h2>
+        <h2 className="text-lg font-bold !text-white font-serif">3. Atualizações dos Termos</h2>
         <p>
           O Nexora News reserva-se o direito de atualizar estes termos periodicamente para refletir alterações legislativas ou melhorias na plataforma.
         </p>
