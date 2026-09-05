@@ -111,7 +111,7 @@ export function AboutPage({ onNavigate }: Props) {
         <div className="pt-8 border-t border-slate-100">
           <div className="text-center max-w-xl mx-auto mb-8">
             <h3 className="text-xl font-bold text-white font-serif">Os Nossos Pilares Editoriais</h3>
-            <p className="text-xs text-slate-500 mt-1">Princípios inegociáveis que orientam cada linha publicada</p>
+            <p className="text-xs text-slate-900 font-medium mt-1">Princípios inegociáveis que orientam cada linha publicada</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -157,7 +157,7 @@ export function AboutPage({ onNavigate }: Props) {
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               O Nexora News foi construído com arquitetura digital moderna para garantir leitura ultra rápida, suporte a funcionamento offline (PWA), alertas sonoros instantâneos de notícias urgentes e compatibilidade universal em computadores, tablets e smartphones.
             </p>
-            <ul className="space-y-2 text-xs text-slate-600 font-medium">
+            <ul className="space-y-2 text-xs text-slate-900 font-semibold">
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-[#146EF5] shrink-0" />
                 <span>Notificações push em tempo real com breaking news</span>
