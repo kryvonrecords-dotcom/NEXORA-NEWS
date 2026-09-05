@@ -13,25 +13,25 @@ data class NewsItem(
     @SerializedName("slug")
     val slug: String,
 
-    @SerializedName("summary")
+    @SerializedName("excerpt")
     val summary: String? = null,
 
     @SerializedName("content")
     val content: String? = null,
 
-    @SerializedName("category")
+    @SerializedName("categoryName")
     val category: String,
 
-    @SerializedName("imageUrl")
+    @SerializedName("featuredImage")
     val imageUrl: String? = null,
 
-    @SerializedName("imageCaption")
+    @SerializedName("featuredImageCaption")
     val imageCaption: String? = null,
 
-    @SerializedName("gallery")
+    @SerializedName("galleryImages")
     val gallery: List<String>? = null,
 
-    @SerializedName("author")
+    @SerializedName("authorName")
     val author: String? = "Redação Nexora",
 
     @SerializedName("source")
@@ -43,13 +43,13 @@ data class NewsItem(
     @SerializedName("updatedAt")
     val updatedAt: String? = null,
 
-    @SerializedName("readTime")
+    @SerializedName("readTimeMinutes")
     val readTime: Int = 3,
 
     @SerializedName("isBreaking")
     val isBreaking: Boolean = false,
 
-    @SerializedName("isFeatured")
+    @SerializedName("isHero")
     val isFeatured: Boolean = false,
 
     @SerializedName("views")

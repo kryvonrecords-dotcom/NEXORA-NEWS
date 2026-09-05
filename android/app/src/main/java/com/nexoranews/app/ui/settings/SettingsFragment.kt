@@ -1,6 +1,8 @@
 package com.nexoranews.app.ui.settings
 
 import android.os.Bundle
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,9 +39,21 @@ class SettingsFragment : Fragment() {
         repository = NewsRepository(context)
 
         setupUI()
-    }
+        binding.cardAdvertising.setOnClickListener {
+            startActivity(Intent(requireContext(), AdvertisingActivity::class.java))
+        }
 
+    }
     private fun setupUI() {
+        binding.tvContactEmail.setOnClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:nexoranews873@gmail.com")
+                }
+                startActivity(intent)
+            } catch (_: Exception) {
+            }
+        }
         val context = requireContext()
 
         // Notification Switch

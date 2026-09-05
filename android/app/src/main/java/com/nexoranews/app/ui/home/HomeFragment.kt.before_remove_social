@@ -73,6 +73,139 @@ class HomeFragment : Fragment() {
         loadData(forceRefresh = false)
     }
 
+    private fun loadSocialMedia() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = repository.getSocialMedia()
+
+            result.onSuccess { settings ->
+
+                // WhatsApp flutuante
+                binding.btnWhatsappFloating.visibility =
+                    if (settings.whatsappFloatingEnabled) View.VISIBLE else View.GONE
+
+                binding.btnWhatsappFloating.setOnClickListener {
+                    val number = settings.whatsappFloatingNumber
+                        .replace("+", "")
+                        .replace(" ", "")
+
+                    if (number.isNotBlank()) {
+                        val message = settings.whatsappFloatingMessage
+
+                        val whatsappUrl =
+                            "https://wa.me/$number?text=" +
+                            Uri.encode(message)
+
+                        startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(whatsappUrl)
+                            )
+                        )
+                    }
+                }
+
+                // Email de contacto
+                binding.btnContactEmail.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:nexoranews873@gmail.com")
+                    }
+
+                    startActivity(intent)
+                }
+
+                // Limpar links anteriores
+                binding.layoutSocialLinks.removeAllViews()
+
+                // Criar links das redes sociais
+                settings.socialLinks.forEach { (name, url) ->
+
+                    if (url.isNotBlank()) {
+
+                        val socialButton = TextView(requireContext()).apply {
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
+
+                            text = name.replaceFirstChar {
+                                if (it.isLowerCase()) {
+                                    it.titlecase()
+                                } else {
+                                    it.toString()
+                                }
+                            }
+
+                            textSize = 16f
+                            setPadding(8, 14, 8, 14)
+                            setTextColor(Color.parseColor("#146EF5"))
+
+                            setBackgroundResource(
+                                android.R.drawable.list_selector_background
+                            )
+
+                            setOnClickListener {
+                                try {
+                                    startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(url)
+                                        )
+                                    )
+                                } catch (e: Exception) {
+                                    // Ignora caso não exista navegador
+                                }
+                            }
+                        }
+
+                        binding.layoutSocialLinks.addView(socialButton)
+                    }
+                }
+
+                // Links personalizados criados pelo Administrador
+                settings.customSocialLinks.forEach { link ->
+
+                    if (link.name.isNotBlank() && link.url.isNotBlank()) {
+
+                        val customButton = TextView(requireContext()).apply {
+
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
+
+                            text = link.name
+                            textSize = 16f
+                            setPadding(8, 14, 8, 14)
+                            setTextColor(Color.parseColor("#146EF5"))
+
+                            setBackgroundResource(
+                                android.R.drawable.list_selector_background
+                            )
+
+                            setOnClickListener {
+                                try {
+                                    startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(link.url)
+                                        )
+                                    )
+                                } catch (e: Exception) {
+                                }
+                            }
+                        }
+
+                        binding.layoutSocialLinks.addView(customButton)
+                    }
+                }
+            }
+
+            result.onFailure {
+                binding.btnWhatsappFloating.visibility = View.GONE
+            }
+        }
+    }
+
     private fun setupRecyclerViews(context: Context) {
         // Category Chips
         chipAdapter = CategoryChipAdapter(emptyList(), currentCategory) { category ->
@@ -95,14 +228,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupListeners() {
-
-        binding.btnWhatsappFloating.setOnClickListener {
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/244921281315"))
-                startActivity(intent)
-            } catch (_: Exception) {
-            }
-        }
         binding.swipeRefreshHome.setColorSchemeResources(R.color.primary_blue, R.color.accent_red)
         binding.swipeRefreshHome.setOnRefreshListener {
             loadData(forceRefresh = true)

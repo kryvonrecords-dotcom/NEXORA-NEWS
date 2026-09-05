@@ -18,6 +18,12 @@ android/.idea/
 .idea/
 .cxx/
 
+# Local/private Firebase configuration
+android/app/google-services.json
+
+# Local/private VAPID configuration
+data/vapid_keys.json
+
 # Local backups, ZIPs and temporary files
 _backup-web-antes-do-zip/
 _zip-atualizado/
@@ -28,9 +34,6 @@ backups/
 *.backup-*
 *.bak
 
-# Local/private Firebase configuration
-android/app/google-services.json
-
 # Temporary diagnostic/test files
 kotlin-error.txt
 test-supabase.ts
@@ -39,33 +42,3 @@ teste-notificacao.png
 verificar-backup.ts
 backup-to-supabase.ts
 android/Task
-
-# Accidental files created from terminal commands
--H
--d
-cd
-grep
-tsx
-react-example@0.0.0
-{
-"database\""
-
-# Additional local files
-android/app/src/main/res/fragment_home.xml.backup2
-data/vapid_keys.json
-"database\"
-database"
-
-# Temporários criados durante recuperação do Supabase
-db-antigo.ts
-server-antigo.ts
-testar-secret.ts
-server.ts.before-supabase-restore
-server/db.ts.before-supabase-restore
-data/nexora_news.backup.json
-data/nexora_news.backup.safe.json
-data/nexora_news.before-restore.json
-android/app/build.gradle.admob-backup
-android/app/src/main/AndroidManifest.xml.admob-backup
-android/app/src/main/java/com/nexoranews/app/MainActivity.kt.admob-backup
-android/app/src/main/java/com/nexoranews/app/ui/detail/ArticleDetailActivity.kt.admob-backup

@@ -252,7 +252,7 @@ class ArticleDetailActivity : AppCompatActivity() {
     }
 
     private fun shareArticle(news: NewsItem) {
-        val shareUrl = "https://nexoranews.ao/noticia/${news.slug}"
+        val shareUrl = "https://nexora-news.onrender.com/noticia/${news.slug}"
         val shareText = getString(
             R.string.share_article_format,
             news.title,

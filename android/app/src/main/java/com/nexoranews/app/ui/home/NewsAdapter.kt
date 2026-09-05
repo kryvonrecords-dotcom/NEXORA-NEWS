@@ -23,7 +23,7 @@ class NewsAdapter(
     private var newsList: List<NewsItem>,
     private val repository: NewsRepository,
     private val onItemClick: ((NewsItem) -> Unit)? = null
-) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
+) : RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
 
     fun updateNews(newItems: List<NewsItem>) {
         this.newsList = newItems
@@ -137,7 +137,7 @@ class NewsAdapter(
         }
 
         private fun shareArticle(context: Context, news: NewsItem) {
-            val shareUrl = "https://nexoranews.ao/noticia/${news.slug}"
+            val shareUrl = "https://nexora-news.onrender.com/noticia/${news.slug}"
             val shareText = context.getString(
                 R.string.share_article_format,
                 news.title,

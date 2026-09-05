@@ -10,7 +10,7 @@ import com.nexoranews.app.databinding.ItemCategoryCardBinding
 class CategoryAdapter(
     private var categories: List<Category>,
     private val onCategoryClick: (Category) -> Unit
-) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
+) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     fun updateCategories(newCategories: List<Category>) {
         this.categories = newCategories

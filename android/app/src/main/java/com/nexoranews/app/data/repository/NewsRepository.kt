@@ -102,6 +102,26 @@ class NewsRepository(context: Context) {
         )
     }
 
+    suspend fun getAds(position: String = "top_hero") = withContext(Dispatchers.IO) {
+        apiService.getAds(position)
+    }
+
+    suspend fun submitAdProposal(
+        company: String,
+        contactName: String,
+        email: String,
+        phone: String,
+        adFormat: String = "hero_banner",
+        budget: String = "1_mes",
+        message: String = ""
+    ) = withContext(Dispatchers.IO) {
+        apiService.submitAdProposal(company, contactName, email, phone, adFormat, budget, message)
+    }
+
+    suspend fun getSocialMedia() = withContext(Dispatchers.IO) {
+        apiService.getSocialMedia()
+    }
+
     fun isBookmarked(newsId: String): Boolean = bookmarkManager.isBookmarked(newsId)
 
     fun toggleBookmark(news: NewsItem): Boolean = bookmarkManager.toggleBookmark(news)

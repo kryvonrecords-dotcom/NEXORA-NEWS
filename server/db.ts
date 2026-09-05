@@ -527,7 +527,6 @@ class DatabaseManager {
         return false;
       }
 
-      // Merge seguro das notícias: não apagar notícias locais ausentes no backup.
       const localNews = Array.isArray(this.data.news) ? this.data.news : [];
       const remoteNews = Array.isArray(restored.news) ? restored.news : [];
 
