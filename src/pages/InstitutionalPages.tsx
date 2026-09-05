@@ -84,10 +84,10 @@ export function AboutPage({ onNavigate }: Props) {
             <h2 className="text-2xl sm:text-3xl font-bold text-[#0B132B] font-serif dark:!text-white">
               A Notícia Que Move o Mundo, Contada com Rigor
             </h2>
-            <p className="text-sm sm:text-base text-slate-900 font-medium">
+            <p className="text-sm sm:text-base text-slate-900 font-medium dark:!text-slate-700">
               O <strong>Nexora News</strong> é uma publicação digital de informação geral fundada com o propósito de oferecer aos cidadãos, líderes de opinião, agentes económicos e à sociedade civil uma cobertura jornalística contínua, analítica e isenta.
             </p>
-            <p className="text-sm sm:text-base text-slate-900 font-medium">
+            <p className="text-sm sm:text-base text-slate-900 font-medium dark:!text-slate-700">
               Com sede em Luanda e correspondentes estratégicos nos principais polos urbanos e capitais internacionais, acompanhamos o pulsar diário da política, economia, sociedade, desporto, cultura, tecnologia e relações internacionais.
             </p>
           </div>
@@ -110,8 +110,8 @@ export function AboutPage({ onNavigate }: Props) {
         {/* Section 2: Três Pilares Fundamentais */}
         <div className="pt-8 border-t border-slate-100">
           <div className="text-center max-w-xl mx-auto mb-8">
-            <h3 className="text-xl font-bold text-[#0B132B] font-serif dark:text-[#0B132B]">Os Nossos Pilares Editoriais</h3>
-            <p className="text-xs text-slate-900 font-medium mt-1">Princípios inegociáveis que orientam cada linha publicada</p>
+            <h3 className="text-xl font-bold text-[#0B132B] font-serif dark:!text-white">Os Nossos Pilares Editoriais</h3>
+            <p className="text-xs text-slate-900 font-medium dark:!text-slate-700 mt-1">Princípios inegociáveis que orientam cada linha publicada</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -120,7 +120,7 @@ export function AboutPage({ onNavigate }: Props) {
                 <Shield className="w-5 h-5" />
               </div>
               <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif dark:text-[#0B132B]">Independência Editorial</h4>
-              <p className="text-xs text-slate-900 font-medium leading-relaxed">
+              <p className="text-xs text-slate-900 font-medium dark:!text-slate-700 leading-relaxed">
                 Total autonomia em relação a interesses partidários, governamentais, confissionais ou grupos de pressão económica.
               </p>
             </div>
@@ -130,7 +130,7 @@ export function AboutPage({ onNavigate }: Props) {
                 <Award className="w-5 h-5" />
               </div>
               <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif dark:text-[#0B132B]">Rigor & Fact-Checking</h4>
-              <p className="text-xs text-slate-900 font-medium leading-relaxed">
+              <p className="text-xs text-slate-900 font-medium dark:!text-slate-700 leading-relaxed">
                 Verificação minuciosa de factos com cruzamento de múltiplas fontes fidedignas antes de qualquer divulgação ao público.
               </p>
             </div>
@@ -140,7 +140,7 @@ export function AboutPage({ onNavigate }: Props) {
                 <Globe className="w-5 h-5" />
               </div>
               <h4 className="font-bold text-[#0B132B] text-base mb-2 font-serif dark:text-[#0B132B]">Pluralismo & Isenção</h4>
-              <p className="text-xs text-slate-900 font-medium leading-relaxed">
+              <p className="text-xs text-slate-900 font-medium dark:!text-slate-700 leading-relaxed">
                 Respeito absoluto pelo contraditório, dando voz às diferentes perspetivas com respeito pela dignidade da pessoa humana.
               </p>
             </div>
@@ -151,13 +151,13 @@ export function AboutPage({ onNavigate }: Props) {
         <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest block">Tecnologia & Inovação</span>
-            <h3 className="text-xl sm:text-2xl font-bold text-[#0B132B] font-serif dark:text-[#0B132B]">
+            <h3 className="text-xl sm:text-2xl font-bold text-[#0B132B] font-serif dark:!text-white">
               Jornalismo na Era Digital
             </h3>
-            <p className="text-xs sm:text-sm text-slate-900 font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-900 font-medium dark:!text-slate-700 leading-relaxed">
               O Nexora News foi construído com arquitetura digital moderna para garantir leitura ultra rápida, suporte a funcionamento offline (PWA), alertas sonoros instantâneos de notícias urgentes e compatibilidade universal em computadores, tablets e smartphones.
             </p>
-            <ul className="space-y-2 text-xs text-slate-900 font-semibold">
+            <ul className="space-y-2 text-xs text-slate-900 font-semibold dark:!text-slate-700">
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-[#146EF5] shrink-0" />
                 <span>Notificações push em tempo real com breaking news</span>
@@ -178,7 +178,7 @@ export function AboutPage({ onNavigate }: Props) {
               <BookOpen className="w-5 h-5 text-[#146EF5]" />
               <span>Transparência Institucional</span>
             </h4>
-            <p className="text-xs text-slate-900 font-medium leading-relaxed">
+            <p className="text-xs text-slate-900 font-medium dark:!text-slate-700 leading-relaxed">
               Consulte os nossos documentos oficiais que regem o exercício da nossa atividade jornalística e comercial.
             </p>
             <div className="space-y-2 pt-2">
