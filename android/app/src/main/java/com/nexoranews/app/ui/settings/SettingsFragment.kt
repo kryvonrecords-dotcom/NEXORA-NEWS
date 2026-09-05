@@ -43,6 +43,20 @@ class SettingsFragment : Fragment() {
             startActivity(Intent(requireContext(), AdvertisingActivity::class.java))
         }
 
+        binding.cardPrivacy.setOnClickListener {
+            startActivity(Intent(requireContext(), InstitutionalActivity::class.java).apply {
+                putExtra("title", "Política de Privacidade")
+                putExtra("path", "/privacidade")
+            })
+        }
+
+        binding.cardTerms.setOnClickListener {
+            startActivity(Intent(requireContext(), InstitutionalActivity::class.java).apply {
+                putExtra("title", "Termos de Uso")
+                putExtra("path", "/termos")
+            })
+        }
+
     }
     private fun setupUI() {
         binding.tvContactEmail.setOnClickListener {

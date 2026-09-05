@@ -68,6 +68,11 @@
         </activity>
 
         <!-- Native Article Detail Screen -->
+        <activity
+            android:name=".ui.settings.InstitutionalActivity"
+            android:exported="false"
+            android:theme="@style/Theme.NexoraNews" />
+
         <activity android:name=".ui.settings.AdvertisingActivity" android:exported="false" android:theme="@style/Theme.NexoraNews" />
         <activity             android:name=".ui.detail.ArticleDetailActivity"
             android:exported="false"

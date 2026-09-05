@@ -129,23 +129,28 @@ class HomeFragment : Fragment() {
             val result = repository.getAds("top_hero")
 
             result.onSuccess { ads ->
-                currentAds = ads
+                val newAds = ads
                     .filter { it.status.equals("active", ignoreCase = true) }
                     .sortedBy { it.order }
 
-                currentAdIndex = 0
+                if (newAds.isNotEmpty()) {
+                    currentAds = newAds
+                    currentAdIndex = 0
 
-                if (currentAds.isNotEmpty()) {
                     displayAd(currentAds[currentAdIndex])
                     adRotationHandler.removeCallbacks(adRotationRunnable)
+
                     if (currentAds.size > 1) {
                         adRotationHandler.postDelayed(adRotationRunnable, 8000)
                     }
-                } else {
+                } else if (currentAds.isEmpty()) {
                     binding.adBannerContainer.root.visibility = View.GONE
                 }
             }.onFailure {
-                binding.adBannerContainer.root.visibility = View.GONE
+                // Mantém o anúncio atual se houver uma falha temporária.
+                if (currentAds.isEmpty()) {
+                    binding.adBannerContainer.root.visibility = View.GONE
+                }
             }
         }
     }
