@@ -66,7 +66,7 @@ export function AboutPage({ onNavigate }: Props) {
           <Globe className="w-3.5 h-3.5" />
           <span>Jornalismo Independente & Rigor Informativo</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black text-[#0B132B] font-serif tracking-tight leading-tight">
+        <h1 className="text-3xl sm:text-5xl font-black text-white font-serif tracking-tight leading-tight">
           Sobre o Nexora News
         </h1>
         <p className="text-slate-600 text-base sm:text-lg mt-4 leading-relaxed font-normal">
@@ -81,7 +81,7 @@ export function AboutPage({ onNavigate }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-4">
             <span className="text-xs font-bold text-[#146EF5] uppercase tracking-widest block">Nossa Identidade</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#0B132B] font-serif">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white font-serif">
               A Notícia Que Move o Mundo, Contada com Rigor
             </h2>
             <p className="text-sm sm:text-base text-slate-600">
@@ -110,7 +110,7 @@ export function AboutPage({ onNavigate }: Props) {
         {/* Section 2: Três Pilares Fundamentais */}
         <div className="pt-8 border-t border-slate-100">
           <div className="text-center max-w-xl mx-auto mb-8">
-            <h3 className="text-xl font-bold text-[#0B132B] font-serif">Os Nossos Pilares Editoriais</h3>
+            <h3 className="text-xl font-bold text-white font-serif">Os Nossos Pilares Editoriais</h3>
             <p className="text-xs text-slate-500 mt-1">Princípios inegociáveis que orientam cada linha publicada</p>
           </div>
 
@@ -151,7 +151,7 @@ export function AboutPage({ onNavigate }: Props) {
         <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest block">Tecnologia & Inovação</span>
-            <h3 className="text-xl sm:text-2xl font-bold text-[#0B132B] font-serif">
+            <h3 className="text-xl sm:text-2xl font-bold text-white font-serif">
               Jornalismo na Era Digital
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -238,7 +238,7 @@ export function EditorialStatutePage({ onNavigate }: Props) {
         <span className="text-xs font-bold text-[#146EF5] uppercase tracking-widest block mb-2">
           Código Deontológico & Linha de Orientação
         </span>
-        <h1 className="text-3xl sm:text-5xl font-black text-[#0B132B] font-serif tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-black text-white font-serif tracking-tight">
           Estatuto Editorial
         </h1>
         <p className="text-slate-600 text-sm sm:text-base mt-3 leading-relaxed">
@@ -490,7 +490,7 @@ export function ContactPage({ onNavigate }: Props) {
         <span className="text-xs font-bold text-[#146EF5] uppercase tracking-widest block mb-2">
           Canais Oficiais de Atendimento
         </span>
-        <h1 className="text-3xl sm:text-5xl font-black text-[#0B132B] font-serif tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-black text-white font-serif tracking-tight">
           Redação & Publicidade
         </h1>
         <p className="text-slate-600 text-sm sm:text-base mt-3 leading-relaxed">
@@ -796,7 +796,7 @@ export function ContactPage({ onNavigate }: Props) {
           {/* Formatos Publicitários Disponíveis */}
           <div className="space-y-4">
             <div className="text-center max-w-xl mx-auto">
-              <h3 className="text-xl sm:text-2xl font-bold text-[#0B132B] font-serif">Formatos Disponíveis no Portal</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-white font-serif">Formatos Disponíveis no Portal</h3>
               <p className="text-xs text-slate-500 mt-1">Soluções flexíveis e adaptáveis a qualquer estratégia de marketing</p>
             </div>
 
