@@ -66,10 +66,10 @@ export function AboutPage({ onNavigate }: Props) {
           <Globe className="w-3.5 h-3.5" />
           <span>Jornalismo Independente & Rigor Informativo</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black text-white font-serif tracking-tight leading-tight">
+        <h1 className="text-3xl sm:text-5xl font-black text-[#0B132B] font-serif tracking-tight leading-tight">
           Sobre o Nexora News
         </h1>
-        <p className="text-slate-600 text-base sm:text-lg mt-4 leading-relaxed font-normal">
+        <p className="text-slate-900 text-base sm:text-lg mt-4 leading-relaxed font-medium">
           Um órgão de comunicação social de referência, dedicado a informar com verdade, independência e profundidade os acontecimentos que moldam Angola, África e o Mundo.
         </p>
       </div>
@@ -81,7 +81,7 @@ export function AboutPage({ onNavigate }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-4">
             <span className="text-xs font-bold text-[#146EF5] uppercase tracking-widest block">Nossa Identidade</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white font-serif">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0B132B] font-serif">
               A Notícia Que Move o Mundo, Contada com Rigor
             </h2>
             <p className="text-sm sm:text-base text-slate-600">
