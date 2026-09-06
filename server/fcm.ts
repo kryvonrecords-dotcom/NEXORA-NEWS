@@ -66,12 +66,9 @@ export async function sendFcmToAll(
   const message: MulticastMessage = {
     tokens: tokens.map(item => item.token),
 
-    notification: {
-      title: notification.title,
-      body: notification.body,
-    },
-
     data: {
+      title: notification.title || '',
+      body: notification.body || '',
       id: notification.id || '',
       newsId: notification.newsId || '',
       newsSlug: notification.newsSlug || '',
@@ -85,20 +82,15 @@ export async function sendFcmToAll(
     },
 
     android: {
-      priority: notification.isBreaking ? 'high' : 'normal',
-      notification: {
-        channelId: 'nexora_news_notifications',
-        imageUrl: fcmImageUrl || undefined,
-        sound: 'default',
-        }
+      priority: notification.isBreaking ? 'high' : 'normal'
     }
   };
 
   try {
     console.log("FCM PAYLOAD AUTOMÁTICO:", JSON.stringify({
       tokens: message.tokens?.length,
-      title: message.notification?.title,
-      body: message.notification?.body,
+      title: message.data?.title,
+      body: message.data?.body,
       data: message.data,
       android: message.android
     }, null, 2));
