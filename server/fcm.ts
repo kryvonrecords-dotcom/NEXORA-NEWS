@@ -4,6 +4,13 @@ import { db } from './db';
 import { AppNotification } from '../src/types';
 
 let initialized = false;
+function normalizeFcmImageUrl(imageUrl?: string): string | undefined {
+  if (!imageUrl) return undefined;
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  if (imageUrl.startsWith("/")) return `https://nexora-news.onrender.com${imageUrl}`;
+  return `https://nexora-news.onrender.com/${imageUrl}`;
+}
+
 
 function initializeFirebaseAdmin(): boolean {
   if (initialized) return true;
@@ -55,6 +62,7 @@ export async function sendFcmToAll(
     };
   }
 
+  const fcmImageUrl = normalizeFcmImageUrl(notification.imageUrl);
   const message: MulticastMessage = {
     tokens: tokens.map(item => item.token),
 
@@ -72,7 +80,7 @@ export async function sendFcmToAll(
         (notification.newsSlug
           ? `/noticia/${notification.newsSlug}`
           : '/'),
-      imageUrl: notification.imageUrl || '',
+      imageUrl: fcmImageUrl || '',
       isBreaking: notification.isBreaking ? 'true' : 'false'
     },
 
@@ -80,7 +88,7 @@ export async function sendFcmToAll(
       priority: notification.isBreaking ? 'high' : 'normal',
       notification: {
         channelId: 'nexora_news_notifications',
-        imageUrl: notification.imageUrl || undefined,
+        imageUrl: fcmImageUrl || undefined,
         sound: 'default',
         }
     }
