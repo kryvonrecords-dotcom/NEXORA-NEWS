@@ -7,6 +7,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from './db';
 import { generateToken, requireAdmin, AuthenticatedRequest } from './auth';
 import { getVapidPublicKey, sendWebPushToAll } from './webPush';
+import { sendFcmToAll } from './fcm';
 
 const router = express.Router();
 
@@ -103,6 +104,36 @@ function slugify(text: string): string {
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+
+// ----------------------------------------------------
+// FIREBASE CLOUD MESSAGING
+// ----------------------------------------------------
+router.post('/fcm/token', (req: Request, res: Response): void => {
+  const { token, userAgent } = req.body || {};
+
+  if (!token || typeof token !== 'string' || !token.trim()) {
+    res.status(400).json({
+      error: 'Token FCM é obrigatório.'
+    });
+    return;
+  }
+
+  const savedToken = db.addFcmToken(
+    token.trim(),
+    typeof userAgent === 'string'
+      ? userAgent
+      : req.get('user-agent')
+  );
+
+  console.log(
+    `FCM token registrado: ${savedToken.id}`
+  );
+
+  res.status(201).json({
+    success: true,
+    message: 'Token FCM registrado com sucesso.'
+  });
+});
 
 // ----------------------------------------------------
 // PUBLIC AUTH & SETUP
@@ -1462,17 +1493,26 @@ const handleSendNotification = async (req: AuthenticatedRequest, res: Response):
     clickUrl: clickUrl || (newsSlug ? `/noticia/${newsSlug}` : '/')
   });
 
-  const result = await sendWebPushToAll(notif).catch(e => {
-    console.error('WebPush broadcast error:', e);
-    return { total: 0, sent: 0, failed: 0 };
-  });
+  const [result, fcmResult] = await Promise.all([
+    sendWebPushToAll(notif).catch(e => {
+      console.error('WebPush broadcast error:', e);
+      return { total: 0, sent: 0, failed: 0 };
+    }),
+    sendFcmToAll(notif).catch(e => {
+      console.error('FCM broadcast error:', e);
+      return { total: 0, sent: 0, failed: 0 };
+    })
+  ]);
 
   res.status(201).json({
     success: true,
     message: `Notificação push enviada com sucesso para ${result.sent || db.getPushSubscriptions().length || 1} dispositivo(s) cadastrado(s)!`,
     notification: notif,
-    delivery: result,
-    deliveredCount: result.sent || 1
+    delivery: {
+      webPush: result,
+      fcm: fcmResult
+    },
+    deliveredCount: (result.sent || 0) + (fcmResult.sent || 0)
   });
 };
 
@@ -1491,17 +1531,26 @@ const handleAdminTestNotification = async (req: AuthenticatedRequest, res: Respo
     clickUrl: req.body.clickUrl || '/'
   });
 
-  const result = await sendWebPushToAll(notif).catch(e => {
-    console.error('WebPush test error:', e);
-    return { total: 0, sent: 0, failed: 0 };
-  });
+  const [result, fcmResult] = await Promise.all([
+    sendWebPushToAll(notif).catch(e => {
+      console.error('WebPush test error:', e);
+      return { total: 0, sent: 0, failed: 0 };
+    }),
+    sendFcmToAll(notif).catch(e => {
+      console.error('FCM test error:', e);
+      return { total: 0, sent: 0, failed: 0 };
+    })
+  ]);
 
   res.json({
     success: true,
-    message: 'Notificação de teste disparada com sucesso para todos os aparelhos conectados!',
+    message: 'Notificação de teste disparada com sucesso!',
     notification: notif,
-    delivery: result,
-    deliveredCount: result.sent || 1
+    delivery: {
+      webPush: result,
+      fcm: fcmResult
+    },
+    deliveredCount: (result.sent || 0) + (fcmResult.sent || 0)
   });
 };
 

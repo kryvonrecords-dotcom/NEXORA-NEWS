@@ -243,3 +243,11 @@ export interface EditorialContactMessage {
 }
 
 
+
+export interface FcmTokenItem {
+  id: string;
+  token: string;
+  userAgent?: string;
+  createdAt: string;
+  updatedAt?: string;
+}

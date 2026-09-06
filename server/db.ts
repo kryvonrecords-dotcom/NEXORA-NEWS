@@ -11,7 +11,7 @@ import {
   NewsItem, 
   NewsletterCampaign, 
   NewsletterSubscriber, 
-  PushSubscriptionItem, 
+  PushSubscriptionItem, FcmTokenItem, 
   SiteSettings, 
   User 
 } from '../src/types';
@@ -28,6 +28,7 @@ interface DatabaseSchema {
   contactMessages?: EditorialContactMessage[];
   notifications: AppNotification[];
   pushSubscriptions: PushSubscriptionItem[];
+  fcmTokens: FcmTokenItem[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -444,7 +445,8 @@ class DatabaseManager {
           adProposals: (parsed.adProposals && parsed.adProposals.length > 0 ? parsed.adProposals : DEFAULT_PROPOSALS).filter((p: CommercialProposal) => !p.company?.toLowerCase().includes('empresa teste')),
           contactMessages: parsed.contactMessages && parsed.contactMessages.length > 0 ? parsed.contactMessages : DEFAULT_CONTACT_MESSAGES,
           notifications: parsed.notifications || DEFAULT_NOTIFICATIONS,
-          pushSubscriptions: parsed.pushSubscriptions || []
+          pushSubscriptions: parsed.pushSubscriptions || [],
+          fcmTokens: parsed.fcmTokens || []
         };
       } catch (err) {
         console.error('Error reading database file, initializing default:', err);
@@ -479,7 +481,8 @@ class DatabaseManager {
       adProposals: DEFAULT_PROPOSALS,
       contactMessages: DEFAULT_CONTACT_MESSAGES,
       notifications: DEFAULT_NOTIFICATIONS,
-      pushSubscriptions: []
+      pushSubscriptions: [],
+      fcmTokens: []
     };
 
     this.saveDataDirect(initialData);
@@ -561,10 +564,21 @@ class DatabaseManager {
         }
       }
 
+      const localFcmTokens = Array.isArray(this.data.fcmTokens)
+        ? this.data.fcmTokens
+        : [];
+
+      const restoredFcmTokens = Array.isArray(restored.fcmTokens)
+        ? restored.fcmTokens
+        : [];
+
       this.data = {
         ...this.data,
         ...restored,
-        news: Array.from(newsMap.values())
+        news: Array.from(newsMap.values()),
+        fcmTokens: restoredFcmTokens.length > 0
+          ? restoredFcmTokens
+          : localFcmTokens
       };
 
       this.saveDataDirect(this.data);
@@ -1219,6 +1233,59 @@ class DatabaseManager {
       this.save();
       return true;
     }
+    return false;
+  }
+
+  // Firebase Cloud Messaging tokens
+  public getFcmTokens(): FcmTokenItem[] {
+    return this.data.fcmTokens || [];
+  }
+
+  public addFcmToken(token: string, userAgent?: string): FcmTokenItem {
+    if (!this.data.fcmTokens) {
+      this.data.fcmTokens = [];
+    }
+
+    const existingIdx = this.data.fcmTokens.findIndex(
+      item => item.token === token
+    );
+
+    if (existingIdx !== -1) {
+      this.data.fcmTokens[existingIdx] = {
+        ...this.data.fcmTokens[existingIdx],
+        userAgent,
+        updatedAt: new Date().toISOString()
+      };
+      this.save();
+      return this.data.fcmTokens[existingIdx];
+    }
+
+    const newToken: FcmTokenItem = {
+      id: `fcm-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+      token,
+      userAgent,
+      createdAt: new Date().toISOString()
+    };
+
+    this.data.fcmTokens.push(newToken);
+    this.save();
+    return newToken;
+  }
+
+  public deleteFcmToken(tokenOrId: string): boolean {
+    if (!this.data.fcmTokens) return false;
+
+    const initialLen = this.data.fcmTokens.length;
+
+    this.data.fcmTokens = this.data.fcmTokens.filter(
+      item => item.id !== tokenOrId && item.token !== tokenOrId
+    );
+
+    if (this.data.fcmTokens.length !== initialLen) {
+      this.save();
+      return true;
+    }
+
     return false;
   }
 
