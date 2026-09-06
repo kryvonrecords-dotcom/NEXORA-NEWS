@@ -105,6 +105,7 @@ export async function sendFcmToAll(
       if (!result.success) {
         failed++;
 
+        console.error('FCM token ' + i + ' falhou:', result.error?.code, result.error?.message);
         const errorCode = result.error?.code || '';
 
         if (
