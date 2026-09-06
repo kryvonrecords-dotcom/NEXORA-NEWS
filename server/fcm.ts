@@ -80,6 +80,7 @@ export async function sendFcmToAll(
       priority: notification.isBreaking ? 'high' : 'normal',
       notification: {
         channelId: 'nexora_news_notifications',
+        imageUrl: notification.imageUrl || undefined,
         sound: 'default',
         }
     }
