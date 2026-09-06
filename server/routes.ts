@@ -713,7 +713,6 @@ router.post('/admin/news', requireAdmin, (req: AuthenticatedRequest, res: Respon
       clickUrl: `/noticia/${created.slug}`
     });
     // Send real background Web Push to all devices
-    sendWebPushToAll(notif).catch(e => console.error('WebPush dispatch error:', e));
     sendFcmToAll(notif).catch(e => console.error('FCM dispatch error:', e));
   }
 
@@ -800,7 +799,6 @@ router.put('/admin/news/:id', requireAdmin, (req: AuthenticatedRequest, res: Res
       type: updated.isBreaking ? 'breaking_news' : 'new_article',
       clickUrl: `/noticia/${updated.slug}`
     });
-    sendWebPushToAll(notif).catch(e => console.error('WebPush dispatch error:', e));
     sendFcmToAll(notif).catch(e => console.error('FCM dispatch error:', e));
   }
 
