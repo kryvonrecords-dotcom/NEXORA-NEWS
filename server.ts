@@ -2,9 +2,75 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { sendFcmToAll } from './server/fcm';
 import { createServer as createViteServer } from 'vite';
 import routes from './server/routes';
 import { db } from './server/db';
+
+
+async function processScheduledNews() {
+  const now = new Date();
+  const scheduledNews = db.getAllNews().filter(news =>
+    news.status === 'scheduled' &&
+    news.scheduledFor &&
+    new Date(news.scheduledFor).getTime() <= now.getTime()
+  );
+
+  if (scheduledNews.length === 0) return;
+
+  for (const news of scheduledNews) {
+    try {
+      const publishedAt = now.toISOString();
+
+      const updated = db.updateNews(news.id, {
+        status: 'published',
+        publishedAt
+      });
+
+      if (!updated) continue;
+
+      const category = db.getCategoryById(updated.categoryId);
+
+      const notif = db.createNotification({
+        title: updated.isBreaking
+          ? `🔴 URGENTE: ${updated.title}`
+          : `📰 ${updated.title}`,
+        body: updated.excerpt ||
+          'Toque para ler a notícia completa no Nexora News.',
+        newsId: updated.id,
+        newsSlug: updated.slug,
+        categoryName: category?.name || updated.categoryName || 'Geral',
+        imageUrl: updated.featuredImage,
+        isBreaking: updated.isBreaking,
+        type: updated.isBreaking ? 'breaking_news' : 'new_article',
+        clickUrl: `/noticia/${updated.slug}`
+      });
+
+      console.log(
+        `⏰ Notícia agendada publicada: "${updated.title}" (${updated.id})`
+      );
+
+      sendFcmToAll(notif)
+        .then(result => {
+          console.log(
+            `⏰ FCM da notícia agendada: ${result.sent} enviados, ${result.failed} falharam.`
+          );
+        })
+        .catch(error => {
+          console.error(
+            'Erro no FCM da notícia agendada:',
+            error
+          );
+        });
+
+    } catch (error) {
+      console.error(
+        `Erro ao processar notícia agendada ${news.id}:`,
+        error
+      );
+    }
+  }
+}
 
 async function startServer() {
   const app = express();
@@ -111,7 +177,12 @@ async function startServer() {
   // Vite middleware for dev / static for production
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        watch: {
+          ignored: ['**/data/**']
+        }
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -125,6 +196,16 @@ async function startServer() {
 
   // Recuperar banco do Supabase antes de iniciar o servidor
   await db.restoreFromSupabase();
+
+  // Processar notícias agendadas imediatamente após restaurar o banco
+  await processScheduledNews();
+
+  // Verificar notícias agendadas a cada 30 segundos
+  setInterval(() => {
+    processScheduledNews().catch(error => {
+      console.error('Erro no processador de notícias agendadas:', error);
+    });
+  }, 30 * 1000);
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Nexora News Server running on http://0.0.0.0:${PORT}`);
