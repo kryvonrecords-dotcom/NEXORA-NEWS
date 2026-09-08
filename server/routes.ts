@@ -5,6 +5,7 @@ import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import { GoogleGenAI } from '@google/genai';
 import { db } from './db';
+import { supabase } from './supabase';
 import { generateToken, requireAdmin, AuthenticatedRequest } from './auth';
 import { getVapidPublicKey, sendWebPushToAll } from './webPush';
 import { sendFcmToAll } from './fcm';
@@ -28,17 +29,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = path.extname(file.originalname).toLowerCase();
-    const cleanName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
-    cb(null, `${cleanName}-${uniqueSuffix}${ext}`);
-  }
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -67,10 +58,52 @@ const upload = multer({
   }
 });
 
+// Supabase Storage
+const SUPABASE_UPLOAD_BUCKET = 'uploads';
+
+function createStorageFilename(file: Express.Multer.File): string {
+  const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  const ext = path.extname(file.originalname).toLowerCase();
+  const cleanName = path
+    .basename(file.originalname, ext)
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .substring(0, 30);
+
+  return `${cleanName}-${uniqueSuffix}${ext}`;
+}
+
+async function uploadToSupabase(file: Express.Multer.File) {
+  if (!supabase) {
+    throw new Error('Supabase Storage não está configurado.');
+  }
+
+  const filename = createStorageFilename(file);
+
+  const { error } = await supabase.storage
+    .from(SUPABASE_UPLOAD_BUCKET)
+    .upload(filename, file.buffer, {
+      contentType: file.mimetype,
+      upsert: false
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  const { data } = supabase.storage
+    .from(SUPABASE_UPLOAD_BUCKET)
+    .getPublicUrl(filename);
+
+  return {
+    filename,
+    url: data.publicUrl
+  };
+}
+
 // Helper for single file upload handler
-const handleSingleUpload = (req: AuthenticatedRequest, res: Response): void => {
-  // If upload.any() was used, check req.files or req.file
+const handleSingleUpload = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   let file: Express.Multer.File | undefined = req.file;
+
   if (!file && req.files && Array.isArray(req.files) && req.files.length > 0) {
     file = req.files[0];
   }
@@ -80,16 +113,25 @@ const handleSingleUpload = (req: AuthenticatedRequest, res: Response): void => {
     return;
   }
 
-  const publicUrl = `/uploads/${file.filename}`;
-  res.json({
-    message: 'Upload concluído com sucesso!',
-    url: publicUrl,
-    filename: file.filename,
-    originalName: file.originalname,
-    size: file.size,
-    mimetype: file.mimetype,
-    mimeType: file.mimetype
-  });
+  try {
+    const uploaded = await uploadToSupabase(file);
+
+    res.json({
+      message: 'Upload concluído com sucesso!',
+      url: uploaded.url,
+      filename: uploaded.filename,
+      originalName: file.originalname,
+      size: file.size,
+      mimetype: file.mimetype,
+      mimeType: file.mimetype
+    });
+  } catch (error: any) {
+    console.error('Erro no upload para Supabase Storage:', error);
+    res.status(500).json({
+      error: 'Erro ao enviar arquivo para o armazenamento permanente.',
+      details: error?.message
+    });
+  }
 };
 
 // Helper for slug generation
@@ -474,26 +516,42 @@ router.post('/admin/uploads', requireAdmin, upload.any(), handleSingleUpload);
 router.post('/admin/media', requireAdmin, upload.any(), handleSingleUpload);
 
 // Multiple Image Upload Endpoints
-const handleMultipleUploads = (req: AuthenticatedRequest, res: Response): void => {
+const handleMultipleUploads = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const rawFiles = (req.files || (req.file ? [req.file] : [])) as Express.Multer.File[];
+
   if (!rawFiles || rawFiles.length === 0) {
     res.status(400).json({ error: 'Nenhum arquivo enviado.' });
     return;
   }
 
-  const uploaded = rawFiles.map(f => ({
-    url: `/uploads/${f.filename}`,
-    filename: f.filename,
-    originalName: f.originalname,
-    size: f.size,
-    mimetype: f.mimetype,
-    mimeType: f.mimetype
-  }));
+  try {
+    const uploaded = await Promise.all(
+      rawFiles.map(async (file) => {
+        const stored = await uploadToSupabase(file);
 
-  res.json({
-    message: 'Uploads concluídos com sucesso!',
-    files: uploaded
-  });
+        return {
+          url: stored.url,
+          filename: stored.filename,
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          mimeType: file.mimetype
+        };
+      })
+    );
+
+    res.json({
+      message: 'Uploads concluídos com sucesso!',
+      files: uploaded
+    });
+  } catch (error: any) {
+    console.error('Erro no upload múltiplo para Supabase Storage:', error);
+
+    res.status(500).json({
+      error: 'Erro ao enviar arquivos para o armazenamento permanente.',
+      details: error?.message
+    });
+  }
 };
 
 router.post('/upload-multiple', requireAdmin, upload.any(), handleMultipleUploads);
@@ -502,28 +560,56 @@ router.post('/admin/uploads-multiple', requireAdmin, upload.any(), handleMultipl
 router.post('/admin/media-multiple', requireAdmin, upload.any(), handleMultipleUploads);
 
 // Media gallery list & aliases
-const handleGetMediaList = (req: AuthenticatedRequest, res: Response): void => {
+const handleGetMediaList = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
-    const files = fs.readdirSync(uploadsDir);
-    const mediaList = files
-      .filter(file => !file.startsWith('.'))
-      .map(file => {
-        const filePath = path.join(uploadsDir, file);
-        const stats = fs.statSync(filePath);
-        return {
-          id: file,
-          filename: file,
-          name: file,
-          url: `/uploads/${file}`,
-          size: stats.size,
-          createdAt: stats.birthtime.toISOString()
-        };
-      })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (!supabase) {
+      res.status(500).json({
+        error: 'Supabase Storage não está configurado.'
+      });
+      return;
+    }
+
+    const { data, error } = await supabase.storage
+      .from(SUPABASE_UPLOAD_BUCKET)
+      .list('', {
+        limit: 1000,
+        offset: 0,
+        sortBy: {
+          column: 'created_at',
+          order: 'desc'
+        }
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const mediaList = (data || []).map(file => {
+      const { data: publicUrlData } = supabase.storage
+        .from(SUPABASE_UPLOAD_BUCKET)
+        .getPublicUrl(file.name);
+
+      return {
+        id: file.name,
+        filename: file.name,
+        name: file.name,
+        url: publicUrlData.publicUrl,
+        size: file.metadata?.size || 0,
+        createdAt: file.created_at || new Date().toISOString()
+      };
+    });
 
     res.json(mediaList);
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao listar arquivos de mídia.' });
+  } catch (error: any) {
+    console.error('Erro ao listar arquivos do Supabase Storage:', error);
+
+    res.status(500).json({
+      error: 'Erro ao listar arquivos de mídia.',
+      details: error?.message
+    });
   }
 };
 
@@ -531,18 +617,56 @@ router.get('/admin/uploads', requireAdmin, handleGetMediaList);
 router.get('/admin/media', requireAdmin, handleGetMediaList);
 
 // Delete uploaded image / media
-const handleDeleteMedia = (req: AuthenticatedRequest, res: Response): void => {
-  const rawParam = req.params.filename || req.params.idOrUrl || '';
-  const decoded = decodeURIComponent(rawParam);
-  const safeFilename = path.basename(decoded);
-  const filePath = path.join(uploadsDir, safeFilename);
+const handleDeleteMedia = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!supabase) {
+      res.status(500).json({
+        error: 'Supabase Storage não está configurado.'
+      });
+      return;
+    }
 
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    res.json({ success: true, message: 'Arquivo excluído com sucesso.' });
-  } else {
-    // If not found, still return success to not block client state
-    res.json({ success: true, message: 'Arquivo removido ou não localizado.' });
+    const rawParam = req.params.filename || req.params.idOrUrl || '';
+    const decoded = decodeURIComponent(rawParam);
+
+    // Aceita tanto o nome do arquivo quanto uma URL completa
+    const filename = decoded.includes('/')
+      ? decoded.split('/').pop() || ''
+      : decoded;
+
+    const safeFilename = path.basename(filename);
+
+    if (!safeFilename) {
+      res.status(400).json({
+        error: 'Nome do arquivo inválido.'
+      });
+      return;
+    }
+
+    const { error } = await supabase.storage
+      .from(SUPABASE_UPLOAD_BUCKET)
+      .remove([safeFilename]);
+
+    if (error) {
+      throw error;
+    }
+
+    res.json({
+      success: true,
+      message: 'Arquivo excluído permanentemente do Supabase Storage.'
+    });
+
+  } catch (error: any) {
+    console.error('Erro ao excluir arquivo do Supabase Storage:', error);
+
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao excluir arquivo permanentemente.',
+      details: error?.message
+    });
   }
 };
 

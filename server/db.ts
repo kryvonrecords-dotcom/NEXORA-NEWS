@@ -20,6 +20,7 @@ interface DatabaseSchema {
   users: User[];
   categories: Category[];
   news: NewsItem[];
+  deletedNewsIds: string[];
   subscribers: NewsletterSubscriber[];
   newsletterCampaigns?: NewsletterCampaign[];
   settings: SiteSettings;
@@ -427,6 +428,9 @@ class DatabaseManager {
           users: parsed.users || [],
           categories: parsed.categories || DEFAULT_CATEGORIES,
           news: parsed.news || DEMO_NEWS,
+          deletedNewsIds: Array.isArray(parsed.deletedNewsIds)
+            ? parsed.deletedNewsIds
+            : [],
           subscribers: parsed.subscribers || [],
           newsletterCampaigns: parsed.newsletterCampaigns || [
             {
@@ -473,6 +477,7 @@ class DatabaseManager {
       users: [initialAdmin],
       categories: DEFAULT_CATEGORIES,
       news: DEMO_NEWS,
+      deletedNewsIds: [],
       subscribers: [
         { id: 'sub-1', email: 'leitor.exemplo@nexoranews.ao', createdAt: new Date().toISOString(), status: 'active' }
       ],
@@ -530,19 +535,43 @@ class DatabaseManager {
         return false;
       }
 
-      const localNews = Array.isArray(this.data.news) ? this.data.news : [];
-      const remoteNews = Array.isArray(restored.news) ? restored.news : [];
+      const localNews = Array.isArray(this.data.news)
+        ? this.data.news
+        : [];
+
+      const remoteNews = Array.isArray(restored.news)
+        ? restored.news
+        : [];
+
+      const localDeletedIds = Array.isArray(this.data.deletedNewsIds)
+        ? this.data.deletedNewsIds
+        : [];
+
+      const remoteDeletedIds = Array.isArray(restored.deletedNewsIds)
+        ? restored.deletedNewsIds
+        : [];
+
+      // Junta todos os IDs apagados localmente e remotamente.
+      // Uma notícia marcada como apagada nunca pode voltar.
+      const deletedNewsIds = Array.from(
+        new Set([
+          ...localDeletedIds,
+          ...remoteDeletedIds
+        ])
+      );
 
       const newsMap = new Map<string, NewsItem>();
 
       for (const news of localNews) {
-        if (news?.id) {
+        if (news?.id && !deletedNewsIds.includes(news.id)) {
           newsMap.set(news.id, news);
         }
       }
 
       for (const news of remoteNews) {
-        if (!news?.id) continue;
+        if (!news?.id || deletedNewsIds.includes(news.id)) {
+          continue;
+        }
 
         const local = newsMap.get(news.id);
 
@@ -576,6 +605,7 @@ class DatabaseManager {
         ...this.data,
         ...restored,
         news: Array.from(newsMap.values()),
+        deletedNewsIds,
         fcmTokens: restoredFcmTokens.length > 0
           ? restoredFcmTokens
           : localFcmTokens
@@ -837,11 +867,24 @@ class DatabaseManager {
 
   public deleteNews(id: string): boolean {
     const initialLen = this.data.news.length;
-    this.data.news = this.data.news.filter(item => item.id !== id);
+
+    this.data.news = this.data.news.filter(
+      item => item.id !== id
+    );
+
     if (this.data.news.length !== initialLen) {
+      if (!Array.isArray(this.data.deletedNewsIds)) {
+        this.data.deletedNewsIds = [];
+      }
+
+      if (!this.data.deletedNewsIds.includes(id)) {
+        this.data.deletedNewsIds.push(id);
+      }
+
       this.save();
       return true;
     }
+
     return false;
   }
 
