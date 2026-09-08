@@ -16,3 +16,23 @@ if (!url || !key) {
 export const supabase = url && key
   ? createClient(url, key)
   : null;
+
+export async function deleteSupabaseStorageFiles(filenames: string[]): Promise<void> {
+  if (!supabase || filenames.length === 0) return;
+
+  const uniqueFiles = [...new Set(
+    filenames
+      .map(name => name.trim())
+      .filter(Boolean)
+  )];
+
+  if (uniqueFiles.length === 0) return;
+
+  const { error } = await supabase.storage
+    .from('uploads')
+    .remove(uniqueFiles);
+
+  if (error) {
+    throw error;
+  }
+}

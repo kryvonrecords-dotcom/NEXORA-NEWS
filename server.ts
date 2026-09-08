@@ -6,6 +6,7 @@ import { sendFcmToAll } from './server/fcm';
 import { createServer as createViteServer } from 'vite';
 import routes from './server/routes';
 import { db } from './server/db';
+import { deleteSupabaseStorageFiles } from './server/supabase';
 
 
 async function processScheduledNews() {
@@ -69,6 +70,55 @@ async function processScheduledNews() {
         error
       );
     }
+  }
+}
+
+
+async function cleanupExpiredNewsStorage(expiredNews: any[]) {
+  const filesToDelete: string[] = [];
+
+  for (const news of expiredNews) {
+    const mediaUrls = [
+      news.featuredImage,
+      ...(Array.isArray(news.galleryImages) ? news.galleryImages : [])
+    ].filter((url): url is string => typeof url === 'string' && url.length > 0);
+
+    for (const url of mediaUrls) {
+      try {
+        const parsed = new URL(url);
+        const pathPrefix = '/storage/v1/object/public/uploads/';
+
+        if (!parsed.pathname.startsWith(pathPrefix)) {
+          continue;
+        }
+
+        const filename = decodeURIComponent(
+          parsed.pathname.slice(pathPrefix.length)
+        );
+
+        if (filename && !filename.includes('/')) {
+          filesToDelete.push(filename);
+        }
+      } catch {
+        // Ignorar URLs inválidas ou externas.
+      }
+    }
+  }
+
+  const uniqueFiles = [...new Set(filesToDelete)];
+
+  if (uniqueFiles.length === 0) return;
+
+  try {
+    await deleteSupabaseStorageFiles(uniqueFiles);
+    console.log(
+      `🧹 Mídia removida do Supabase Storage após expiração: ${uniqueFiles.length}`
+    );
+  } catch (error) {
+    console.error(
+      'Erro ao remover mídia de notícias expiradas do Supabase Storage:',
+      error
+    );
   }
 }
 
@@ -200,8 +250,9 @@ async function startServer() {
   // Processar notícias agendadas imediatamente após restaurar o banco
   await processScheduledNews();
 
-  // Remover notícias publicadas há mais de 24 horas
-  db.expireOldNews();
+  // Remover notícias publicadas há mais de 24 horas e sua mídia do Storage
+  const expiredNews = db.expireOldNews();
+  await cleanupExpiredNewsStorage(expiredNews);
 
   // Verificar agendamentos e expiração de notícias a cada 30 segundos
   setInterval(() => {
@@ -209,7 +260,10 @@ async function startServer() {
       console.error('Erro no processador de notícias agendadas:', error);
     });
 
-    db.expireOldNews();
+    const expiredNews = db.expireOldNews();
+    cleanupExpiredNewsStorage(expiredNews).catch(error => {
+      console.error('Erro na limpeza de mídia de notícias expiradas:', error);
+    });
   }, 30 * 1000);
 
   app.listen(PORT, '0.0.0.0', () => {
