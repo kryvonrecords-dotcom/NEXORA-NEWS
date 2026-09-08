@@ -888,6 +888,36 @@ class DatabaseManager {
     return false;
   }
 
+  public expireOldNews(): string[] {
+    const now = Date.now();
+    const expirationMs = 24 * 60 * 60 * 1000;
+
+    const expiredIds = this.data.news
+      .filter(news => {
+        if (news.status !== 'published' || !news.publishedAt) {
+          return false;
+        }
+
+        const publishedAt = new Date(news.publishedAt).getTime();
+
+        return Number.isFinite(publishedAt) &&
+          now - publishedAt >= expirationMs;
+      })
+      .map(news => news.id);
+
+    for (const id of expiredIds) {
+      this.deleteNews(id);
+    }
+
+    if (expiredIds.length > 0) {
+      console.log(
+        `🗑️ Notícias expiradas após 24h: ${expiredIds.length}`
+      );
+    }
+
+    return expiredIds;
+  }
+
   // Newsletter
   public getSubscribers(): NewsletterSubscriber[] {
     return this.data.subscribers;

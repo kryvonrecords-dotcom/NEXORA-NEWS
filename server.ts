@@ -200,11 +200,16 @@ async function startServer() {
   // Processar notícias agendadas imediatamente após restaurar o banco
   await processScheduledNews();
 
-  // Verificar notícias agendadas a cada 30 segundos
+  // Remover notícias publicadas há mais de 24 horas
+  db.expireOldNews();
+
+  // Verificar agendamentos e expiração de notícias a cada 30 segundos
   setInterval(() => {
     processScheduledNews().catch(error => {
       console.error('Erro no processador de notícias agendadas:', error);
     });
+
+    db.expireOldNews();
   }, 30 * 1000);
 
   app.listen(PORT, '0.0.0.0', () => {
