@@ -780,10 +780,21 @@ class DatabaseManager {
   }
 
   public getPublishedNews(): NewsItem[] {
-    const now = new Date().toISOString();
+    const now = Date.now();
+    const expirationMs = 24 * 60 * 60 * 1000;
+    const nowIso = new Date(now).toISOString();
+
     return this.getAllNews().filter(n => {
-      if (n.status === 'published') return true;
-      if (n.status === 'scheduled' && n.scheduledFor && n.scheduledFor <= now) return true;
+      if (n.status === 'published') {
+        if (!n.publishedAt) return false;
+        const publishedAt = new Date(n.publishedAt).getTime();
+        return Number.isFinite(publishedAt) && now - publishedAt < expirationMs;
+      }
+
+      if (n.status === 'scheduled' && n.scheduledFor && n.scheduledFor <= nowIso) {
+        return true;
+      }
+
       return false;
     }).sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime());
   }
@@ -791,6 +802,15 @@ class DatabaseManager {
   public getNewsById(id: string): NewsItem | undefined {
     const n = this.data.news.find(item => item.id === id);
     if (!n) return undefined;
+
+    if (n.status === 'published' && n.publishedAt) {
+      const publishedAt = new Date(n.publishedAt).getTime();
+      if (Number.isFinite(publishedAt) &&
+          Date.now() - publishedAt >= 24 * 60 * 60 * 1000) {
+        return undefined;
+      }
+    }
+
     const cat = this.getCategoryById(n.categoryId);
     return {
       ...n,
@@ -802,6 +822,15 @@ class DatabaseManager {
   public getNewsBySlug(slug: string): NewsItem | undefined {
     const n = this.data.news.find(item => item.slug.toLowerCase() === slug.toLowerCase());
     if (!n) return undefined;
+
+    if (n.status === 'published' && n.publishedAt) {
+      const publishedAt = new Date(n.publishedAt).getTime();
+      if (Number.isFinite(publishedAt) &&
+          Date.now() - publishedAt >= 24 * 60 * 60 * 1000) {
+        return undefined;
+      }
+    }
+
     const cat = this.getCategoryById(n.categoryId);
     return {
       ...n,
