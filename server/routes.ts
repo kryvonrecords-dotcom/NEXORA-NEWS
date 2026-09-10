@@ -800,7 +800,7 @@ router.get('/settings', (req: Request, res: Response): void => {
 // Image & Media Upload Endpoints (Real file upload via multipart/form-data)
 router.post('/upload', requireAdmin, upload.any(), handleSingleUpload);
 
-router.post('/admin/automation/test-news-import', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+router.post('/admin/automation/test-news-import', async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const result = await importNewsDataArticles(1);
     res.json({
