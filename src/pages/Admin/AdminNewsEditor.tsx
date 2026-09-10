@@ -243,27 +243,33 @@ export function AdminNewsEditor({ editId, onNavigate }: Props) {
       setContent(result.content || '');
       setTags(result.suggestedTags || []);
 
-      // Search for a free editorial image on Wikimedia Commons
-      // Use the AI description when available, otherwise fall back to the
-      // generated title/theme so the article can still receive an image.
-      const imageSearchDescription =
-        result.suggestedImageDescription?.trim() ||
-        result.title?.trim() ||
-        aiTheme.trim();
+      // Usar a imagem que o servidor já encontrou automaticamente.
+      if (result.featuredImage) {
+        setFeaturedImage(result.featuredImage);
+        setFeaturedImageCaption(
+          result.featuredImageCaption || 'Imagem: Wikimedia Commons'
+        );
+      } else {
+        // Fallback: procurar uma imagem gratuita caso o servidor não tenha encontrado.
+        const imageSearchDescription =
+          result.suggestedImageDescription?.trim() ||
+          result.title?.trim() ||
+          aiTheme.trim();
 
-      if (imageSearchDescription) {
-        try {
-          const imageResult = await api.searchNewsImage(imageSearchDescription);
-          if (imageResult?.imageUrl) {
-            setFeaturedImage(imageResult.imageUrl);
-            setFeaturedImageCaption(
-              imageResult.title
-                ? `${imageResult.title.replace(/^File:/, '')} — Wikimedia Commons`
-                : 'Imagem: Wikimedia Commons'
-            );
+        if (imageSearchDescription) {
+          try {
+            const imageResult = await api.searchNewsImage(imageSearchDescription);
+            if (imageResult?.imageUrl) {
+              setFeaturedImage(imageResult.imageUrl);
+              setFeaturedImageCaption(
+                imageResult.title
+                  ? `${imageResult.title.replace(/^File:/, '')} — Wikimedia Commons`
+                  : 'Imagem: Wikimedia Commons'
+              );
+            }
+          } catch (imageErr) {
+            console.warn('Não foi possível obter imagem gratuita:', imageErr);
           }
-        } catch (imageErr) {
-          console.warn('Não foi possível obter imagem gratuita:', imageErr);
         }
       }
 
