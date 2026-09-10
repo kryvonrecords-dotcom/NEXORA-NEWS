@@ -1869,6 +1869,62 @@ VERIFICAÇÃO FINAL:
 
     const text = response.text || '';
     const parsed = JSON.parse(text);
+
+    // Buscar automaticamente uma imagem gratuita no Wikimedia Commons
+    try {
+      const imageQuery = (
+        parsed.suggestedImageDescription ||
+        parsed.title ||
+        theme.trim()
+      ).trim();
+
+      if (imageQuery) {
+        const queries = [
+          imageQuery,
+          parsed.title || theme.trim(),
+          theme.trim()
+        ].filter(Boolean);
+
+        let imageFound: any = null;
+
+        for (const searchText of queries) {
+          const query = encodeURIComponent(searchText);
+          const imageUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${query}&gsrnamespace=6&gsrlimit=5&prop=imageinfo&iiprop=url&iiurlwidth=1280&format=json`;
+
+          const imageResponse = await fetch(imageUrl, {
+            headers: {
+              'User-Agent': 'NexoraNews/1.0'
+            }
+          });
+
+          if (!imageResponse.ok) continue;
+
+          const imageData = await imageResponse.json();
+          const pages = Object.values(imageData?.query?.pages || {}) as any[];
+
+          imageFound = pages.find(page =>
+            page?.imageinfo?.[0]?.thumburl || page?.imageinfo?.[0]?.url
+          );
+
+          if (imageFound) break;
+        }
+
+        if (imageFound) {
+          const info = imageFound.imageinfo[0];
+
+          parsed.featuredImage = info.thumburl || info.url;
+          parsed.featuredImageCaption =
+            `${(imageFound.title || '').replace(/^File:/, '')} — Wikimedia Commons`;
+
+          console.log('Imagem gratuita encontrada:', parsed.featuredImage);
+        } else {
+          console.log('Nenhuma imagem encontrada no Wikimedia Commons.');
+        }
+      }
+    } catch (imageError) {
+      console.error('Erro ao buscar imagem gratuita:', imageError);
+    }
+
     res.json(parsed);
   } catch (err: any) {
     console.error('Gemini generate-news error:', err);
