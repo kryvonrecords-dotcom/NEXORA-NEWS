@@ -107,7 +107,7 @@ export async function importNewsDataArticles(limit = 10): Promise<{
     }),
     fetchNewsDataNews({
       language: 'pt',
-      country: 'ng,za,ke,gh,mz,na,zm,cd,cg,tz,ug,rw',
+      country: 'ng,za,ke,gh,mz',
       size: perSource
     }),
     fetchNewsDataNews({
