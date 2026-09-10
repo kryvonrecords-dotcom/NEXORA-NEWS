@@ -12,6 +12,254 @@ import { sendFcmToAll } from './fcm';
 
 const router = express.Router();
 
+// -------------------------------------------------------------
+// PIXABAY - IMAGENS AUTOMÁTICAS PARA NOTÍCIAS
+// -------------------------------------------------------------
+async function fetchPixabayImage(query: string): Promise<string | null> {
+  const apiKey = process.env.PIXABAY_API_KEY;
+
+  if (!apiKey || !query?.trim()) {
+    return null;
+  }
+
+  const url = new URL('https://pixabay.com/api/');
+  url.searchParams.set('key', apiKey);
+  url.searchParams.set('q', query.trim());
+  url.searchParams.set('image_type', 'photo');
+  url.searchParams.set('orientation', 'horizontal');
+  url.searchParams.set('safesearch', 'true');
+  url.searchParams.set('per_page', '5');
+
+  const response = await fetch(url.toString());
+
+  if (!response.ok) {
+    throw new Error(`Pixabay HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (data?.hits?.length) {
+    return data.hits[0].largeImageURL || data.hits[0].webformatURL || null;
+  }
+
+  return null;
+}
+
+
+
+// -------------------------------------------------------------
+// IMPORTADOR AUTOMÁTICO DE NOTÍCIAS
+// -------------------------------------------------------------
+function slugifyNewsTitle(title: string): string {
+  return title
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 180);
+}
+
+function detectNewsCategory(article: any): string {
+  const text = [
+    article?.title,
+    article?.description,
+    ...(Array.isArray(article?.keywords) ? article.keywords : []),
+    ...(Array.isArray(article?.category) ? article.category : [article?.category])
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  if (/(futebol|futebol|football|soccer|basquete|basketball|nba|girabola|champions|olimpí|olimpi|atleta|desporto|sport)/i.test(text)) return 'desporto';
+  if (/(tecnologia|technology|tech|ai |artificial intelligence|inteligência artificial|software|smartphone|internet|cyber|startup|digital)/i.test(text)) return 'tecnologia';
+  if (/(economia|economy|business|mercado|market|finan|banco|bank|petróleo|petroleo|oil|investimento|investment|inflação|inflacao)/i.test(text)) return 'economia';
+  if (/(política|politica|politics|election|eleição|eleicao|governo|government|presidente|president|parlamento|parliament|ministro|diplomacia)/i.test(text)) return 'politica';
+  if (/(saúde|saude|health|hospital|medicina|medical|vacina|vaccine|doença|doenca)/i.test(text)) return 'saude';
+  if (/(educação|educacao|education|universidade|university|escola|school|estudante|student|bolsa de estudo)/i.test(text)) return 'educacao';
+  if (/(música|musica|music|cinema|movie|filme|film|celebridade|celebrity|artista|artist|entretenimento|entertainment|festival)/i.test(text)) return 'entretenimento';
+  if (/(cultura|culture|arte|art|literatura|literature|património|patrimonio|heritage)/i.test(text)) return 'cultura';
+  if (/(sociedade|society|comunidade|community|crime|segurança|seguranca|acidente|protesto)/i.test(text)) return 'sociedade';
+  if (/(angola|luanda|benguela|huambo|cabinda|lubango|namibe|malanje|uan|unitel|sonangol)/i.test(text)) return 'angola';
+  if (/(áfrica|africa|african|nigeria|south africa|kenya|ghana|mozambique|namibia|congo|zambia)/i.test(text)) return 'africa';
+
+  return 'mundo';
+}
+
+function getNewsCategoryId(categorySlug: string): string {
+  const category = db.getCategoryBySlug(categorySlug);
+  return category?.id || 'cat-mundo';
+}
+
+async function importNewsDataArticles(limit = 10): Promise<{
+  fetched: number;
+  imported: number;
+  skipped: number;
+  errors: number;
+}> {
+  const data = await fetchNewsDataNews({
+    language: 'pt',
+    size: Math.min(Math.max(limit, 1), 10)
+  });
+
+  const articles = Array.isArray(data?.results) ? data.results : [];
+  const existingNews = db.getAllNews();
+
+  let imported = 0;
+  let skipped = 0;
+  let errors = 0;
+
+  for (const article of articles) {
+    try {
+      const title = String(article?.title || '').trim();
+
+      if (!title) {
+        skipped++;
+        continue;
+      }
+
+      const sourceUrl = String(article?.link || '').trim();
+      const slugBase = slugifyNewsTitle(title);
+
+      if (!slugBase) {
+        skipped++;
+        continue;
+      }
+
+      const duplicate = existingNews.some(n =>
+        n.slug.toLowerCase() === slugBase.toLowerCase() ||
+        (sourceUrl && n.content.includes(sourceUrl))
+      );
+
+      if (duplicate) {
+        skipped++;
+        continue;
+      }
+
+      const categorySlug = detectNewsCategory(article);
+      const categoryId = getNewsCategoryId(categorySlug);
+
+      const description = String(
+        article?.description ||
+        article?.content ||
+        title
+      ).trim();
+
+      let imageUrl = String(
+        article?.image_url ||
+        article?.image ||
+        ''
+      ).trim();
+
+      if (!imageUrl) {
+        try {
+          imageUrl = await fetchPixabayImage(title) || '';
+        } catch {
+          imageUrl = '';
+        }
+      }
+
+      if (!imageUrl) {
+        imageUrl = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80';
+      }
+
+      const keywords = Array.isArray(article?.keywords)
+        ? article.keywords.filter(Boolean).map((k: any) => String(k).trim()).slice(0, 15)
+        : [];
+
+      const tags = keywords.length
+        ? keywords
+        : title
+            .split(/\s+/)
+            .map(word => word.replace(/[^\p{L}\p{N}-]/gu, '').trim())
+            .filter(word => word.length >= 4)
+            .slice(0, 8);
+
+      const publishedAt = article?.pubDate
+        ? new Date(article.pubDate).toISOString()
+        : new Date().toISOString();
+
+      const content = `
+        <p>${description}</p>
+        ${sourceUrl ? `<p><strong>Fonte:</strong> <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Ver fonte original</a></p>` : ''}
+      `.trim();
+
+      const created = db.createNews({
+        title,
+        slug: slugBase,
+        excerpt: description.substring(0, 500),
+        content,
+        featuredImage: imageUrl,
+        featuredImageCaption: 'Imagem ilustrativa',
+        galleryImages: [],
+        categoryId,
+        authorId: 'nexora-automation',
+        authorName: 'Redação Nexora',
+        authorRole: 'Automação',
+        tags,
+        status: 'published',
+        isBreaking: false,
+        isHero: false,
+        isSecondaryHero: false,
+        publishedAt,
+        readTimeMinutes: 1
+      });
+
+      existingNews.push(created);
+      imported++;
+    } catch (error) {
+      console.error('[NEXORA AUTOMATION] Erro ao importar notícia:', error);
+      errors++;
+    }
+  }
+
+  return {
+    fetched: articles.length,
+    imported,
+    skipped,
+    errors
+  };
+}
+
+// -------------------------------------------------------------
+// NEWS DATA.IO - FONTE AUTOMÁTICA DE NOTÍCIAS
+// -------------------------------------------------------------
+async function fetchNewsDataNews(params: {
+  language?: string;
+  country?: string;
+  category?: string;
+  size?: number;
+}) {
+  const apiKey = process.env.NEWSDATA_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('NEWSDATA_API_KEY não configurada no servidor.');
+  }
+
+  const url = new URL('https://newsdata.io/api/1/latest');
+  url.searchParams.set('apikey', apiKey);
+  url.searchParams.set('language', params.language || 'pt');
+  url.searchParams.set('size', String(params.size || 10));
+
+  if (params.country) url.searchParams.set('country', params.country);
+  if (params.category) url.searchParams.set('category', params.category);
+
+  const response = await fetch(url.toString());
+
+  if (!response.ok) {
+    throw new Error(`NewsData.io HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (data?.status === 'error') {
+    throw new Error(data?.results?.message || 'Erro na NewsData.io');
+  }
+
+  return data;
+}
+
+
 // Lazy Gemini AI initialization
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
@@ -511,6 +759,24 @@ router.get('/settings', (req: Request, res: Response): void => {
 
 // Image & Media Upload Endpoints (Real file upload via multipart/form-data)
 router.post('/upload', requireAdmin, upload.any(), handleSingleUpload);
+
+router.post('/admin/automation/test-news-import', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const result = await importNewsDataArticles(1);
+    res.json({
+      success: true,
+      message: 'Teste de importação concluído.',
+      result
+    });
+  } catch (error) {
+    console.error('[NEXORA AUTOMATION TEST]', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
+
 router.post('/admin/upload', requireAdmin, upload.any(), handleSingleUpload);
 router.post('/admin/uploads', requireAdmin, upload.any(), handleSingleUpload);
 router.post('/admin/media', requireAdmin, upload.any(), handleSingleUpload);
