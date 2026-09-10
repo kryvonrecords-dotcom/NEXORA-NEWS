@@ -1878,9 +1878,42 @@ VERIFICAÇÃO FINAL:
         theme.trim()
       ).trim();
 
+      // Termos comuns traduzidos para melhorar a pesquisa no Wikimedia Commons.
+      const imageSearchTerms = imageQuery
+        .replace(/seleção brasileira/gi, 'Brazil national football team')
+        .replace(/seleção do brasil/gi, 'Brazil national football team')
+        .replace(/brasil/gi, 'Brazil')
+        .replace(/futebol/gi, 'football')
+        .replace(/jogador/gi, 'football player')
+        .replace(/jogadores/gi, 'football players')
+        .replace(/copa do mundo/gi, 'World Cup')
+        .replace(/treino/gi, 'football training')
+        .replace(/treinamento/gi, 'football training')
+        .replace(/estádio/gi, 'football stadium')
+        .replace(/equipa/gi, 'football team')
+        .replace(/time/gi, 'football team')
+        .replace(/campeonato/gi, 'championship')
+        .replace(/mundial/gi, 'World Cup')
+        .replace(/política/gi, 'politics')
+        .replace(/eleições/gi, 'election')
+        .replace(/eleição/gi, 'election')
+        .replace(/presidente/gi, 'president')
+        .replace(/governo/gi, 'government')
+        .replace(/economia/gi, 'economy')
+        .replace(/negócios/gi, 'business')
+        .replace(/tecnologia/gi, 'technology')
+        .replace(/saúde/gi, 'health')
+        .replace(/educação/gi, 'education')
+        .replace(/guerra/gi, 'war')
+        .replace(/Ucrânia/gi, 'Ukraine')
+        .replace(/Rússia/gi, 'Russia')
+        .replace(/Estados Unidos/gi, 'United States')
+        .replace(/Portugal/gi, 'Portugal')
+        .replace(/Angola/gi, 'Angola');
+
       if (imageQuery) {
         const queries = [
-          imageQuery,
+          imageSearchTerms,
           parsed.title || theme.trim(),
           theme.trim()
         ].filter(Boolean);
