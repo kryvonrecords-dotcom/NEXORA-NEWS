@@ -695,6 +695,18 @@ export const api = {
     });
   },
 
+  // Free news image search (Wikimedia Commons)
+  async searchNewsImage(description: string): Promise<{
+    imageUrl: string;
+    title?: string;
+    source?: string;
+  }> {
+    return fetchWithAuth('/api/admin/ai/search-news-image', {
+      method: 'POST',
+      body: JSON.stringify({ description }),
+    });
+  },
+
   // AI Content Generator (Server-Side Gemini API)
   async generateAiNewsDraft(params: {
     theme: string;

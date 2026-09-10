@@ -1698,6 +1698,56 @@ router.delete('/admin/notifications/:id', requireAdmin, (req: AuthenticatedReque
 });
 
 // -------------------------------------------------------------
+// FREE NEWS IMAGE SEARCH (WIKIMEDIA COMMONS)
+// -------------------------------------------------------------
+router.post('/admin/ai/search-news-image', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const { description } = req.body;
+
+  if (!description || !description.trim()) {
+    res.status(400).json({ error: 'A descrição da imagem é obrigatória.' });
+    return;
+  }
+
+  try {
+    const query = encodeURIComponent(description.trim());
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${query}&gsrnamespace=6&gsrlimit=5&prop=imageinfo&iiprop=url&iiurlwidth=1280&format=json`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'NexoraNews/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Wikimedia HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const pages = Object.values(data?.query?.pages || {}) as any[];
+
+    const image = pages.find(page =>
+      page?.imageinfo?.[0]?.thumburl || page?.imageinfo?.[0]?.url
+    );
+
+    if (!image) {
+      res.json({ imageUrl: '' });
+      return;
+    }
+
+    const imageInfo = image.imageinfo[0];
+
+    res.json({
+      imageUrl: imageInfo.thumburl || imageInfo.url,
+      title: image.title || '',
+      source: 'Wikimedia Commons'
+    });
+  } catch (err) {
+    console.error('Wikimedia image search error:', err);
+    res.json({ imageUrl: '' });
+  }
+});
+
+// -------------------------------------------------------------
 // AI NEWS CONTENT GENERATOR (GEMINI API)
 // -------------------------------------------------------------
 router.post('/admin/ai/generate-news', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -1723,29 +1773,99 @@ router.post('/admin/ai/generate-news', requireAdmin, async (req: AuthenticatedRe
   }
 
   try {
-    const prompt = `Você é um jornalista sénior da agência de notícias "Nexora News" (Angola/Internacional).
-Escreva uma notícia completa, rigorosa e jornalística sobre o seguinte tema: "${theme.trim()}".
-Categoria: ${categorySlug || 'Geral'}
-Tom: ${tone || 'jornalístico e imparcial'}
-Extensão desejada: ${targetLength || 'médio'}
+    const prompt = `Você é um jornalista sénior, editor e redator profissional da Nexora News, um portal de notícias de Angola com cobertura nacional e internacional.
 
-Responda ESTRITAMENTE em formato JSON (sem markdown de código) com o seguinte esquema:
+TEMA: "${theme.trim()}"
+CATEGORIA: ${categorySlug || 'geral'}
+TOM: ${tone || 'jornalístico e imparcial'}
+EXTENSÃO: ${targetLength || 'médio'}
+
+REGRA PRINCIPAL:
+NUNCA invente acontecimentos, resultados, classificações, datas, números, estatísticas, valores, nomes, declarações, transferências, lesões ou outras informações apresentadas como atuais.
+
+Se o utilizador fornecer apenas um tema amplo, produza uma matéria EXPLICATIVA, CONTEXTUAL ou DE ANÁLISE.
+
+Por exemplo, se o tema for apenas "Girabola", não invente resultados, jornadas, posições na tabela, líder, campeão, jogos futuros ou acontecimentos recentes.
+
+Nesse caso, explique o Girabola como o Campeonato Nacional de Futebol de Angola, abordando a importância da competição, o desenvolvimento do futebol angolano, clubes, formação de jogadores, organização e desafios estruturais, sem inventar acontecimentos atuais.
+
+Se o utilizador fornecer uma notícia com factos concretos, utilize somente os factos fornecidos. Não acrescente informações factuais não fornecidas.
+
+Nunca escreva "a redação apurou", "segundo fontes", "especialistas afirmam" ou atribua declarações a alguém quando nenhuma fonte ou declaração foi fornecida.
+
+ESTRUTURA:
+- Título curto, forte, claro e informativo.
+- Resumo em 1 ou 2 frases.
+- Conteúdo com 5 a 8 parágrafos.
+- Primeiro parágrafo: apresentação do assunto.
+- Parágrafos seguintes: contexto, desenvolvimento, importância, impacto ou desafios.
+- Último parágrafo: conclusão ou próximos passos.
+
+Use HTML válido dentro de "content", principalmente <p>...</p>. Pode utilizar <strong>, <em> e <h2> quando necessário.
+
+Não use Markdown.
+Não use blocos de código.
+Não repita informações.
+Evite frases genéricas e texto de enchimento.
+Use português natural utilizado em Angola.
+O texto deve parecer produzido por uma redação jornalística profissional.
+
+PARA TEMAS AMPLOS:
+Não transforme um assunto geral numa falsa notícia de última hora.
+Não use expressões temporais como "recentemente", "hoje", "nesta temporada", "entrou numa fase decisiva" ou semelhantes sem que os factos correspondentes tenham sido fornecidos.
+
+TAGS:
+Crie entre 3 e 5 tags diretamente relacionadas ao tema.
+
+IMAGEM:
+Crie uma descrição de fotografia ou ilustração jornalística coerente com o tema. Não diga que a imagem representa um acontecimento específico que não foi fornecido.
+
+RESPONDA EXCLUSIVAMENTE COM JSON VÁLIDO, sem texto antes ou depois.
+
+Formato obrigatório:
 {
-  "title": "Título conciso, informativo e de alto impacto jornalístico",
-  "excerpt": "Resumo executivo da notícia em 1 a 2 frases claras e objetivas",
-  "content": "Conteúdo jornalístico completo com vários parágrafos formatados em HTML (<p>, <strong>, etc.)",
+  "title": "Título jornalístico",
+  "excerpt": "Resumo da matéria em 1 ou 2 frases",
+  "content": "<p>Primeiro parágrafo...</p><p>Segundo parágrafo...</p><p>Terceiro parágrafo...</p><p>Quarto parágrafo...</p><p>Quinto parágrafo...</p>",
   "suggestedTags": ["tag1", "tag2", "tag3"],
-  "suggestedImageDescription": "Descrição editorial em português para foto ou ilustração adequada",
+  "suggestedImageDescription": "Descrição jornalística da imagem ideal",
   "categorySlug": "${categorySlug || 'geral'}"
-}`;
+}
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.7-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
+VERIFICAÇÃO FINAL:
+- JSON válido;
+- 5 a 8 parágrafos;
+- português natural;
+- nenhuma informação factual inventada;
+- nenhuma notícia atual inventada;
+- nenhuma classificação ou resultado inventado;
+- nenhuma fonte ou declaração inventada;
+- tema amplo tratado de forma contextual.`;
+    let response;
+    const models = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash'];
+    let lastError;
+
+    for (const model of models) {
+      try {
+        console.log(`Tentando Gemini: ${model}`);
+        response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+          }
+        });
+        console.log(`Gemini respondeu com sucesso: ${model}`);
+        break;
+      } catch (err) {
+        lastError = err;
+        console.error(`Gemini ${model} falhou:`, err);
       }
-    });
+    }
+
+    if (!response) {
+      throw lastError || new Error('Nenhum modelo Gemini conseguiu gerar a notícia.'); 
+    }
 
     const text = response.text || '';
     const parsed = JSON.parse(text);
@@ -1754,10 +1874,10 @@ Responda ESTRITAMENTE em formato JSON (sem markdown de código) com o seguinte e
     console.error('Gemini generate-news error:', err);
     const cleanTheme = theme.trim();
     res.json({
-      title: `Reportagem Especial: ${cleanTheme}`,
-      excerpt: `Análise detalhada e informações em tempo real sobre ${cleanTheme}.`,
-      content: `<p>A redação do Nexora News apurou novos detalhes acerca de <strong>${cleanTheme}</strong>.</p><p>As entidades competentes pronunciaram-se e indicam que novas medidas estão a ser articuladas para dar resposta à situação.</p>`,
-      suggestedTags: [categorySlug || 'noticias', 'destaque'],
+      title: `Análise: ${cleanTheme}`,
+      excerpt: `Uma análise contextual sobre ${cleanTheme}, com foco nas informações gerais e na importância do tema.`,
+      content: `<p>O tema <strong>${cleanTheme}</strong> merece atenção e análise devido à sua relevância no contexto atual.</p><p>Esta matéria apresenta uma abordagem contextual ao assunto, procurando explicar os seus principais aspetos de forma clara e objetiva.</p><p>A compreensão do tema depende do contexto, das informações disponíveis e dos desenvolvimentos devidamente confirmados.</p><p>Quando existirem acontecimentos específicos relacionados com este assunto, eles deverão ser apresentados com base em informações verificadas e fontes identificadas.</p><p>O Nexora News continuará a acompanhar o tema e poderá atualizar a cobertura quando surgirem informações confirmadas e relevantes.</p>`,
+      suggestedTags: [categorySlug || 'geral', 'atualidade', 'análise'],
       suggestedImageDescription: `Imagem editorial representativa de ${cleanTheme}`,
       categorySlug: categorySlug || 'geral'
     });

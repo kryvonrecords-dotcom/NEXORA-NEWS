@@ -62,6 +62,9 @@ export function AdminNewsEditor({ editId, onNavigate }: Props) {
   const [isBreaking, setIsBreaking] = useState(false);
   const [isHero, setIsHero] = useState(false);
   const [sendPushNotification, setSendPushNotification] = useState(true);
+  // AI News Generator
+  const [aiTheme, setAiTheme] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
 
   // Quick Category creation modal
   const [newCategoryModal, setNewCategoryModal] = useState(false);
@@ -215,6 +218,59 @@ export function AdminNewsEditor({ editId, onNavigate }: Props) {
     }
   };
 
+  // Generate news with Gemini AI
+  const handleGenerateWithAI = async () => {
+    if (!aiTheme.trim()) {
+      setError('Escreva primeiro o tema da notícia para a IA.');
+      return;
+    }
+
+    setAiGenerating(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const selectedCategory = categories.find(c => c.id === categoryId);
+      const result = await api.generateAiNewsDraft({
+        theme: aiTheme.trim(),
+        categorySlug: selectedCategory?.slug || 'geral',
+        tone: 'journalistic',
+        targetLength: 'medium'
+      });
+
+      setTitle(result.title || '');
+      setExcerpt(result.excerpt || '');
+      setContent(result.content || '');
+      setTags(result.suggestedTags || []);
+
+      // Search for a free editorial image on Wikimedia Commons
+      if (result.suggestedImageDescription) {
+        try {
+          const imageResult = await api.searchNewsImage(result.suggestedImageDescription);
+          if (imageResult?.imageUrl) {
+            setFeaturedImage(imageResult.imageUrl);
+            setFeaturedImageCaption(
+              imageResult.title
+                ? `${imageResult.title.replace(/^File:/, '')} — Wikimedia Commons`
+                : 'Imagem: Wikimedia Commons'
+            );
+          }
+        } catch (imageErr) {
+          console.warn('Não foi possível obter imagem gratuita:', imageErr);
+        }
+      }
+
+      const matchedCategory = categories.find(c => c.slug === result.categorySlug);
+      if (matchedCategory) setCategoryId(matchedCategory.id);
+
+      setSuccess('✨ Notícia criada pela IA! Revise e publique quando quiser.');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao gerar notícia com a IA.');
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
   // Submit
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -364,6 +420,63 @@ export function AdminNewsEditor({ editId, onNavigate }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: TITLE & RICH CONTENT (8 Cols) */}
         <div className="lg:col-span-8 space-y-6">
+          {/* AI NEWS GENERATOR */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 shadow-2xs space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-[#146EF5] text-white rounded-xl">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-black text-slate-900">
+                  Criar Notícia com IA
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Escreva um tema e a IA cria automaticamente a notícia.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={aiTheme}
+                onChange={e => setAiTheme(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleGenerateWithAI();
+                  }
+                }}
+                placeholder="Ex: Novo investimento em Angola"
+                disabled={aiGenerating}
+                className="flex-1 px-4 py-3 bg-white border border-blue-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#146EF5] disabled:opacity-60"
+              />
+
+              <button
+                type="button"
+                onClick={handleGenerateWithAI}
+                disabled={aiGenerating}
+                className="px-5 py-3 bg-[#146EF5] hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {aiGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    A IA está a escrever...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Gerar com IA
+                  </>
+                )}
+              </button>
+            </div>
+
+            <p className="text-[11px] text-slate-500">
+              A IA preencherá o título, subtítulo, conteúdo e tags automaticamente.
+            </p>
+          </div>
+
           {/* Title & Excerpt */}
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-2xs space-y-4">
             <div>
