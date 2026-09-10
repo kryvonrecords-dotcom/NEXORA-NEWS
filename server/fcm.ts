@@ -110,7 +110,8 @@ export async function sendFcmToAll(
 
         if (
           errorCode === 'messaging/registration-token-not-registered' ||
-          errorCode === 'messaging/invalid-registration-token'
+          errorCode === 'messaging/invalid-registration-token' ||
+          errorCode === 'messaging/invalid-argument'
         ) {
           db.deleteFcmToken(tokens[i].token);
         }
