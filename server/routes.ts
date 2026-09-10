@@ -1916,7 +1916,7 @@ VERIFICAÇÃO FINAL:
           parsed.featuredImageCaption =
             `${(imageFound.title || '').replace(/^File:/, '')} — Wikimedia Commons`;
 
-          console.log('Imagem gratuita encontrada:', parsed.featuredImage);
+          console.log('NEXORA IMAGE AUTO:', parsed.featuredImage);
         } else {
           console.log('Nenhuma imagem encontrada no Wikimedia Commons.');
         }
