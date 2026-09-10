@@ -2050,6 +2050,26 @@ router.delete('/admin/notifications/:id', requireAdmin, (req: AuthenticatedReque
 // -------------------------------------------------------------
 // FREE NEWS IMAGE SEARCH (WIKIMEDIA COMMONS)
 // -------------------------------------------------------------
+router.get('/api/automation/news', async (req: Request, res: Response): Promise<void> => {
+  const secret = process.env.AUTOMATION_SECRET;
+
+  if (!secret || req.query.key !== secret) {
+    res.status(401).json({ error: 'Não autorizado' });
+    return;
+  }
+
+  try {
+    const result = await importNewsDataArticles(10);
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    console.error('[NEXORA AUTOMATION] Erro na rota automática:', error);
+    res.status(500).json({ error: 'Erro na importação automática' });
+  }
+});
+
 router.post('/admin/ai/search-news-image', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { description } = req.body;
 
