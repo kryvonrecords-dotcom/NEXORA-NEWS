@@ -2064,7 +2064,7 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
   const lastRun = settings.newsAutomationLastRun
     ? new Date(settings.newsAutomationLastRun).getTime()
     : 0;
-  const cooldownMs = 30 * 60 * 1000;
+  const cooldownMs = 5 * 60 * 1000;
 
   if (lastRun && now - lastRun < cooldownMs) {
     const nextRun = new Date(lastRun + cooldownMs).toISOString();
@@ -2081,7 +2081,7 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
 
   try {
     const newsDataResult = await importNewsDataArticles(10);
-    const rssResult = await importRSSArticles(20);
+    const rssResult = await importRSSArticles(2);
 
     const runTime = new Date().toISOString();
 
