@@ -720,6 +720,8 @@ export const api = {
     suggestedTags: string[];
     suggestedImageDescription: string;
     categorySlug: string;
+    featuredImage?: string;
+    featuredImageCaption?: string;
   }> {
     return fetchWithAuth('/api/admin/ai/generate-news', {
       method: 'POST',
