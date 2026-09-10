@@ -244,9 +244,16 @@ export function AdminNewsEditor({ editId, onNavigate }: Props) {
       setTags(result.suggestedTags || []);
 
       // Search for a free editorial image on Wikimedia Commons
-      if (result.suggestedImageDescription) {
+      // Use the AI description when available, otherwise fall back to the
+      // generated title/theme so the article can still receive an image.
+      const imageSearchDescription =
+        result.suggestedImageDescription?.trim() ||
+        result.title?.trim() ||
+        aiTheme.trim();
+
+      if (imageSearchDescription) {
         try {
-          const imageResult = await api.searchNewsImage(result.suggestedImageDescription);
+          const imageResult = await api.searchNewsImage(imageSearchDescription);
           if (imageResult?.imageUrl) {
             setFeaturedImage(imageResult.imageUrl);
             setFeaturedImageCaption(
