@@ -145,6 +145,55 @@ export async function importNewsDataArticles(limit = 10): Promise<{
         title
       ).trim();
 
+      const articleContent = String(
+        article?.content ||
+        article?.description ||
+        ''
+      ).trim();
+
+      const sourceName = String(
+        article?.source_name ||
+        article?.source_id ||
+        article?.source ||
+        ''
+      ).trim();
+
+      const articleCategory = String(
+        article?.category ||
+        categorySlug ||
+        ''
+      ).trim();
+
+      const keywords = Array.isArray(article?.keywords)
+        ? article.keywords.filter(Boolean).map((k: any) => String(k).trim()).slice(0, 15)
+        : [];
+
+      const articleKeywords = keywords.length
+        ? keywords.join(', ')
+        : '';
+
+      const contentSections = [
+        `<p><strong>${title}</strong></p>`,
+        `<p>${description}</p>`,
+        articleContent && articleContent !== description
+          ? `<p>${articleContent}</p>`
+          : '',
+        sourceName
+          ? `<p><strong>Fonte:</strong> ${sourceName}</p>`
+          : '',
+        articleCategory
+          ? `<p><strong>Categoria:</strong> ${articleCategory}</p>`
+          : '',
+        articleKeywords
+          ? `<p><strong>Palavras-chave:</strong> ${articleKeywords}</p>`
+          : '',
+        sourceUrl
+          ? `<p><strong>Fonte original:</strong> <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Ler notícia original</a></p>`
+          : ''
+      ].filter(Boolean);
+
+      const content = contentSections.join('\n');
+
       let imageUrl = String(
         article?.image_url ||
         article?.image ||
@@ -163,10 +212,6 @@ export async function importNewsDataArticles(limit = 10): Promise<{
         imageUrl = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80';
       }
 
-      const keywords = Array.isArray(article?.keywords)
-        ? article.keywords.filter(Boolean).map((k: any) => String(k).trim()).slice(0, 15)
-        : [];
-
       const tags = keywords.length
         ? keywords
         : title
@@ -178,11 +223,6 @@ export async function importNewsDataArticles(limit = 10): Promise<{
       const publishedAt = article?.pubDate
         ? new Date(article.pubDate).toISOString()
         : new Date().toISOString();
-
-      const content = `
-        <p>${description}</p>
-        ${sourceUrl ? `<p><strong>Fonte:</strong> <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Ver fonte original</a></p>` : ''}
-      `.trim();
 
       const created = db.createNews({
         title,
