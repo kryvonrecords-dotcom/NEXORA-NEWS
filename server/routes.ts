@@ -137,7 +137,12 @@ export async function importNewsDataArticles(limit = 10): Promise<{
         continue;
       }
 
-      const sourceUrl = String(article?.link || '').trim();
+      const rawSourceUrl = String(article?.link || '').trim();
+      const sourceUrl = /^https?:\/\//i.test(rawSourceUrl)
+        ? rawSourceUrl
+        : rawSourceUrl
+          ? `https://${rawSourceUrl}`
+          : '';
       const slugBase = slugifyNewsTitle(title);
 
       if (!slugBase) {
