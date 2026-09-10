@@ -97,12 +97,31 @@ export async function importNewsDataArticles(limit = 10): Promise<{
   skipped: number;
   errors: number;
 }> {
-  const data = await fetchNewsDataNews({
-    language: 'pt',
-    size: Math.min(Math.max(limit, 1), 10)
-  });
+  const perSource = Math.max(1, Math.ceil(limit / 3));
 
-  const articles = Array.isArray(data?.results) ? data.results : [];
+  const [angolaData, africaData, mundoData] = await Promise.all([
+    fetchNewsDataNews({
+      language: 'pt',
+      country: 'ao',
+      size: perSource
+    }),
+    fetchNewsDataNews({
+      language: 'pt',
+      country: 'ng,za,ke,gh,mz,na,zm,cd,cg,tz,ug,rw',
+      size: perSource
+    }),
+    fetchNewsDataNews({
+      language: 'pt',
+      size: perSource
+    })
+  ]);
+
+  const articles = [
+    ...(Array.isArray(angolaData?.results) ? angolaData.results : []),
+    ...(Array.isArray(africaData?.results) ? africaData.results : []),
+    ...(Array.isArray(mundoData?.results) ? mundoData.results : [])
+  ].slice(0, Math.max(limit, 1));
+
   const existingNews = db.getAllNews();
 
   let imported = 0;
@@ -165,7 +184,10 @@ export async function importNewsDataArticles(limit = 10): Promise<{
       ).trim();
 
       const keywords = Array.isArray(article?.keywords)
-        ? article.keywords.filter(Boolean).map((k: any) => String(k).trim()).slice(0, 15)
+        ? article.keywords
+            .filter(Boolean)
+            .map((k: any) => String(k).trim())
+            .slice(0, 15)
         : [];
 
       const articleKeywords = keywords.length
@@ -173,7 +195,7 @@ export async function importNewsDataArticles(limit = 10): Promise<{
         : '';
 
       const contentSections = [
-        `<p><strong>${title}</strong></p>`,
+        `<h2>${title}</h2>`,
         `<p>${description}</p>`,
         articleContent && articleContent !== description
           ? `<p>${articleContent}</p>`
@@ -188,7 +210,7 @@ export async function importNewsDataArticles(limit = 10): Promise<{
           ? `<p><strong>Palavras-chave:</strong> ${articleKeywords}</p>`
           : '',
         sourceUrl
-          ? `<p><strong>Fonte original:</strong> <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Ler notícia original</a></p>`
+          ? `<p><strong>Leia a notícia completa na fonte original:</strong> <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Acessar fonte original</a></p>`
           : ''
       ].filter(Boolean);
 
@@ -246,6 +268,23 @@ export async function importNewsDataArticles(limit = 10): Promise<{
       });
 
       existingNews.push(created);
+
+      const notification = db.createNotification({
+        title: created.isBreaking ? `🔴 URGENTE: ${created.title}` : `📰 ${created.title}`,
+        body: created.excerpt || 'Toque para ler a notícia completa no Nexora News.',
+        newsId: created.id,
+        newsSlug: created.slug,
+        categoryName: created.categoryName || 'Geral',
+        imageUrl: created.featuredImage,
+        isBreaking: created.isBreaking,
+        type: created.isBreaking ? 'breaking_news' : 'new_article',
+        clickUrl: `/noticia/${created.slug}`
+      });
+
+      sendFcmToAll(notification).catch(e =>
+        console.error('[NEXORA AUTOMATION] FCM dispatch error:', e)
+      );
+
       imported++;
     } catch (error) {
       console.error('[NEXORA AUTOMATION] Erro ao importar notícia:', error);
