@@ -91,7 +91,7 @@ function getNewsCategoryId(categorySlug: string): string {
   return category?.id || 'cat-mundo';
 }
 
-async function importNewsDataArticles(limit = 10): Promise<{
+export async function importNewsDataArticles(limit = 10): Promise<{
   fetched: number;
   imported: number;
   skipped: number;
