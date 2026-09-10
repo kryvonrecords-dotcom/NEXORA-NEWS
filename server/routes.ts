@@ -9,6 +9,7 @@ import { supabase } from './supabase';
 import { generateToken, requireAdmin, AuthenticatedRequest } from './auth';
 import { getVapidPublicKey, sendWebPushToAll } from './webPush';
 import { sendFcmToAll } from './fcm';
+import { importRSSArticles } from './rss';
 
 const router = express.Router();
 
@@ -2050,7 +2051,7 @@ router.delete('/admin/notifications/:id', requireAdmin, (req: AuthenticatedReque
 // -------------------------------------------------------------
 // FREE NEWS IMAGE SEARCH (WIKIMEDIA COMMONS)
 // -------------------------------------------------------------
-router.get('/api/automation/news', async (req: Request, res: Response): Promise<void> => {
+router.get('/automation/news', async (req: Request, res: Response): Promise<void> => {
   const secret = process.env.AUTOMATION_SECRET;
 
   if (!secret || req.query.key !== secret) {
@@ -2058,11 +2059,46 @@ router.get('/api/automation/news', async (req: Request, res: Response): Promise<
     return;
   }
 
-  try {
-    const result = await importNewsDataArticles(10);
+  const settings = db.getSettings();
+  const now = Date.now();
+  const lastRun = settings.newsAutomationLastRun
+    ? new Date(settings.newsAutomationLastRun).getTime()
+    : 0;
+  const cooldownMs = 30 * 60 * 1000;
+
+  if (lastRun && now - lastRun < cooldownMs) {
+    const nextRun = new Date(lastRun + cooldownMs).toISOString();
+
     res.json({
       success: true,
-      ...result
+      skipped: true,
+      message: 'Automação já executada recentemente.',
+      lastRun: settings.newsAutomationLastRun,
+      nextRun
+    });
+    return;
+  }
+
+  try {
+    const newsDataResult = await importNewsDataArticles(10);
+    const rssResult = await importRSSArticles(20);
+
+    const runTime = new Date().toISOString();
+
+    db.updateSettings({
+      newsAutomationLastRun: runTime,
+      newsAutomationLastResult: JSON.stringify({
+        newsData: newsDataResult,
+        rss: rssResult
+      })
+    });
+
+    res.json({
+      success: true,
+      skipped: false,
+      lastRun: runTime,
+      newsData: newsDataResult,
+      rss: rssResult
     });
   } catch (error) {
     console.error('[NEXORA AUTOMATION] Erro na rota automática:', error);

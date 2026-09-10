@@ -125,6 +125,8 @@ export interface SiteSettings {
   whatsappFloatingMessage?: string;
   showSocialInHeader?: boolean;
   showSocialInFooter?: boolean;
+  newsAutomationLastRun?: string;
+  newsAutomationLastResult?: string;
 }
 
 export type PortalSettings = SiteSettings;
