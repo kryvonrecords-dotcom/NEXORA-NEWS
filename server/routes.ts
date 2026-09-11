@@ -2050,7 +2050,7 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
   const lastRun = settings.newsAutomationLastRun
     ? new Date(settings.newsAutomationLastRun).getTime()
     : 0;
-  const cooldownMs = 5 * 60 * 1000;
+  const cooldownMs = 60 * 1000;
 
   if (newsAutomationRunning) {
     res.json({
@@ -2085,13 +2085,13 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
     };
 
     try {
-      newsDataResult = await importNewsDataArticles(3);
+      newsDataResult = await importNewsDataArticles(1);
     } catch (error) {
       console.error('[NEXORA AUTOMATION] NewsData indisponível, continuando com RSS:', error);
       newsDataResult.errors = 1;
     }
 
-    const remainingSlots = Math.max(0, 3 - newsDataResult.imported);
+    const remainingSlots = Math.max(0, 1 - newsDataResult.imported);
     const rssResult = await importRSSArticles(remainingSlots);
 
     const runTime = new Date().toISOString();
