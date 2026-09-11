@@ -49,6 +49,7 @@ import { db } from './db';
 import { RSS_SOURCES } from './rss-sources';
 import { sendFcmToAll } from './fcm';
 import { fetchPixabayImage } from './pixabay';
+import { fetchPexelsImage } from './pexels';
 
 function detectRSSCategory(text: string): string {
   const value = text.toLowerCase();
@@ -147,6 +148,14 @@ export async function importRSSArticles(limit = 20): Promise<{
               featuredImage = await fetchPixabayImage(title) || '';
             } catch {
               featuredImage = '';
+            }
+
+            if (!featuredImage) {
+              try {
+                featuredImage = await fetchPexelsImage(title) || '';
+              } catch {
+                featuredImage = '';
+              }
             }
           }
 
