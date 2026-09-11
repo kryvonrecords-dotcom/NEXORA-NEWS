@@ -47,6 +47,7 @@ export async function fetchRSSFeed(
 
 import { db } from './db';
 import { RSS_SOURCES } from './rss-sources';
+import { sendFcmToAll } from './fcm';
 
 function detectRSSCategory(text: string): string {
   const value = text.toLowerCase();
@@ -164,6 +165,23 @@ export async function importRSSArticles(limit = 20): Promise<{
           });
 
           existingNews.push(created);
+
+          const notification = db.createNotification({
+            title: `📰 ${created.title}`,
+            body: created.excerpt || 'Toque para ler a notícia completa no Nexora News.',
+            newsId: created.id,
+            newsSlug: created.slug,
+            categoryName: created.categoryName || 'Geral',
+            imageUrl: created.featuredImage,
+            isBreaking: false,
+            type: 'new_article',
+            clickUrl: `/noticia/${created.slug}`
+          });
+
+          sendFcmToAll(notification).catch(error =>
+            console.error('[NEXORA RSS] FCM dispatch error:', error)
+          );
+
           imported++;
         } catch (error) {
           console.error(
