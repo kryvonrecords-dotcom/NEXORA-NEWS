@@ -50,7 +50,6 @@ export const RSS_SOURCES: RSSSource[] = [
   },
   {
     name: 'AllAfrica Entertainment',
-    url: 'https://allafrica.com/tools/headlines/rdf/entertainment/headlines.rdf',
     category: 'entretenimento',
     country: 'Africa'
   },
@@ -62,7 +61,6 @@ export const RSS_SOURCES: RSSSource[] = [
   },
   {
     name: 'Renascença',
-    url: 'https://rr.pt/rss',
     category: 'portugal',
     country: 'Portugal'
   },

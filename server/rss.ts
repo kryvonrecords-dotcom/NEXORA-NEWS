@@ -48,6 +48,7 @@ export async function fetchRSSFeed(
 import { db } from './db';
 import { RSS_SOURCES } from './rss-sources';
 import { sendFcmToAll } from './fcm';
+import { fetchPixabayImage } from './pixabay';
 
 function detectRSSCategory(text: string): string {
   const value = text.toLowerCase();
@@ -139,12 +140,22 @@ export async function importRSSArticles(limit = 20): Promise<{
             `<p><strong>Leia a notícia completa na fonte original:</strong> <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Acessar fonte original</a></p>`
           ].join('\n');
 
+          let featuredImage = article.imageUrl || '';
+
+          if (!featuredImage) {
+            try {
+              featuredImage = await fetchPixabayImage(title) || '';
+            } catch {
+              featuredImage = '';
+            }
+          }
+
           const created = db.createNews({
             title,
             slug,
             excerpt: description.substring(0, 500),
             content,
-            featuredImage: article.imageUrl || '',
+            featuredImage,
             featuredImageCaption: 'Imagem da fonte original',
             galleryImages: [],
             categoryId: db.getCategoryBySlug(
