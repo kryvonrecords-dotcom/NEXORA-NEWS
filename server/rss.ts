@@ -145,14 +145,14 @@ export async function importRSSArticles(limit = 20): Promise<{
 
           if (!featuredImage) {
             try {
-              featuredImage = await fetchPixabayImage(title) || '';
+              featuredImage = await fetchPexelsImage(title) || '';
             } catch {
               featuredImage = '';
             }
 
             if (!featuredImage) {
               try {
-                featuredImage = await fetchPexelsImage(title) || '';
+                featuredImage = await fetchPixabayImage(title) || '';
               } catch {
                 featuredImage = '';
               }
