@@ -923,7 +923,11 @@ class DatabaseManager {
 
     const expiredNews = this.data.news
       .filter(news => {
-        if (news.status !== 'published' || !news.publishedAt) {
+        if (
+          news.status !== 'published' ||
+          !news.publishedAt ||
+          news.authorId === 'nexora-rss'
+        ) {
           return false;
         }
 
