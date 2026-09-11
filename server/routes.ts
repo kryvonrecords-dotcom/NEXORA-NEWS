@@ -98,30 +98,14 @@ export async function importNewsDataArticles(limit = 10): Promise<{
   skipped: number;
   errors: number;
 }> {
-  const perSource = Math.max(1, Math.ceil(limit / 3));
+  const newsData = await fetchNewsDataNews({
+    language: 'pt',
+    size: Math.max(limit, 1)
+  });
 
-  const [angolaData, africaData, mundoData] = await Promise.all([
-    fetchNewsDataNews({
-      language: 'pt',
-      country: 'ao',
-      size: perSource
-    }),
-    fetchNewsDataNews({
-      language: 'pt',
-      country: 'ng,za,ke,gh,mz',
-      size: perSource
-    }),
-    fetchNewsDataNews({
-      language: 'pt',
-      size: perSource
-    })
-  ]);
-
-  const articles = [
-    ...(Array.isArray(angolaData?.results) ? angolaData.results : []),
-    ...(Array.isArray(africaData?.results) ? africaData.results : []),
-    ...(Array.isArray(mundoData?.results) ? mundoData.results : [])
-  ].slice(0, Math.max(limit, 1));
+  const articles = Array.isArray(newsData?.results)
+    ? newsData.results.slice(0, Math.max(limit, 1))
+    : [];
 
   const existingNews = db.getAllNews();
 
