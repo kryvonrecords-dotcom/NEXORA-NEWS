@@ -267,30 +267,6 @@ async function startServer() {
     });
   }, 30 * 1000);
 
-  // Importar notícias automaticamente a cada 30 minutos
-  const runAutomaticNewsImport = async () => {
-    try {
-      const result = await importNewsDataArticles(10);
-      console.log('[NEXORA AUTOMATION] Importação automática:', result);
-    } catch (error) {
-      console.error('[NEXORA AUTOMATION] Erro na importação automática:', error);
-    }
-  };
-
-  // Primeira importação após o servidor iniciar
-  setTimeout(() => {
-    runAutomaticNewsImport().catch(error => {
-      console.error('[NEXORA AUTOMATION] Erro na primeira importação:', error);
-    });
-  }, 60 * 1000);
-
-  // Novas importações a cada 30 minutos
-  setInterval(() => {
-    runAutomaticNewsImport().catch(error => {
-      console.error('[NEXORA AUTOMATION] Erro no agendamento:', error);
-    });
-  }, 30 * 60 * 1000);
-
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Nexora News Server running on http://0.0.0.0:${PORT}`);
   });
