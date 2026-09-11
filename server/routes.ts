@@ -2080,7 +2080,20 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
   }
 
   try {
-    const newsDataResult = await importNewsDataArticles(3);
+    let newsDataResult = {
+      fetched: 0,
+      imported: 0,
+      skipped: 0,
+      errors: 0
+    };
+
+    try {
+      newsDataResult = await importNewsDataArticles(3);
+    } catch (error) {
+      console.error('[NEXORA AUTOMATION] NewsData indisponível, continuando com RSS:', error);
+      newsDataResult.errors = 1;
+    }
+
     const remainingSlots = Math.max(0, 3 - newsDataResult.imported);
     const rssResult = await importRSSArticles(remainingSlots);
 
