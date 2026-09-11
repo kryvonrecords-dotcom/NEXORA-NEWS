@@ -2035,6 +2035,8 @@ router.delete('/admin/notifications/:id', requireAdmin, (req: AuthenticatedReque
 // -------------------------------------------------------------
 // FREE NEWS IMAGE SEARCH (WIKIMEDIA COMMONS)
 // -------------------------------------------------------------
+let newsAutomationRunning = false;
+
 router.get('/automation/news', async (req: Request, res: Response): Promise<void> => {
   const secret = process.env.AUTOMATION_SECRET;
 
@@ -2050,6 +2052,15 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
     : 0;
   const cooldownMs = 5 * 60 * 1000;
 
+  if (newsAutomationRunning) {
+    res.json({
+      success: true,
+      skipped: true,
+      message: 'Automação já está em execução.'
+    });
+    return;
+  }
+
   if (lastRun && now - lastRun < cooldownMs) {
     const nextRun = new Date(lastRun + cooldownMs).toISOString();
 
@@ -2062,6 +2073,8 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
     });
     return;
   }
+
+  newsAutomationRunning = true;
 
   try {
     let newsDataResult = {
@@ -2101,6 +2114,8 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
   } catch (error) {
     console.error('[NEXORA AUTOMATION] Erro na rota automática:', error);
     res.status(500).json({ error: 'Erro na importação automática' });
+  } finally {
+    newsAutomationRunning = false;
   }
 });
 
