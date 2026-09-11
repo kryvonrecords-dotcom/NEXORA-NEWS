@@ -7,7 +7,14 @@ export async function fetchPixabayImage(query: string): Promise<string | null> {
 
   const url = new URL('https://pixabay.com/api/');
   url.searchParams.set('key', apiKey);
-  url.searchParams.set('q', query.trim());
+  const words = query
+    .replace(/[^a-zA-Z0-9À-ÿ ]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 8)
+    .join(' ');
+
+  url.searchParams.set('q', words || query.trim());
   url.searchParams.set('image_type', 'photo');
   url.searchParams.set('orientation', 'horizontal');
   url.searchParams.set('safesearch', 'true');
