@@ -2080,8 +2080,9 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
   }
 
   try {
-    const newsDataResult = await importNewsDataArticles(10);
-    const rssResult = await importRSSArticles(2);
+    const newsDataResult = await importNewsDataArticles(3);
+    const remainingSlots = Math.max(0, 3 - newsDataResult.imported);
+    const rssResult = await importRSSArticles(remainingSlots);
 
     const runTime = new Date().toISOString();
 
