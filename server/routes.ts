@@ -1051,6 +1051,121 @@ const handleAdminStats = (req: AuthenticatedRequest, res: Response): void => {
 router.get('/admin/stats', requireAdmin, handleAdminStats);
 router.get('/admin/dashboard', requireAdmin, handleAdminStats);
 
+// -------------------------------------------------------------
+// ESTATÍSTICAS DE INSTALAÇÕES DO APLICATIVO
+// Apenas administradores autenticados
+// -------------------------------------------------------------
+router.get('/admin/app-downloads/stats', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!supabase) {
+      res.status(503).json({ error: 'Supabase não configurado.' });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('app_downloads')
+      .select('downloaded_at, app_version, version, platform, country, source, device_id');
+
+    if (error) {
+      console.error('Erro ao buscar estatísticas do aplicativo:', error.message);
+      res.status(500).json({
+        error: 'Não foi possível carregar as estatísticas do aplicativo.'
+      });
+      return;
+    }
+
+    const rows = data || [];
+
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+
+    const last7Start = new Date(now);
+    last7Start.setDate(last7Start.getDate() - 6);
+    last7Start.setHours(0, 0, 0, 0);
+
+    const last30Start = new Date(now);
+    last30Start.setDate(last30Start.getDate() - 29);
+    last30Start.setHours(0, 0, 0, 0);
+
+    const getDate = (value: string | null) => {
+      const date = value ? new Date(value) : null;
+      return date && !Number.isNaN(date.getTime()) ? date : null;
+    };
+
+    const today = rows.filter(row => {
+      const date = getDate(row.downloaded_at);
+      return date ? date >= todayStart : false;
+    }).length;
+
+    const last7Days = rows.filter(row => {
+      const date = getDate(row.downloaded_at);
+      return date ? date >= last7Start : false;
+    }).length;
+
+    const last30Days = rows.filter(row => {
+      const date = getDate(row.downloaded_at);
+      return date ? date >= last30Start : false;
+    }).length;
+
+    const countBy = (field: string) => {
+      const counts: Record<string, number> = {};
+
+      rows.forEach(row => {
+        const value = String(row[field] || 'Desconhecido').trim() || 'Desconhecido';
+        counts[value] = (counts[value] || 0) + 1;
+      });
+
+      return Object.entries(counts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+    };
+
+    const daily = Array.from({ length: 30 }, (_, index) => {
+      const date = new Date(last30Start);
+      date.setDate(last30Start.getDate() + index);
+
+      const key = date.toISOString().slice(0, 10);
+
+      const count = rows.filter(row => {
+        const rowDate = getDate(row.downloaded_at);
+        return rowDate ? rowDate.toISOString().slice(0, 10) === key : false;
+      }).length;
+
+      return {
+        date: key,
+        count
+      };
+    });
+
+    const uniqueDevices = new Set(
+      rows
+        .map(row => String(row.device_id || '').trim())
+        .filter(Boolean)
+    ).size;
+
+    res.json({
+      total: rows.length,
+      today,
+      last7Days,
+      last30Days,
+      uniqueDevices,
+      countries: countBy('country'),
+      versions: countBy('app_version'),
+      platforms: countBy('platform'),
+      sources: countBy('source'),
+      daily
+    });
+  } catch (error: any) {
+    console.error('Erro na estatística de instalações:', error);
+
+    res.status(500).json({
+      error: 'Erro interno ao carregar estatísticas do aplicativo.'
+    });
+  }
+});
+
+
 // Admin News CRUD
 router.get('/admin/news', requireAdmin, (req: AuthenticatedRequest, res: Response): void => {
   const { status, category, search, limit, offset } = req.query;

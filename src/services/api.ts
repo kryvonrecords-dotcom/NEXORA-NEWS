@@ -325,6 +325,21 @@ export const api = {
     return fetchWithAuth('/api/admin/stats');
   },
 
+  async getAdminAppDownloadStats(): Promise<{
+    total: number;
+    today: number;
+    last7Days: number;
+    last30Days: number;
+    uniqueDevices: number;
+    countries: Array<{ name: string; count: number }>;
+    versions: Array<{ name: string; count: number }>;
+    platforms: Array<{ name: string; count: number }>;
+    sources: Array<{ name: string; count: number }>;
+    daily: Array<{ date: string; count: number }>;
+  }> {
+    return fetchWithAuth('/api/admin/app-downloads/stats');
+  },
+
   // Admin News Management
   async getAdminNews(params?: {
     status?: string;

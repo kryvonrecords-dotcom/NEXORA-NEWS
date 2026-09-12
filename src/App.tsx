@@ -25,6 +25,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AdminLogin } from './pages/Admin/AdminLogin';
 import { AdminLayout } from './pages/Admin/AdminLayout';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
+import { AdminAppStats } from './pages/Admin/AdminAppStats';
 import { AdminNewsList } from './pages/Admin/AdminNewsList';
 import { AdminNewsEditor } from './pages/Admin/AdminNewsEditor';
 import { AdminNotifications } from './pages/Admin/AdminNotifications';
@@ -113,6 +114,14 @@ function AppContent() {
       return (
         <AdminLayout activeTab="dashboard" onNavigate={navigate}>
           <AdminDashboard onNavigate={navigate} />
+        </AdminLayout>
+      );
+    }
+
+    if (pathname === '/admin/app') {
+      return (
+        <AdminLayout activeTab="app-stats" onNavigate={navigate}>
+          <AdminAppStats onNavigate={navigate} />
         </AdminLayout>
       );
     }

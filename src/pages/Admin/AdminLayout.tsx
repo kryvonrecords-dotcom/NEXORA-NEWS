@@ -17,7 +17,8 @@ import {
   Bell,
   Megaphone,
   Share2,
-  Briefcase
+  Briefcase,
+  Smartphone
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -53,6 +54,7 @@ export function AdminLayout({ activeTab, onNavigate, children }: Props) {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { id: 'app-stats', label: 'Estatísticas do Aplicativo', path: '/admin/app', icon: Smartphone },
     { id: 'news-list', label: 'Todas as Notícias', path: '/admin/noticias', icon: FileText },
     { id: 'news-new', label: 'Nova Notícia', path: '/admin/noticias/nova', icon: PlusCircle, highlight: true },
     { 
