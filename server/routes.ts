@@ -2392,6 +2392,75 @@ VERIFICAÇÃO FINAL:
   }
 });
 
+
+// -------------------------------------------------------------
+// CONTADOR DE DOWNLOADS / INSTALAÇÕES DO APLICATIVO
+// -------------------------------------------------------------
+router.post('/app/download', async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!supabase) {
+      res.status(503).json({ error: 'Supabase não configurado.' });
+      return;
+    }
+
+    const {
+      app_version,
+      version,
+      platform = 'android',
+      country,
+      source,
+      device_id
+    } = req.body || {};
+
+    const resolvedVersion =
+      String(app_version || version || '').trim() || null;
+
+    const resolvedPlatform =
+      String(platform || 'android').trim().toLowerCase();
+
+    const resolvedCountry =
+      String(country || '').trim() || null;
+
+    const resolvedSource =
+      String(source || '').trim() || null;
+
+    const resolvedDeviceId =
+      String(device_id || '').trim() || null;
+
+    const userAgent = req.get('user-agent') || null;
+
+    const { data, error } = await supabase
+      .from('app_downloads')
+      .insert({
+        app_version: resolvedVersion,
+        version: resolvedVersion,
+        platform: resolvedPlatform,
+        country: resolvedCountry,
+        source: resolvedSource,
+        device_id: resolvedDeviceId,
+        user_agent: userAgent
+      })
+      .select('id, downloaded_at')
+      .single();
+
+    if (error) {
+      console.error('App download registration failed:', error.message);
+      res.status(500).json({ error: 'Não foi possível registrar o download.' });
+      return;
+    }
+
+    res.status(201).json({
+      success: true,
+      download: data
+    });
+  } catch (error: any) {
+    console.error('App download route error:', error);
+    res.status(500).json({
+      error: 'Erro interno ao registrar o download.'
+    });
+  }
+});
+
 // Error handling middleware for API routes and Multer
 router.use((err: any, req: Request, res: Response, next: any) => {
   if (err instanceof multer.MulterError) {
