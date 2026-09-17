@@ -626,6 +626,7 @@ class DatabaseManager {
 
   private backupInProgress = false;
   private backupPending = false;
+  private backupTimer: NodeJS.Timeout | null = null;
 
   public save() {
     this.saveDataDirect(this.data);
@@ -633,7 +634,15 @@ class DatabaseManager {
     if (!supabase) return;
 
     this.backupPending = true;
-    void this.flushSupabaseBackup();
+
+    if (this.backupTimer) {
+      return;
+    }
+
+    this.backupTimer = setTimeout(() => {
+      this.backupTimer = null;
+      void this.flushSupabaseBackup();
+    }, 3000);
   }
 
   private async flushSupabaseBackup(): Promise<void> {
