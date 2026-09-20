@@ -69,6 +69,19 @@ function detectRSSCategory(text: string): string {
   return 'mundo';
 }
 
+function isLikelyPortuguese(text: string): boolean {
+  const value = text.toLowerCase();
+
+  const portuguese = (value.match(/\b(de|da|do|das|dos|em|no|na|nos|nas|para|por|com|que|uma|um|os|as|ao|aos|esta|este|sobre|tambem|mais|como|foi|sao|ser|tem|seu|sua)\b/g) || []).length;
+  const english = (value.match(/\b(the|and|of|to|in|for|with|from|on|at|is|are|was|were|this|that|new|will|has|have)\b/g) || []).length;
+  const french = (value.match(/\b(le|la|les|des|du|et|pour|avec|dans|sur|une|un|est|sont|qui|que|ce|cette|ces)\b/g) || []).length;
+  const portugueseSignals = /[ãõáàâéêíóôúç]/i.test(text) ||
+    /\b(angola|luanda|brasil|portugal|governo|presidente|ministro|noticia|noticias|economia|saude|desporto|educacao|empresa|mercado)\b/i.test(value);
+
+  if (english >= portuguese + 2 || french >= portuguese + 2) return false;
+  return portugueseSignals || portuguese >= 2;
+}
+
 function slugifyRSSTitle(title: string): string {
   return title
     .toLowerCase()
@@ -106,7 +119,11 @@ export async function importRSSArticles(limit = 20): Promise<{
 
       fetched += articles.length;
 
-      for (const article of articles) {
+      const portugueseArticles = articles.filter(article =>
+        isLikelyPortuguese(`${article.title} ${article.description}`)
+      );
+
+      for (const article of portugueseArticles) {
         if (imported >= limit) break;
 
         try {
