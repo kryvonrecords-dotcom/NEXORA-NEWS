@@ -131,13 +131,6 @@ async function startServer() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Static uploads directory for serving uploaded real images
-  const uploadsDir = path.join(process.cwd(), 'uploads');
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-  }
-  app.use('/uploads', express.static(uploadsDir));
-
   // Fallback for /uploads/* if image file was deleted, lost after restart, or not found on disk
   app.get('/uploads/*', (req, res) => {
     const filename = path.basename(req.path || '');
