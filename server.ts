@@ -8,7 +8,32 @@ import routes from './server/routes';
 import { db } from './server/db';
 import { deleteSupabaseStorageFiles } from './server/supabase';
 import { importNewsDataArticles } from './server/routes';
+import { importRSSArticles } from './server/rss';
 
+
+async function runAutomaticNewsImport() {
+  try {
+    let newsDataResult = { fetched: 0, imported: 0, skipped: 0, errors: 0 };
+
+    if (process.env.NEWSDATA_API_KEY) {
+      try {
+        newsDataResult = await importNewsDataArticles(10);
+      } catch (error) {
+        console.error('[NEXORA AUTOMATION] NewsData indisponível, continuando com RSS:', error);
+      }
+    }
+
+    const remainingSlots = Math.max(0, 10 - newsDataResult.imported);
+    const rssResult = await importRSSArticles(remainingSlots);
+
+    console.log('[NEXORA AUTOMATION] Importação automática:', {
+      newsData: newsDataResult,
+      rss: rssResult
+    });
+  } catch (error) {
+    console.error('[NEXORA AUTOMATION] Erro na importação automática:', error);
+  }
+}
 
 async function processScheduledNews() {
   const now = new Date();
@@ -247,6 +272,15 @@ async function startServer() {
   // Remover notícias publicadas há mais de 24 horas e sua mídia do Storage
   const expiredNews = db.expireOldNews();
   await cleanupExpiredNewsStorage(expiredNews);
+
+  // Importar notícias automaticamente a cada 5 minutos
+  await runAutomaticNewsImport();
+
+  setInterval(() => {
+    runAutomaticNewsImport().catch(error => {
+      console.error('[NEXORA AUTOMATION] Erro no agendamento:', error);
+    });
+  }, 5 * 60 * 1000);
 
   // Verificar agendamentos e expiração de notícias a cada 30 segundos
   setInterval(() => {
