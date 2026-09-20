@@ -302,7 +302,7 @@ async function fetchNewsDataNews(params: {
   const apiKey = process.env.NEWSDATA_API_KEY;
 
   if (!apiKey) {
-    throw new Error('NEWSDATA_API_KEY não configurada no servidor.');
+    return { status: "success", results: [] };
   }
 
   const url = new URL('https://newsdata.io/api/1/latest');
