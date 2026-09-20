@@ -17,13 +17,13 @@ async function runAutomaticNewsImport() {
 
     if (process.env.NEWSDATA_API_KEY) {
       try {
-        newsDataResult = await importNewsDataArticles(10);
+        newsDataResult = await importNewsDataArticles(2);
       } catch (error) {
         console.error('[NEXORA AUTOMATION] NewsData indisponível, continuando com RSS:', error);
       }
     }
 
-    const remainingSlots = Math.max(0, 10 - newsDataResult.imported);
+    const remainingSlots = Math.max(0, 2 - newsDataResult.imported);
     const rssResult = await importRSSArticles(remainingSlots);
 
     console.log('[NEXORA AUTOMATION] Importação automática:', {
