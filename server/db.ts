@@ -642,38 +642,44 @@ class DatabaseManager {
     this.backupTimer = setTimeout(() => {
       this.backupTimer = null;
       void this.flushSupabaseBackup();
-    }, 3000);
+    }, 60000);
+  }
+
+  public saveLocalOnly() {
+    this.saveDataDirect(this.data);
   }
 
   private async flushSupabaseBackup(): Promise<void> {
     if (!supabase || this.backupInProgress) return;
 
     this.backupInProgress = true;
+    this.backupPending = false;
 
     try {
-      while (this.backupPending) {
-        this.backupPending = false;
+      const snapshot = JSON.stringify(this.data);
 
-        const snapshot = JSON.stringify(this.data);
+      const { error } = await supabase
+        .from('nexora_backup')
+        .upsert({
+          id: 1,
+          data: snapshot
+        });
 
-        const { error } = await supabase
-          .from('nexora_backup')
-          .upsert({
-            id: 1,
-            data: snapshot
-          });
-
-        if (error) {
-          console.error('Supabase backup failed:', error.message);
-        } else {
-          console.log('Supabase backup updated successfully.');
-        }
+      if (error) {
+        console.error('Supabase backup failed:', error.message);
+      } else {
+        console.log('Supabase backup updated successfully.');
       }
     } finally {
       this.backupInProgress = false;
 
-      if (this.backupPending) {
-        void this.flushSupabaseBackup();
+      if (this.backupPending && !this.backupTimer) {
+        console.log('Supabase backup pendente; novo backup agendado para daqui a 60 segundos.');
+
+        this.backupTimer = setTimeout(() => {
+          this.backupTimer = null;
+          void this.flushSupabaseBackup();
+        }, 60000);
       }
     }
   }
@@ -789,15 +795,11 @@ class DatabaseManager {
   }
 
   public getPublishedNews(): NewsItem[] {
-    const now = Date.now();
-    const expirationMs = 24 * 60 * 60 * 1000;
-    const nowIso = new Date(now).toISOString();
+    const nowIso = new Date().toISOString();
 
     return this.getAllNews().filter(n => {
       if (n.status === 'published') {
-        if (!n.publishedAt) return false;
-        const publishedAt = new Date(n.publishedAt).getTime();
-        return Number.isFinite(publishedAt) && now - publishedAt < expirationMs;
+        return Boolean(n.publishedAt);
       }
 
       if (n.status === 'scheduled' && n.scheduledFor && n.scheduledFor <= nowIso) {
@@ -812,14 +814,6 @@ class DatabaseManager {
     const n = this.data.news.find(item => item.id === id);
     if (!n) return undefined;
 
-    if (n.status === 'published' && n.publishedAt) {
-      const publishedAt = new Date(n.publishedAt).getTime();
-      if (Number.isFinite(publishedAt) &&
-          Date.now() - publishedAt >= 24 * 60 * 60 * 1000) {
-        return undefined;
-      }
-    }
-
     const cat = this.getCategoryById(n.categoryId);
     return {
       ...n,
@@ -831,14 +825,6 @@ class DatabaseManager {
   public getNewsBySlug(slug: string): NewsItem | undefined {
     const n = this.data.news.find(item => item.slug.toLowerCase() === slug.toLowerCase());
     if (!n) return undefined;
-
-    if (n.status === 'published' && n.publishedAt) {
-      const publishedAt = new Date(n.publishedAt).getTime();
-      if (Number.isFinite(publishedAt) &&
-          Date.now() - publishedAt >= 24 * 60 * 60 * 1000) {
-        return undefined;
-      }
-    }
 
     const cat = this.getCategoryById(n.categoryId);
     return {
@@ -852,7 +838,7 @@ class DatabaseManager {
     const n = this.data.news.find(item => item.id === id);
     if (n) {
       n.views = (n.views || 0) + 1;
-      this.save();
+      this.saveLocalOnly();
       return n.views;
     }
     return 0;
@@ -882,6 +868,32 @@ class DatabaseManager {
 
     this.data.news.unshift(item);
     this.save();
+    return item;
+  }
+
+  public createNewsLocalOnly(newsData: Omit<NewsItem, 'id' | 'createdAt' | 'updatedAt' | 'views'>): NewsItem {
+    const cat = this.getCategoryById(newsData.categoryId);
+    const id = `news-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
+
+    const textContent = newsData.content ? newsData.content.replace(/<[^>]*>?/gm, '') : '';
+    const wordCount = textContent.split(/\s+/).filter(Boolean).length;
+    const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
+
+    const item: NewsItem = {
+      ...newsData,
+      id,
+      categoryName: cat ? cat.name : 'Geral',
+      categorySlug: cat ? cat.slug : 'geral',
+      views: 0,
+      readTimeMinutes: newsData.readTimeMinutes || readTimeMinutes,
+      createdAt: now,
+      updatedAt: now,
+      publishedAt: newsData.publishedAt || now
+    };
+
+    this.data.news.unshift(item);
+    this.saveLocalOnly();
     return item;
   }
 
@@ -946,11 +958,25 @@ class DatabaseManager {
           now - publishedAt >= expirationMs;
       });
 
-    for (const news of expiredNews) {
-      this.deleteNews(news.id);
-    }
-
     if (expiredNews.length > 0) {
+      const expiredIds = new Set(expiredNews.map(news => news.id));
+
+      this.data.news = this.data.news.filter(
+        news => !expiredIds.has(news.id)
+      );
+
+      if (!Array.isArray(this.data.deletedNewsIds)) {
+        this.data.deletedNewsIds = [];
+      }
+
+      for (const news of expiredNews) {
+        if (!this.data.deletedNewsIds.includes(news.id)) {
+          this.data.deletedNewsIds.push(news.id);
+        }
+      }
+
+      this.save();
+
       console.log(
         `🗑️ Notícias expiradas após 24h: ${expiredNews.length}`
       );
@@ -1061,6 +1087,23 @@ class DatabaseManager {
   }
 
   // Settings
+  public updateSettingsLocalOnly(newSettings: Partial<SiteSettings>): SiteSettings {
+    const current = this.data.settings || DEFAULT_SETTINGS;
+    this.data.settings = {
+      ...current,
+      ...newSettings,
+      socialLinks: {
+        ...(current.socialLinks || DEFAULT_SETTINGS.socialLinks),
+        ...(newSettings.socialLinks || {})
+      },
+      customSocialLinks: newSettings.customSocialLinks !== undefined
+        ? newSettings.customSocialLinks
+        : (current.customSocialLinks || [])
+    };
+    this.saveLocalOnly();
+    return this.data.settings;
+  }
+
   public getSettings(): SiteSettings {
     return this.data.settings || DEFAULT_SETTINGS;
   }
@@ -1196,7 +1239,7 @@ class DatabaseManager {
     const ad = this.data.advertisements.find(a => a.id === id);
     if (ad) {
       ad.viewsCount = (ad.viewsCount || 0) + 1;
-      this.save();
+      this.saveLocalOnly();
       return true;
     }
     return false;
@@ -1207,7 +1250,7 @@ class DatabaseManager {
     const ad = this.data.advertisements.find(a => a.id === id);
     if (ad) {
       ad.clicksCount = (ad.clicksCount || 0) + 1;
-      this.save();
+      this.saveLocalOnly();
       return true;
     }
     return false;
@@ -1440,6 +1483,38 @@ class DatabaseManager {
       this.data.notifications = this.data.notifications.slice(0, 100);
     }
     this.save();
+    return newNotif;
+  }
+
+  public createNotificationLocalOnly(data: Partial<AppNotification>): AppNotification {
+    if (!this.data.notifications) {
+      this.data.notifications = [];
+    }
+
+    const newNotif: AppNotification = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      title: data.title || 'Alerta Nexora News',
+      body: data.body || '',
+      newsId: data.newsId,
+      newsSlug: data.newsSlug,
+      categoryName: data.categoryName,
+      imageUrl: data.imageUrl,
+      isBreaking: Boolean(data.isBreaking),
+      type: data.type || (data.isBreaking ? 'breaking_news' : 'new_article'),
+      sentAt: data.sentAt || new Date().toISOString(),
+      deliveredCount: this.data.pushSubscriptions && this.data.pushSubscriptions.length > 0
+        ? Math.max(this.data.pushSubscriptions.length, 120)
+        : (this.data.subscribers ? this.data.subscribers.length + 45 : 120),
+      clickUrl: data.clickUrl || (data.newsSlug ? `/noticia/${data.newsSlug}` : '/')
+    };
+
+    this.data.notifications.unshift(newNotif);
+
+    if (this.data.notifications.length > 100) {
+      this.data.notifications = this.data.notifications.slice(0, 100);
+    }
+
+    this.saveLocalOnly();
     return newNotif;
   }
 

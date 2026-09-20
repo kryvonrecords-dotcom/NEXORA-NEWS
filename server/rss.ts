@@ -159,7 +159,7 @@ export async function importRSSArticles(limit = 20): Promise<{
             }
           }
 
-          const created = db.createNews({
+          const created = db.createNewsLocalOnly({
             title,
             slug,
             excerpt: description.substring(0, 500),
@@ -186,7 +186,7 @@ export async function importRSSArticles(limit = 20): Promise<{
 
           existingNews.push(created);
 
-          const notification = db.createNotification({
+          const notification = db.createNotificationLocalOnly({
             title: `📰 ${created.title}`,
             body: created.excerpt || 'Toque para ler a notícia completa no Nexora News.',
             newsId: created.id,

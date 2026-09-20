@@ -236,7 +236,7 @@ export async function importNewsDataArticles(limit = 10): Promise<{
         ? new Date(article.pubDate).toISOString()
         : new Date().toISOString();
 
-      const created = db.createNews({
+      const created = db.createNewsLocalOnly({
         title,
         slug: slugBase,
         excerpt: description.substring(0, 500),
@@ -259,7 +259,7 @@ export async function importNewsDataArticles(limit = 10): Promise<{
 
       existingNews.push(created);
 
-      const notification = db.createNotification({
+      const notification = db.createNotificationLocalOnly({
         title: created.isBreaking ? `🔴 URGENTE: ${created.title}` : `📰 ${created.title}`,
         body: created.excerpt || 'Toque para ler a notícia completa no Nexora News.',
         newsId: created.id,
@@ -719,8 +719,7 @@ router.get('/news/slug/:slug', (req: Request, res: Response): void => {
   }
 
   // Increment views
-  db.incrementViews(item.id);
-  item.views = (item.views || 0) + 1;
+  item.views = db.incrementViews(item.id);
 
   // Get related news from same category
   const allPublished = db.getPublishedNews();
@@ -2211,7 +2210,7 @@ router.get('/automation/news', async (req: Request, res: Response): Promise<void
 
     const runTime = new Date().toISOString();
 
-    db.updateSettings({
+    db.updateSettingsLocalOnly({
       newsAutomationLastRun: runTime,
       newsAutomationLastResult: JSON.stringify({
         newsData: newsDataResult,
