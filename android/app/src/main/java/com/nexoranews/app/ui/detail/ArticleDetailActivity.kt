@@ -2,6 +2,9 @@ package com.nexoranews.app.ui.detail
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
@@ -48,6 +51,14 @@ class ArticleDetailActivity : AppCompatActivity() {
                 putExtra(EXTRA_NEWS_SLUG, slug)
             }
             context.startActivity(intent)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent != null) {
+            setIntent(intent)
+            extractIntentData()
         }
     }
 
@@ -148,7 +159,7 @@ class ArticleDetailActivity : AppCompatActivity() {
                 displayNews(item)
                 loadRelatedNews(item)
             } else {
-                Toast.makeText(this@ArticleDetailActivity, "Não foi possível carregar a notícia", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ArticleDetailActivity, "Falhou: $slug", Toast.LENGTH_LONG).show()
                 finish()
             }
         }
@@ -167,8 +178,15 @@ class ArticleDetailActivity : AppCompatActivity() {
 
         // Featured Image
         if (!news.imageUrl.isNullOrBlank()) {
+            val imageUrl = if (news.imageUrl.startsWith("/")) {
+                "https://nexora-news.nexoranews.blitz.cloud${news.imageUrl}"
+            } else {
+                news.imageUrl
+                    .replaceFirst("http://", "https://")
+            }
+
             Glide.with(this)
-                .load(news.imageUrl)
+                .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.color.secondary_dark)
                 .error(R.color.secondary_dark)
@@ -198,7 +216,12 @@ class ArticleDetailActivity : AppCompatActivity() {
         } else {
             news.summary ?: "Conteúdo completo em actualização pela redacção do Nexora News."
         }
-        binding.tvDetailContent.text = bodyContent
+        binding.tvDetailContent.text = Html.fromHtml(
+            bodyContent,
+            Html.FROM_HTML_MODE_LEGACY
+        )
+        binding.tvDetailContent.movementMethod = LinkMovementMethod.getInstance()
+        binding.tvDetailContent.linksClickable = true
 
         // Bookmark Setup
         updateBookmarkButton(news.id)
@@ -241,9 +264,9 @@ class ArticleDetailActivity : AppCompatActivity() {
                 binding.tvRelatedHeader.visibility = View.VISIBLE
                 binding.rvRelatedNews.visibility = View.VISIBLE
                 binding.rvRelatedNews.layoutManager = LinearLayoutManager(this@ArticleDetailActivity)
-                binding.rvRelatedNews.adapter = NewsAdapter(related, repository) { clickedArticle ->
+                binding.rvRelatedNews.adapter = NewsAdapter(related, repository, { clickedArticle: NewsItem ->
                     start(this@ArticleDetailActivity, clickedArticle)
-                }
+        })
             } else {
                 binding.tvRelatedHeader.visibility = View.GONE
                 binding.rvRelatedNews.visibility = View.GONE
@@ -252,7 +275,7 @@ class ArticleDetailActivity : AppCompatActivity() {
     }
 
     private fun shareArticle(news: NewsItem) {
-        val shareUrl = "https://nexora-news.onrender.com/noticia/${news.slug}"
+        val shareUrl = "https://nexora-news.nexoranews.blitz.cloud/noticia/${news.slug}"
         val shareText = getString(
             R.string.share_article_format,
             news.title,

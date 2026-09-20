@@ -125,6 +125,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadAd() {
+        // O espaço do banner permanece sempre reservado.
+        binding.adBannerContainer.root.visibility = View.VISIBLE
+
         viewLifecycleOwner.lifecycleScope.launch {
             val result = repository.getAds("top_hero")
 
@@ -143,14 +146,11 @@ class HomeFragment : Fragment() {
                     if (currentAds.size > 1) {
                         adRotationHandler.postDelayed(adRotationRunnable, 8000)
                     }
-                } else if (currentAds.isEmpty()) {
-                    binding.adBannerContainer.root.visibility = View.GONE
                 }
+                // Não esconder o banner quando não houver anúncio temporariamente.
             }.onFailure {
-                // Mantém o anúncio atual se houver uma falha temporária.
-                if (currentAds.isEmpty()) {
-                    binding.adBannerContainer.root.visibility = View.GONE
-                }
+                // Mantém o banner visível durante falhas temporárias da API.
+                binding.adBannerContainer.root.visibility = View.VISIBLE
             }
         }
     }
@@ -165,7 +165,7 @@ class HomeFragment : Fragment() {
 
         button.text = ad.callToAction.ifBlank { "Acessar Agora" }
 
-        val imageUrl = if (ad.mediaUrl.startsWith("/")) "https://nexora-news.onrender.com${ad.mediaUrl}" else ad.mediaUrl
+        val imageUrl = if (ad.mediaUrl.startsWith("/")) "https://nexora-news.nexoranews.blitz.cloud${ad.mediaUrl}" else ad.mediaUrl
         if (imageUrl.isNotBlank()) {
             Glide.with(this)
                 .load(imageUrl)
@@ -197,30 +197,19 @@ class HomeFragment : Fragment() {
             }
             binding.layoutError.visibility = View.GONE
 
-            // 1. Fetch Categories
-            val categoriesResult = repository.getCategories()
-            val allCategory = Category(
-                id = "cat-all",
-                name = "Todos",
-                slug = "todos",
-                description = "Todas as notícias",
-                color = "#146EF5",
-                order = 0
-            )
-            val combinedCategories = listOf(allCategory) + categoriesResult.categories
-            chipAdapter.updateCategories(combinedCategories, currentCategory)
-
-            // 2. Fetch News
+            // Primeiro mostra o conteúdo local sem esperar pela internet.
             val newsResult = repository.getNews(
                 category = if (currentCategory == "Todos") null else currentCategory,
                 forceRefresh = forceRefresh
             )
 
+            if (!isAdded) return@launch
+
             binding.swipeRefreshHome.isRefreshing = false
             binding.layoutLoading.visibility = View.GONE
 
-            // Notify activity about offline status banner
-            (activity as? MainActivity)?.setOfflineBannerVisible(newsResult.isOffline)
+            // Não mostrar falso aviso de "sem internet" por falha da API.
+            (activity as? MainActivity)?.setOfflineBannerVisible(false)
 
             if (newsResult.news.isEmpty()) {
                 binding.layoutContent.visibility = View.GONE
@@ -230,12 +219,15 @@ class HomeFragment : Fragment() {
                 binding.layoutError.visibility = View.GONE
 
                 // Setup Hero
-                val hero = newsResult.news.firstOrNull { it.isFeatured } ?: newsResult.news.first()
+                val hero = newsResult.news.firstOrNull { it.isFeatured }
+                    ?: newsResult.news.first()
+
                 heroArticle = hero
                 setupHeroCard(hero)
 
                 // Setup Breaking news ticker
                 val breaking = newsResult.news.firstOrNull { it.isBreaking }
+
                 if (breaking != null) {
                     binding.breakingNewsContainer.visibility = View.VISIBLE
                     binding.tvBreakingText.text = breaking.title
@@ -246,13 +238,53 @@ class HomeFragment : Fragment() {
                     binding.breakingNewsContainer.visibility = View.GONE
                 }
 
-                // Recent news (excluding hero to avoid duplication if in "Todos")
+                // Recent news
                 val recentNews = if (currentCategory == "Todos") {
                     newsResult.news.filter { it.id != hero.id }
                 } else {
                     newsResult.news
                 }
+
                 newsAdapter.updateNews(recentNews)
+            }
+
+            // Depois de mostrar o cache, atualiza pela internet em segundo plano.
+            if (!forceRefresh && newsResult.news.isNotEmpty()) {
+                launch {
+                    val freshResult = repository.getNews(
+                        category = if (currentCategory == "Todos") null else currentCategory,
+                        forceRefresh = true
+                    )
+
+                    if (!isAdded || freshResult.news.isEmpty()) return@launch
+
+                    val freshNews = freshResult.news
+                    val freshHero = freshNews.firstOrNull { it.isFeatured }
+                        ?: freshNews.first()
+
+                    heroArticle = freshHero
+                    setupHeroCard(freshHero)
+
+                    val freshBreaking = freshNews.firstOrNull { it.isBreaking }
+
+                    if (freshBreaking != null) {
+                        binding.breakingNewsContainer.visibility = View.VISIBLE
+                        binding.tvBreakingText.text = freshBreaking.title
+                        binding.breakingNewsContainer.setOnClickListener {
+                            ArticleDetailActivity.start(requireContext(), freshBreaking)
+                        }
+                    } else {
+                        binding.breakingNewsContainer.visibility = View.GONE
+                    }
+
+                    val freshRecentNews = if (currentCategory == "Todos") {
+                        freshNews.filter { it.id != freshHero.id }
+                    } else {
+                        freshNews
+                    }
+
+                    newsAdapter.updateNews(freshRecentNews)
+                }
             }
         }
     }
@@ -272,8 +304,14 @@ class HomeFragment : Fragment() {
         tvMeta?.text = "Por $author • Destaque Editorial"
 
         if (!hero.imageUrl.isNullOrBlank() && ivHero != null) {
+            val imageUrl = if (hero.imageUrl.startsWith("/")) {
+                "https://nexora-news.nexoranews.blitz.cloud${hero.imageUrl}"
+            } else {
+                hero.imageUrl
+            }
+
             Glide.with(this)
-                .load(hero.imageUrl)
+                .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.color.secondary_dark)
                 .centerCrop()

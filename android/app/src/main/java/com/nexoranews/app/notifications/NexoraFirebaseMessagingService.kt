@@ -11,7 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.nexoranews.app.MainActivity
+import com.nexoranews.app.ui.detail.ArticleDetailActivity
 import com.nexoranews.app.R
 import com.nexoranews.app.data.remote.ApiClient
 import java.net.HttpURLConnection
@@ -23,7 +23,7 @@ class NexoraFirebaseMessagingService : FirebaseMessagingService() {
     companion object {
         private const val CHANNEL_ID = "nexora_news_notifications"
         private const val CHANNEL_NAME = "Nexora News"
-        private const val SERVER_BASE_URL = "https://nexora-news.onrender.com"
+        private const val SERVER_BASE_URL = "https://nexora-news.nexoranews.blitz.cloud"
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -40,8 +40,10 @@ class NexoraFirebaseMessagingService : FirebaseMessagingService() {
             ?: message.data["imageUrl"]
             ?: ""
 
+        android.util.Log.d("NexoraFCM", "IMAGEM FCM RECEBIDA: $imageUrl")
+        val newsSlug = message.data["newsSlug"]
         val clickUrl = message.data["clickUrl"]
-            ?: message.data["newsSlug"]?.let {
+            ?: newsSlug?.let {
                 "/noticia/$it"
             }
             ?: "/"
@@ -53,6 +55,7 @@ class NexoraFirebaseMessagingService : FirebaseMessagingService() {
             body = body,
             imageUrl = imageUrl,
             clickUrl = clickUrl,
+            newsSlug = newsSlug,
             isBreaking = isBreaking
         )
     }
@@ -113,21 +116,30 @@ class NexoraFirebaseMessagingService : FirebaseMessagingService() {
         body: String,
         imageUrl: String,
         clickUrl: String,
+        newsSlug: String?,
         isBreaking: Boolean
     ) {
         createNotificationChannel()
 
+        val slug = newsSlug
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: clickUrl
+                .substringBefore("?")
+                .substringAfterLast("/")
+                .trim()
+
         val intent = Intent(
             this,
-            MainActivity::class.java
+            ArticleDetailActivity::class.java
         ).apply {
             flags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP
 
             putExtra(
-                "notification_click_url",
-                clickUrl
+                "extra_news_slug",
+                slug
             )
         }
 
@@ -183,7 +195,7 @@ class NexoraFirebaseMessagingService : FirebaseMessagingService() {
                 if (imageUrl.startsWith("/")) {
                     SERVER_BASE_URL + imageUrl
                 } else {
-                    imageUrl
+                    imageUrl.replaceFirst("http://", "https://")
                 }
 
             val bitmap = downloadBitmap(fullImageUrl)
@@ -199,6 +211,7 @@ class NexoraFirebaseMessagingService : FirebaseMessagingService() {
                         )
                         .setContentTitle(title)
                         .setContentText(body)
+                        .setLargeIcon(bitmap)
                         .setStyle(
                             NotificationCompat.BigPictureStyle()
                                 .bigPicture(bitmap)
@@ -244,18 +257,81 @@ class NexoraFirebaseMessagingService : FirebaseMessagingService() {
                     .openConnection() as HttpURLConnection
 
             connection.connectTimeout = 10000
-            connection.readTimeout = 15000
+            connection.readTimeout = 20000
             connection.doInput = true
+            connection.instanceFollowRedirects = true
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("User-Agent", "NexoraNews/1.0")
             connection.connect()
 
-            if (connection.responseCode in 200..299) {
-                connection.inputStream.use {
-                    BitmapFactory.decodeStream(it)
-                }
-            } else {
-                null
+            val responseCode = connection.responseCode
+
+            if (responseCode !in 200..299) {
+                android.util.Log.e(
+                    "NexoraFCM",
+                    "Falha HTTP ao baixar imagem: $responseCode"
+                )
+                return null
             }
 
+            val bytes = connection.inputStream.use { input ->
+                val output = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                var count: Int
+                var total = 0
+
+                while (input.read(buffer).also { count = it } != -1) {
+                    total += count
+
+                    if (total > 8 * 1024 * 1024) {
+                        android.util.Log.e(
+                            "NexoraFCM",
+                            "Imagem excede o limite de 8 MB."
+                        )
+                        return@use null
+                    }
+
+                    output.write(buffer, 0, count)
+                }
+
+                output.toByteArray()
+            } ?: return null
+
+            android.util.Log.d(
+                "NexoraFCM",
+                "Imagem baixada: ${bytes.size} bytes"
+            )
+
+            val bitmap = BitmapFactory.decodeByteArray(
+                bytes,
+                0,
+                bytes.size
+            ) ?: return null
+
+            val maxSize = 1024
+
+            val scale = minOf(
+                1f,
+                maxSize.toFloat() / bitmap.width,
+                maxSize.toFloat() / bitmap.height
+            )
+
+            if (scale < 1f) {
+                val scaled = Bitmap.createScaledBitmap(
+                    bitmap,
+                    (bitmap.width * scale).toInt(),
+                    (bitmap.height * scale).toInt(),
+                    true
+                )
+
+                if (scaled !== bitmap) {
+                    bitmap.recycle()
+                }
+
+                scaled
+            } else {
+                bitmap
+            }
         } catch (e: Exception) {
             android.util.Log.e(
                 "NexoraFCM",

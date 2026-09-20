@@ -22,7 +22,8 @@ import java.util.Locale
 class NewsAdapter(
     private var newsList: List<NewsItem>,
     private val repository: NewsRepository,
-    private val onItemClick: ((NewsItem) -> Unit)? = null
+    private val onItemClick: ((NewsItem) -> Unit)? = null,
+    private val onBookmarkChanged: (() -> Unit)? = null
 ) : RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
 
     fun updateNews(newItems: List<NewsItem>) {
@@ -61,8 +62,15 @@ class NewsAdapter(
 
             // Load Image with Glide
             if (!news.imageUrl.isNullOrBlank()) {
+                val imageUrl = if (news.imageUrl.startsWith("/")) {
+                    "https://nexora-news.nexoranews.blitz.cloud${news.imageUrl}"
+                } else {
+                    news.imageUrl
+                        .replaceFirst("http://", "https://")
+                }
+
                 Glide.with(context)
-                    .load(news.imageUrl)
+                    .load(imageUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.color.surface_variant)
                     .error(R.color.surface_variant)
@@ -93,6 +101,7 @@ class NewsAdapter(
                     context.getString(R.string.action_unbookmarked)
                 }
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                onBookmarkChanged?.invoke()
             }
 
             binding.btnItemShare.setOnClickListener {
@@ -137,7 +146,7 @@ class NewsAdapter(
         }
 
         private fun shareArticle(context: Context, news: NewsItem) {
-            val shareUrl = "https://nexora-news.onrender.com/noticia/${news.slug}"
+            val shareUrl = "https://nexora-news.nexoranews.blitz.cloud/noticia/${news.slug}"
             val shareText = context.getString(
                 R.string.share_article_format,
                 news.title,

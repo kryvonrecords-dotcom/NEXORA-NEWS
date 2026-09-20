@@ -32,7 +32,7 @@ class InstitutionalActivity : AppCompatActivity() {
 
         webView.webViewClient = WebViewClient()
 
-        webView.loadUrl("https://nexora-news.onrender.com$path")
+        webView.loadUrl("https://nexora-news.nexoranews.blitz.cloud$path")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

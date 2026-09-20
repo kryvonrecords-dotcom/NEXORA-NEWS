@@ -10,7 +10,7 @@ import java.net.URL
 object ApiClient {
 
     // Primary and fallback endpoints for the API
-    private const val BASE_URL = "https://nexora-news.onrender.com/api"
+    private const val BASE_URL = "https://nexora-news.nexoranews.blitz.cloud/api"
     private const val TIMEOUT_MS = 10000
 
     fun postJson(endpoint: String, jsonBody: String): Result<String> {
