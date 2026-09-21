@@ -9,6 +9,7 @@ import { MostReadSidebar } from '../components/MostReadSidebar';
 import { NewsletterBox } from '../components/NewsletterBox';
 import { PromoHeroBanner } from '../components/PromoHeroBanner';
 import { RefreshButton } from '../components/RefreshButton';
+import AdsterraBanner from '../components/ads/AdsterraBanner';
 
 interface Props {
   onNavigate: (path: string) => void;
@@ -98,8 +99,15 @@ export function HomePage({ onNavigate }: Props) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {latestNews.map(item => (
-              <NewsCard key={item.id} news={item} variant="standard" onNavigate={onNavigate} />
+            {latestNews.map((item, index) => (
+              <React.Fragment key={item.id}>
+                <NewsCard news={item} variant="standard" onNavigate={onNavigate} />
+                {index === 1 && (
+                  <div className="sm:col-span-2">
+                    <AdsterraBanner />
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
         </div>
