@@ -196,7 +196,7 @@ async function startServer() {
   app.get('/sitemap.xml', (req, res) => {
     const news = db.getPublishedNews();
     const categories = db.getCategories();
-    const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+    const baseUrl = process.env.APP_URL || `https://${req.get('host')}`;
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     // Home
@@ -224,7 +224,7 @@ async function startServer() {
 
   // Robots.txt
   app.get('/robots.txt', (req, res) => {
-    const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+    const baseUrl = process.env.APP_URL || `https://${req.get('host')}`;
     const txt = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/admin\n\nSitemap: ${baseUrl}/sitemap.xml\n`;
     res.header('Content-Type', 'text/plain');
     res.send(txt);
