@@ -27,6 +27,7 @@ import { NewsItem } from '../types';
 import { api } from '../services/api';
 import { formatDate, formatDateTime, shareArticle } from '../lib/utils';
 import { NewsCard } from '../components/NewsCard';
+import AdsterraBanner from '../components/ads/AdsterraBanner';
 import { useAuth } from '../context/AuthContext';
 import { useSavedArticles } from '../context/SavedArticlesContext';
 import { getNewsImageUrl, handleImageError } from '../utils/imageUtils';
@@ -331,6 +332,11 @@ export function ArticlePage({ slug, onNavigate }: Props) {
               </div>
             </div>
 
+            {/* Publicidade */}
+            <div className="my-8">
+              <AdsterraBanner />
+            </div>
+
             {/* Text Size Controls */}
             <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 mb-8 text-xs">
               <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
@@ -357,11 +363,10 @@ export function ArticlePage({ slug, onNavigate }: Props) {
 
             {/* Main Article Body */}
             <div className={`prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 space-y-6 ${fontClass}`}>
-              {news.content.split('\n\n').map((paragraph, idx) => (
-                <p key={idx} className="leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
+              <div
+                className="article-content"
+                dangerouslySetInnerHTML={{ __html: news.content }}
+              />
             </div>
           </div>
 
