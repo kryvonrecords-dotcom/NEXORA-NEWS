@@ -597,10 +597,50 @@ class DatabaseManager {
         ? restored.fcmTokens
         : [];
 
+      const localAdvertisements = Array.isArray(this.data.advertisements)
+        ? this.data.advertisements
+        : [];
+
+      const remoteAdvertisements = Array.isArray(restored.advertisements)
+        ? restored.advertisements
+        : [];
+
+      const advertisementsMap = new Map<string, Advertisement>();
+
+      for (const ad of localAdvertisements) {
+        if (ad?.id) {
+          advertisementsMap.set(ad.id, ad);
+        }
+      }
+
+      for (const ad of remoteAdvertisements) {
+        if (!ad?.id) continue;
+
+        const localAd = advertisementsMap.get(ad.id);
+
+        if (!localAd) {
+          advertisementsMap.set(ad.id, ad);
+          continue;
+        }
+
+        const localAdTime = new Date(
+          localAd.updatedAt || localAd.createdAt || 0
+        ).getTime();
+
+        const remoteAdTime = new Date(
+          ad.updatedAt || ad.createdAt || 0
+        ).getTime();
+
+        if (remoteAdTime >= localAdTime) {
+          advertisementsMap.set(ad.id, ad);
+        }
+      }
+
       this.data = {
         ...this.data,
         ...restored,
         news: Array.from(newsMap.values()),
+        advertisements: Array.from(advertisementsMap.values()),
         deletedNewsIds,
         fcmTokens: restoredFcmTokens.length > 0
           ? restoredFcmTokens
