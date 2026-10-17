@@ -96,19 +96,46 @@ async function readSource(source: typeof SOURCES[number]) {
 
     if (!title || !link || !/^https?:\/\//i.test(link)) return null;
 
+    const image = imageFrom(item).replace(/&amp;/g, "&");
+    const categoryId = source.category === "Economia" ? "economia" : "brasil";
+    const slugBase = title
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 75);
+    const slug = `${slugBase}-${source.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
     return {
-      id: `${source.name.toLowerCase().replace(/\W+/g, "-")}-${encodeURIComponent(link)}`,
+      id: slug,
+      slug,
       title,
       excerpt: description.slice(0, 500),
       content: description,
-      imageUrl: imageFrom(item) || undefined,
+      featuredImage: image,
+      imageUrl: image,
+      featuredImageCaption: title,
+      categoryId,
+      categoryName: source.category,
+      categorySlug: categoryId,
+      authorId: "nexora-brasil",
+      authorName: source.name,
+      authorRole: "Fonte de notícias",
+      tags: ["Brasil", source.category],
+      status: "published",
+      isBreaking: false,
+      isHero: false,
+      publishedAt: date,
+      createdAt: date,
+      updatedAt: date,
+      views: 0,
+      readTimeMinutes: 3,
       url: link,
       link,
       source: source.name,
-      category: source.category,
       country: "Brasil",
       language: "pt-BR",
-      publishedAt: date,
       isPublished: true,
       isDemo: false
     };
