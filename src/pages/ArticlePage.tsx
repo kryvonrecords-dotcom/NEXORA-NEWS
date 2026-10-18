@@ -27,7 +27,6 @@ import { NewsItem } from '../types';
 import { api } from '../services/api';
 import { formatDate, formatDateTime, shareArticle } from '../lib/utils';
 import { NewsCard } from '../components/NewsCard';
-import AdsterraBanner from '../components/ads/AdsterraBanner';
 import { useAuth } from '../context/AuthContext';
 import { useSavedArticles } from '../context/SavedArticlesContext';
 import { getNewsImageUrl, handleImageError } from '../utils/imageUtils';
