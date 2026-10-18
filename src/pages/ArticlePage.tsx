@@ -333,7 +333,6 @@ export function ArticlePage({ slug, onNavigate }: Props) {
 
             {/* Publicidade */}
             <div className="my-8">
-              <AdsterraBanner />
             </div>
 
             {/* Text Size Controls */}
